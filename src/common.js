@@ -161,7 +161,7 @@ const NAT64_DEFAULTS = new Set([
 
 let _watchOptionsFunc = null;
 const DEFAULT_LOCAL_OPTIONS = {
-  [REGULAR_COLOR]: "darkfg",  // default immediately replaced
+  [REGULAR_COLOR]: "",  // default replaced on first boot.
   [INCOGNITO_COLOR]: "lightfg",
 };
 const DEFAULT_SYNC_OPTIONS = {

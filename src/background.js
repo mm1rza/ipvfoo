@@ -416,7 +416,8 @@ class TabInfo extends SaveableEntry {
 
     // Don't waste time redrawing the same icon.
     if (this.lastPattern != pattern) {
-      const color = options[this.color];
+      // Briefly defaults to "" on first boot.
+      const color = options[this.color] || "darkfg";
       action.setIcon({
         "tabId": this.id(),
         "path": {
@@ -628,18 +629,20 @@ function lookupOriginMap(origin) {
 // Dark mode detection. This can eventually be replaced by
 // https://github.com/w3c/webextensions/issues/229
 (async () => {
+  // Only do dark mode detection on first boot.
+  // We will still get updates from the popup windows when visible.
+  await optionsReady;
+  if (options[REGULAR_COLOR]) {
+    return;
+  }
+
   if (typeof window !== 'undefined' && window.matchMedia) {
     // Firefox can detect dark mode from the background page.
-    await optionsReady;
     const query = window.matchMedia('(prefers-color-scheme: dark)');
     setColorIsDarkMode(REGULAR_COLOR, query.matches);
-    query.addEventListener("change", (event) => {
-      setColorIsDarkMode(REGULAR_COLOR, event.matches);
-    });
   } else {
     // Chrome needs an offscreen document to detect dark mode.
     // See the onMessage handler below.
-    await optionsReady;
     try {
       await chrome.offscreen.createDocument({
         url: "detectdarkmode.html",
@@ -649,8 +652,6 @@ function lookupOriginMap(origin) {
     } catch {
       console.log("detectdarkmode failed!");
     }
-    // The offscreen document can't provide darkMode updates, so kill it now.
-    // We will still get updates from the popup windows when visible.
     try {
       await chrome.offscreen.closeDocument();
     } catch {
