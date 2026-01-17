@@ -17,6 +17,7 @@ const ALL_URLS = "<all_urls>";
 const LONG_DOMAIN = 50;
 const tabId = window.location.hash.substr(1);
 let table = null;
+let hitCounter = {}; // Track hits per IP address
 window.onload = async function() {
   table = document.getElementById("addr_table");
   table.onmousedown = handleMouseDown;
@@ -127,6 +128,13 @@ function pushAll(tuples, pattern, color, spillCount) {
 // Insert or update a single table row.
 function pushOne(tuple) {
   const domain = tuple[0];
+  const addr = tuple[1];
+  
+  // Increment hit counter for this IP
+  if (addr && addr !== "(x)" && !addr.startsWith("(")) {
+    hitCounter[addr] = (hitCounter[addr] || 0) + 1;
+  }
+  
   let insertHere = null;
   let isFirst = true;
   for (let tr = table.firstChild; tr; tr = tr.nextSibling) {
@@ -298,13 +306,28 @@ function makeRow(isFirst, tuple) {
   // Build the "BGP" column.
   const bgpTd = document.createElement("td");
   bgpTd.className = `bgpTd${connectedClass}`;
-  const bgpLink = document.createElement("a");
-  bgpLink.href = `https://bgp.he.net/ip/${addr}`;
-  bgpLink.textContent = "bgp";
-  bgpLink.target = "_blank";
-  bgpLink.style.color = "#0066cc";
-  bgpLink.style.textDecoration = "none";
-  bgpTd.appendChild(bgpLink);
+  
+  // Only create link if address is valid (not "no address" or similar)
+  if (addr && addr !== "(x)" && !addr.startsWith("(")) {
+    const bgpLink = document.createElement("a");
+    bgpLink.href = `https://bgp.he.net/ip/${addr}`;
+    bgpLink.textContent = "bgp";
+    bgpLink.target = "_blank";
+    bgpLink.style.color = "#00d9ff";
+    bgpLink.style.textDecoration = "none";
+    bgpTd.appendChild(bgpLink);
+  } else {
+    bgpTd.appendChild(document.createTextNode("(x)"));
+    bgpTd.style.color = "#999";
+  }
+  
+  // Build the "Hits" column.
+  const hitsTd = document.createElement("td");
+  hitsTd.className = `hitsTd${connectedClass}`;
+  const hits = hitCounter[addr] || 0;
+  hitsTd.appendChild(document.createTextNode(hits));
+  hitsTd.style.textAlign = "center";
+  hitsTd.style.color = hits > 0 ? "#48ff00" : "#999";
   // Build the (possibly invisible) "WebSocket/Cached" column.
   // We don't need to worry about drawing both, because a cached WebSocket
   // would be nonsensical.
@@ -336,6 +359,7 @@ function makeRow(isFirst, tuple) {
   tr.appendChild(domainTd);
   tr.appendChild(addrTd);
   tr.appendChild(bgpTd);
+  tr.appendChild(hitsTd);
   tr.appendChild(cacheTd);
   return tr;
 }

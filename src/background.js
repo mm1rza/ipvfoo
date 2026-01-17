@@ -451,7 +451,7 @@ class TabInfo extends SaveableEntry {
   getTuples() {
     const mainDomain = this.mainDomain || "(no domain)";
     const domains = Object.keys(this.domains).sort();
-    const mainTuple = [mainDomain, "(no address)", "?", 0];
+    const mainTuple = [mainDomain, "(x)", "?", 0];
     const tuples = [mainTuple];
     for (const domain of domains) {
       const d = this.domains[domain];
@@ -1080,7 +1080,7 @@ chrome.webRequest.onResponseStarted.addListener(wrap(async (details) => {
       }
     }
   }
-  addr = reformatForNAT64(addr) || "(no address)";
+  addr = reformatForNAT64(addr) || "(x)";
 
   // Domain flags
   const dflags =
