@@ -41,6 +41,7 @@ const HIDDEN_DOMAINS = [
   "secure.gravatar.com",
   "ad.doubleclick.net",
   "9212252.fls.doubleclick.net",
+  "acs.whatsapp.com",
   "www.googleadservices.com",
   "avatars.githubusercontent.com",
   "ssl.gstatic.com",
