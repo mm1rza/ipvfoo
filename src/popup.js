@@ -11,16 +11,100 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 "use strict";
+
 // Requires <script src="common.js">
 const ALL_URLS = "<all_urls>";
-// Snip domains longer than this, to avoid horizontal scrolling.
 const LONG_DOMAIN = 50;
 const tabId = window.location.hash.substr(1);
 let table = null;
-let hitCounter = {}; // Track hits per IP address
+let hitCounter = {}; 
+
+// --- DAFTAR DOMAIN YANG DISEMBUNYIKAN ---
+const HIDDEN_DOMAINS = [
+  "googleads.g.doubleclick.net",
+  "ssl.google-analytics.com",
+  "www.googletagmanager.com",
+  "static.xx.fbcdn.net",
+  "crashlogs.whatsapp.net",
+  "graph.whatsapp.net",
+  "static.whatsapp.net",
+  "wa-web-plus.web.app",
+  "fonts.googleapis.com",
+  "fonts.gstatic.com",
+  "www.google-analytics.com",
+  "ajax.googleapis.com",
+  "assets.trakteer.id",
+  "connect.facebook.net",
+  "i.ytimg.com",
+  "jnn-pa.googleapis.com",
+  "maxcdn.bootstrapcdn.com",
+  "secure.gravatar.com",
+  "ad.doubleclick.net",
+  "9212252.fls.doubleclick.net",
+  "www.googleadservices.com",
+  "avatars.githubusercontent.com",
+  "ssl.gstatic.com",
+  "www.gstatic.com",
+  "pagead2.googlesyndication.com",
+  "www.fbsbx.com",
+  "static.cdninstagram.com"
+];
+
+// Load hit counter dari chrome.storage
+async function loadHitCounter() {
+  try {
+    const result = await chrome.storage.local.get(['ipHitCounter', 'lastResetDate']);
+    const today = new Date().toDateString();
+    const lastReset = result.lastResetDate;
+    
+    if (lastReset !== today) {
+      hitCounter = {};
+      await chrome.storage.local.set({ ipHitCounter: {}, lastResetDate: today });
+    } else if (result.ipHitCounter) {
+      hitCounter = result.ipHitCounter;
+    }
+  } catch (e) {
+    console.log('Could not load hit counter:', e);
+  }
+}
+
+async function saveHitCounter() {
+  try {
+    await chrome.storage.local.set({ ipHitCounter: hitCounter });
+  } catch (e) {
+    console.log('Could not save hit counter:', e);
+  }
+}
+
+async function resetAllCounters() {
+  hitCounter = {};
+  await chrome.storage.local.set({ ipHitCounter: {}, lastResetDate: new Date().toDateString() });
+  if (table && table.firstChild) {
+    const rows = Array.from(table.children);
+    rows.forEach((tr, index) => {
+      if (tr._tuple) {
+        const newRow = makeRow(index === 0, tr._tuple);
+        tr.parentNode.replaceChild(newRow, tr);
+      }
+    });
+  }
+}
+
 window.onload = async function() {
+  await loadHitCounter();
   table = document.getElementById("addr_table");
   table.onmousedown = handleMouseDown;
+  
+  const resetBtn = document.createElement("button");
+  resetBtn.textContent = "x";
+  resetBtn.style.cssText = "position: fixed; top: 5px; right: 5px; padding: 5px 10px; background: #ff4444; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; z-index: 1000;";
+  resetBtn.onclick = async () => {
+    if (confirm("Reset all IP hit counters?")) {
+      await resetAllCounters();
+    }
+  };
+  document.body.appendChild(resetBtn);
+  
   if (IS_MOBILE) {
     document.getElementById("mobile_footer").style.display = "flex";
     document.addEventListener("selectionchange", redrawLookupBubble);
@@ -32,17 +116,9 @@ window.onload = async function() {
     connectToExtension();
   } else if (tabId) {
     throw new Error(`Bad tabId: ${tabId}`);
-  } else {
-    console.log("No tabId, using test table")
-    const TEST_TUPLES = [
-      ["ipv6.example.com", "2001:db8::f00", "6", DFLAG_SSL],
-      ["ipv4.example.com", "192.0.2.9", "4", DFLAG_NOSSL],
-      ["cached.example.com", "2001:db8::f00", "6", DFLAG_SSL | DFLAG_NOSSL | AFLAG_CACHE],
-    ];
-    pushAll(TEST_TUPLES, "646", REGULAR_COLOR, 0);
   }
 };
-// Monitor for dark mode updates.
+
 const darkModeQuery = window.matchMedia('(prefers-color-scheme: dark)');
 let darkMode = darkModeQuery.matches;
 darkModeQuery.addEventListener("change", async (event) => {
@@ -52,24 +128,21 @@ darkModeQuery.addEventListener("change", async (event) => {
     setColorIsDarkMode(lastColor, darkMode);
   }
 });
+
 async function beg() {
   const p = await chrome.permissions.getAll();
   for (const origin of p.origins) {
-    if (origin == ALL_URLS) {
-      return;  // We already have permission.
-    }
+    if (origin == ALL_URLS) return;
   }
   const button = document.getElementById("beg");
-  button.style.display = "block";  // visible
+  button.style.display = "block";
   button.addEventListener("click", async () => {
-    // We need to close the popup before awaiting, otherwise
-    // Firefox (at least version 116 on Windows) renders the
-    // permission dialog underneath the popup.
     const promise = chrome.permissions.request({origins: [ALL_URLS]});
     window.close();
     await promise;
   });
 }
+
 function redrawLookupBubble() {
   const bubble = document.getElementById("lookup_bubble");
   const sel = window.getSelection();
@@ -93,11 +166,11 @@ function redrawLookupBubble() {
   const bubbleRect = bubble.getBoundingClientRect();
   bubble.style.setProperty('--bubble-width', `${bubbleRect.width}px`);
 }
+
 function connectToExtension() {
   const port = chrome.runtime.connect(null, {name: tabId});
   port.onMessage.addListener((msg) => {
     document.bgColor = "";
-    //console.log("onMessage", msg.cmd, msg);
     switch (msg.cmd) {
       case "pushAll":
         return pushAll(msg.tuples, msg.pattern, msg.color, msg.spillCount);
@@ -116,30 +189,36 @@ function connectToExtension() {
     setTimeout(connectToExtension, 1);
   });
 }
-// Clear the table, and fill it with new data.
+
+// MODIFIKASI: Filter semua domain saat pertama kali dimuat
 function pushAll(tuples, pattern, color, spillCount) {
   removeChildren(table);
-  for (let i = 0; i < tuples.length; i++) {
-    table.appendChild(makeRow(i == 0, tuples[i]));
+  const filteredTuples = tuples.filter(t => !HIDDEN_DOMAINS.includes(t[0]));
+  for (let i = 0; i < filteredTuples.length; i++) {
+    table.appendChild(makeRow(i == 0, filteredTuples[i]));
   }
   pushPattern(pattern, color);
   pushSpillCount(spillCount);
 }
-// Insert or update a single table row.
-function pushOne(tuple) {
+
+// MODIFIKASI: Jangan tambahkan jika domain ada di daftar hidden
+async function pushOne(tuple) {
   const domain = tuple[0];
   const addr = tuple[1];
   
-  // Increment hit counter for this IP
+  if (HIDDEN_DOMAINS.includes(domain)) {
+    return; // Stop di sini, jangan diproses
+  }
+
   if (addr && addr !== "(x)" && !addr.startsWith("(")) {
     hitCounter[addr] = (hitCounter[addr] || 0) + 1;
+    saveHitCounter();
   }
   
   let insertHere = null;
   let isFirst = true;
   for (let tr = table.firstChild; tr; tr = tr.nextSibling) {
     if (tr._domain == domain) {
-      // Found an exact match.  Update the row.
       minimalCopy(makeRow(isFirst, tuple), tr);
       return;
     }
@@ -150,24 +229,18 @@ function pushOne(tuple) {
       break;
     }
   }
-  // No exact match.  Insert the row in alphabetical order.
   table.insertBefore(makeRow(false, tuple), insertHere);
-  if (IS_MOBILE) {
-    zoomHack();
-  } else {
-    scrollbarHack();
-  }
+  if (IS_MOBILE) { zoomHack(); } else { scrollbarHack(); }
 }
+
 let lastPattern = "";
-let lastColor = "";  // regular/incognito color scheme
+let lastColor = "";
 function pushPattern(pattern, color) {
   if (lastColor != color) {
     lastColor = color;
     setColorIsDarkMode(lastColor, darkMode);
   }
-  if (!IS_MOBILE) {
-    return;
-  }
+  if (!IS_MOBILE) return;
   if (lastPattern != pattern) {
     lastPattern = pattern;
   } else {
@@ -178,42 +251,27 @@ function pushPattern(pattern, color) {
     img.src = iconPath(pattern, 32, color);
   }
 }
-// Count must be a number.
+
 function pushSpillCount(count) {
-  document.getElementById("spill_count_container").style.display =
-      count == 0 ? "none" : "block";
-  removeChildren(document.getElementById("spill_count")).appendChild(
-      document.createTextNode(count));
-  if (IS_MOBILE) {
-    zoomHack();
-  } else {
-    scrollbarHack();
-  }
+  document.getElementById("spill_count_container").style.display = count == 0 ? "none" : "block";
+  removeChildren(document.getElementById("spill_count")).appendChild(document.createTextNode(count));
+  if (IS_MOBILE) { zoomHack(); } else { scrollbarHack(); }
 }
-// Shake the content (for 500ms) to signal an error.
+
 function shake() {
   document.body.className = "shake";
-  setTimeout(function() {
-    document.body.className = "";
-  }, 600);
+  setTimeout(function() { document.body.className = ""; }, 600);
 }
-// On mobile, zoom in so the table fills the viewport.
+
 function zoomHack() {
-  // This value is actually a bit smaller than we want,
-  // but apparently a too-narrow viewport results in a best-fit zoom.
   const tableWidth = document.querySelector('table').offsetWidth;
   document.querySelector('meta[name="viewport"]').setAttribute('content', `width=${tableWidth}`);
-  // Leave room to the right for the text selection handle,
-  // to prevent jittery zooming if the user selects an IP address.
-  // 8% of the table width seems reasonable.
   table.style.setProperty('--cache-min-width', `${tableWidth * 0.08}px`);
 }
-// Workaround for https://bugzilla.mozilla.org/show_bug.cgi?id=1395025
+
 let redrawn = false;
 function scrollbarHack() {
-  if (typeof browser == "undefined") {
-    return;  // nothing to do on Chrome.
-  }
+  if (typeof browser == "undefined") return;
   setTimeout(() => {
     const e = document.documentElement;
     if (e.scrollHeight > e.clientHeight) {
@@ -224,59 +282,47 @@ function scrollbarHack() {
     }
   }, 200);
 }
-// Copy the contents of src into dst, making minimal changes.
+
 function minimalCopy(src, dst) {
   dst.className = src.className;
-  for (let s = src.firstChild, d = dst.firstChild, sNext, dNext;
-       s && d;
-       s = sNext, d = dNext) {
+  for (let s = src.firstChild, d = dst.firstChild, sNext, dNext; s && d; s = sNext, d = dNext) {
     sNext = s.nextSibling;
     dNext = d.nextSibling;
-    // First, sync up the class names.
-    d.className = s.className = s.className;
-    // Only replace the whole node if something changes.
-    // That way, we avoid stomping on the user's selected text.
+    d.className = s.className;
     if (!d.isEqualNode(s)) {
       dst.replaceChild(s, d);
     }
   }
 }
+
 function makeImg(src, title) {
   const img = document.createElement("img");
-  img.src = src;
-  img.title = title;
+  img.src = src; img.title = title;
   return img;
 }
+
 function makeSslImg(flags) {
   switch (flags & (DFLAG_SSL | DFLAG_NOSSL)) {
     case DFLAG_SSL | DFLAG_NOSSL:
-      return makeImg(
-          "gray_schrodingers_lock.png",
-          "Mixture of HTTPS and non-HTTPS connections.");
+      return makeImg("gray_schrodingers_lock.png", "Mixture of HTTPS and non-HTTPS connections.");
     case DFLAG_SSL:
-      return makeImg(
-          "gray_lock.png",
-          "Connection uses HTTPS.\n" +
-          "Warning: IPvFoo does not verify the integrity of encryption.");
+      return makeImg("gray_lock.png", "Connection uses HTTPS.\nWarning: IPvFoo does not verify the integrity of encryption.");
     default:
-      return makeImg(
-          "gray_unlock.png",
-          "Connection does not use HTTPS.");
+      return makeImg("gray_unlock.png", "Connection does not use HTTPS.");
   }
 }
+
 function makeRow(isFirst, tuple) {
   const domain = tuple[0];
   const addr = tuple[1];
   const version = tuple[2];
   const flags = tuple[3];
   const tr = document.createElement("tr");
-  if (isFirst) {
-    tr.className = "mainRow";
-  }
-  // Build the SSL icon for the "zeroth" pseudo-column.
+  if (isFirst) tr.className = "mainRow";
+  tr._tuple = tuple;
+  
   const sslImg = makeSslImg(flags);
   sslImg.className = "sslImg";
-  // Build the "Domain" column.
   const domainTd = document.createElement("td");
   domainTd.appendChild(sslImg);
   const selectMe = document.createElement("span");
@@ -290,7 +336,7 @@ function makeRow(isFirst, tuple) {
   domainTd.className = "domainTd";
   domainTd.onclick = handleClick;
   domainTd.oncontextmenu = handleContextMenu;
-  // Build the "Address" column.
+
   const addrTd = document.createElement("td");
   let addrClass = "";
   switch (version) {
@@ -303,11 +349,8 @@ function makeRow(isFirst, tuple) {
   addrTd.onclick = handleClick;
   addrTd.oncontextmenu = handleContextMenu;
   
-  // Build the "BGP" column.
   const bgpTd = document.createElement("td");
   bgpTd.className = `bgpTd${connectedClass}`;
-  
-  // Only create link if address is valid (not "no address" or similar)
   if (addr && addr !== "(x)" && !addr.startsWith("(")) {
     const bgpLink = document.createElement("a");
     bgpLink.href = `https://bgp.he.net/ip/${addr}`;
@@ -321,40 +364,26 @@ function makeRow(isFirst, tuple) {
     bgpTd.style.color = "#999";
   }
   
-  // Build the "Hits" column.
   const hitsTd = document.createElement("td");
   hitsTd.className = `hitsTd${connectedClass}`;
   const hits = hitCounter[addr] || 0;
   hitsTd.appendChild(document.createTextNode(hits));
   hitsTd.style.textAlign = "center";
   hitsTd.style.color = hits > 0 ? "#48ff00" : "#999";
-  // Build the (possibly invisible) "WebSocket/Cached" column.
-  // We don't need to worry about drawing both, because a cached WebSocket
-  // would be nonsensical.
-  //
-  // Now that we also have a Service Worker icon, I just made it replace
-  // the Cached icon because I'm too lazy to align multiple columns properly.
+  hitsTd.style.fontWeight = hits > 0 ? "bold" : "normal";
+  
   const cacheTd = document.createElement("td");
   cacheTd.className = `cacheTd${connectedClass}`;
   if (flags & DFLAG_WEBSOCKET) {
-    cacheTd.appendChild(
-        makeImg("websocket.png", "WebSocket handshake; connection may still be active."));
-    cacheTd.style.paddingLeft = '6pt';
-  } else if (flags & AFLAG_PREFETCH) {
-    cacheTd.appendChild(
-        makeImg("prefetch.png", "Prefetched request; may be proxied."));
-    cacheTd.style.paddingLeft = '6pt';
-  } else if (flags & AFLAG_WORKER) {
-    cacheTd.appendChild(
-        makeImg("serviceworker.png", "Service Worker request; possibly from a different tab."));
+    cacheTd.appendChild(makeImg("websocket.png", "WebSocket handshake."));
     cacheTd.style.paddingLeft = '6pt';
   } else if (flags & AFLAG_CACHE) {
-    cacheTd.appendChild(
-        makeImg("cached_arrow.png", "Data from cached requests only."));
+    cacheTd.appendChild(makeImg("cached_arrow.png", "Data from cached requests."));
     cacheTd.style.paddingLeft = '6pt';
   } else {
     cacheTd.style.paddingLeft = '0';
   }
+  
   tr._domain = domain;
   tr.appendChild(domainTd);
   tr.appendChild(addrTd);
@@ -363,22 +392,17 @@ function makeRow(isFirst, tuple) {
   tr.appendChild(cacheTd);
   return tr;
 }
-// Given a long domain name, generate "prefix...suffix".  When the user
-// clicks "...", all domains are expanded.  The CSS is tricky because
-// we want the original domain to remain intact for clipboard purposes.
+
 function makeSnippedText(domain, keep) {
   const prefix = domain.substr(0, keep);
   const snipped = domain.substr(keep, domain.length - 2 * keep);
   const suffix = domain.substr(domain.length - keep);
   const f = document.createDocumentFragment();
-  // Add prefix text.
   f.appendChild(document.createTextNode(prefix));
-  // Add snipped text, invisible but copyable.
   let snippedText = document.createElement("span");
   snippedText.className = "snippedTextInvisible";
   snippedText.textContent = snipped;
   f.appendChild(snippedText);
-  // Add clickable "..." image.
   const snipImg = makeImg("snip.png", "");
   snipImg.className = "snipImg";
   const snipLink = document.createElement("a");
@@ -387,14 +411,15 @@ function makeSnippedText(domain, keep) {
   snipLink.addEventListener("click", unsnipAll);
   snipLink.appendChild(snipImg);
   f.appendChild(snipLink);
-  // Add suffix text.
   f.appendChild(document.createTextNode(suffix));
   return f;
 }
+
 function unsnipAll(event) {
   event.preventDefault();
   removeStyles(".snippedTextInvisible", ".snipLinkVisible");
 }
+
 function removeStyles(...selectors) {
   const stylesheet = document.styleSheets[0];
   for (const selector of selectors) {
@@ -406,10 +431,7 @@ function removeStyles(...selectors) {
     }
   }
 }
-// Mac OS has an annoying feature where right-click selects the current
-// "word" (i.e. a useless fragment of the address) before showing a
-// context menu.  Detect this by watching for the selection to change
-// between consecutive onmousedown and oncontextmenu events.
+
 let oldTimeStamp = 0;
 let oldRanges = [];
 function handleMouseDown(e) {
@@ -420,42 +442,36 @@ function handleMouseDown(e) {
     oldRanges.push(sel.getRangeAt(i));
   }
 }
+
 function sameRange(r1, r2) {
   return (r1.compareBoundaryPoints(Range.START_TO_START, r2) == 0 &&
           r1.compareBoundaryPoints(Range.END_TO_END, r2) == 0);
 }
+
 function isSpuriousSelection(sel, newTimeStamp) {
-  if (newTimeStamp - oldTimeStamp > 10) {
-    return false;
-  }
-  if (sel.rangeCount != oldRanges.length) {
-    return true;
-  }
+  if (newTimeStamp - oldTimeStamp > 10) return false;
+  if (sel.rangeCount != oldRanges.length) return true;
   for (let i = 0; i < sel.rangeCount; i++) {
-    if (!sameRange(sel.getRangeAt(i), oldRanges[i])) {
-      return true;
-    }
+    if (!sameRange(sel.getRangeAt(i), oldRanges[i])) return true;
   }
   return false;
 }
+
 function handleContextMenu(e) {
   const sel = window.getSelection();
-  if (isSpuriousSelection(sel, e.timeStamp)) {
-    sel.removeAllRanges();
-  }
+  if (isSpuriousSelection(sel, e.timeStamp)) sel.removeAllRanges();
   selectWholeAddress(this, sel);
   return sel;
 }
-// Let the "selectMe" class define a more specific selection range.
+
 function nodeToRange(node) {
   const range = document.createRange();
   range.selectNodeContents(node.querySelector('.selectMe') || node);
   return range;
 }
+
 function handleClick(e) {
   const sel = window.getSelection();
-  // If the user clicked an already-selected address, deselect it.
-  // Don't check timeStamp because it depends how long they held the button.
   if (e.detail == 1 && oldRanges.length == 1) {
     if (sameRange(nodeToRange(this), oldRanges[0])) {
       sel.removeAllRanges();
@@ -464,8 +480,7 @@ function handleClick(e) {
   }
   selectWholeAddress(this, sel);
 }
-// If the user hasn't manually selected part of the address, then select
-// the whole thing, to make copying easier.
+
 function selectWholeAddress(node, sel) {
   if (sel.isCollapsed || !sel.containsNode(node, true)) {
     sel.removeAllRanges();
