@@ -47,6 +47,12 @@ const HIDDEN_DOMAINS = [
   "www.gstatic.com",
   "pagead2.googlesyndication.com",
   "www.fbsbx.com",
+  "www.google.co.id",
+  "www.google.com",
+  "static.doubleclick.net",
+  "yt3.ggpht.com",
+  "accounts.youtube.com",
+  "dit.whatsapp.net",
   "static.cdninstagram.com"
 ];
 
