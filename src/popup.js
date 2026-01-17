@@ -1,39 +1,27 @@
 /*
 Copyright (C) 2011  Paul Marks  http://www.pmarks.net/
-
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
-
     http://www.apache.org/licenses/LICENSE-2.0
-
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-
 "use strict";
-
 // Requires <script src="common.js">
-
 const ALL_URLS = "<all_urls>";
-
 // Snip domains longer than this, to avoid horizontal scrolling.
 const LONG_DOMAIN = 50;
-
 const tabId = window.location.hash.substr(1);
-
 let table = null;
-
 window.onload = async function() {
   table = document.getElementById("addr_table");
   table.onmousedown = handleMouseDown;
-
   if (IS_MOBILE) {
     document.getElementById("mobile_footer").style.display = "flex";
-
     document.addEventListener("selectionchange", redrawLookupBubble);
     const resizeObserver = new ResizeObserver(redrawLookupBubble);
     resizeObserver.observe(table);
@@ -53,7 +41,6 @@ window.onload = async function() {
     pushAll(TEST_TUPLES, "646", REGULAR_COLOR, 0);
   }
 };
-
 // Monitor for dark mode updates.
 const darkModeQuery = window.matchMedia('(prefers-color-scheme: dark)');
 let darkMode = darkModeQuery.matches;
@@ -64,7 +51,6 @@ darkModeQuery.addEventListener("change", async (event) => {
     setColorIsDarkMode(lastColor, darkMode);
   }
 });
-
 async function beg() {
   const p = await chrome.permissions.getAll();
   for (const origin of p.origins) {
@@ -83,36 +69,29 @@ async function beg() {
     await promise;
   });
 }
-
 function redrawLookupBubble() {
   const bubble = document.getElementById("lookup_bubble");
   const sel = window.getSelection();
   const text = sel.toString();
   const menuTitle = lookupMenuTitle(text);
   const href = selectionToLookupUrl(text)?.href;
-
   if (!(menuTitle && href)) {
     bubble.style.display = "none";
     return;
   }
-
   const link = document.getElementById("lookup_link");
   link.textContent = menuTitle;
   link.href = href;
-
   const selRect = sel.getRangeAt(0).getBoundingClientRect();
   const tableRect = table.getBoundingClientRect();
-
   bubble.style.display = "block";
   bubble.style.top = `${selRect.bottom + window.scrollY + 5}px`;
   bubble.style.setProperty('--bubble-left', `${selRect.left - 10}px`);
   bubble.style.setProperty('--table-left', `${tableRect.left}px`);
   bubble.style.setProperty('--table-width', `${tableRect.width}px`);
-
   const bubbleRect = bubble.getBoundingClientRect();
   bubble.style.setProperty('--bubble-width', `${bubbleRect.width}px`);
 }
-
 function connectToExtension() {
   const port = chrome.runtime.connect(null, {name: tabId});
   port.onMessage.addListener((msg) => {
@@ -131,13 +110,11 @@ function connectToExtension() {
         return shake();
     }
   });
-
   port.onDisconnect.addListener(() => {
     document.bgColor = "lightpink";
     setTimeout(connectToExtension, 1);
   });
 }
-
 // Clear the table, and fill it with new data.
 function pushAll(tuples, pattern, color, spillCount) {
   removeChildren(table);
@@ -147,7 +124,6 @@ function pushAll(tuples, pattern, color, spillCount) {
   pushPattern(pattern, color);
   pushSpillCount(spillCount);
 }
-
 // Insert or update a single table row.
 function pushOne(tuple) {
   const domain = tuple[0];
@@ -174,7 +150,6 @@ function pushOne(tuple) {
     scrollbarHack();
   }
 }
-
 let lastPattern = "";
 let lastColor = "";  // regular/incognito color scheme
 function pushPattern(pattern, color) {
@@ -195,7 +170,6 @@ function pushPattern(pattern, color) {
     img.src = iconPath(pattern, 32, color);
   }
 }
-
 // Count must be a number.
 function pushSpillCount(count) {
   document.getElementById("spill_count_container").style.display =
@@ -208,7 +182,6 @@ function pushSpillCount(count) {
     scrollbarHack();
   }
 }
-
 // Shake the content (for 500ms) to signal an error.
 function shake() {
   document.body.className = "shake";
@@ -216,20 +189,17 @@ function shake() {
     document.body.className = "";
   }, 600);
 }
-
 // On mobile, zoom in so the table fills the viewport.
 function zoomHack() {
   // This value is actually a bit smaller than we want,
   // but apparently a too-narrow viewport results in a best-fit zoom.
   const tableWidth = document.querySelector('table').offsetWidth;
   document.querySelector('meta[name="viewport"]').setAttribute('content', `width=${tableWidth}`);
-
   // Leave room to the right for the text selection handle,
   // to prevent jittery zooming if the user selects an IP address.
   // 8% of the table width seems reasonable.
   table.style.setProperty('--cache-min-width', `${tableWidth * 0.08}px`);
 }
-
 // Workaround for https://bugzilla.mozilla.org/show_bug.cgi?id=1395025
 let redrawn = false;
 function scrollbarHack() {
@@ -246,7 +216,6 @@ function scrollbarHack() {
     }
   }, 200);
 }
-
 // Copy the contents of src into dst, making minimal changes.
 function minimalCopy(src, dst) {
   dst.className = src.className;
@@ -264,14 +233,12 @@ function minimalCopy(src, dst) {
     }
   }
 }
-
 function makeImg(src, title) {
   const img = document.createElement("img");
   img.src = src;
   img.title = title;
   return img;
 }
-
 function makeSslImg(flags) {
   switch (flags & (DFLAG_SSL | DFLAG_NOSSL)) {
     case DFLAG_SSL | DFLAG_NOSSL:
@@ -289,30 +256,24 @@ function makeSslImg(flags) {
           "Connection does not use HTTPS.");
   }
 }
-
 function makeRow(isFirst, tuple) {
   const domain = tuple[0];
   const addr = tuple[1];
   const version = tuple[2];
   const flags = tuple[3];
-
   const tr = document.createElement("tr");
   if (isFirst) {
     tr.className = "mainRow";
   }
-
   // Build the SSL icon for the "zeroth" pseudo-column.
   const sslImg = makeSslImg(flags);
   sslImg.className = "sslImg";
-
   // Build the "Domain" column.
   const domainTd = document.createElement("td");
   domainTd.appendChild(sslImg);
-
   const selectMe = document.createElement("span");
   domainTd.appendChild(selectMe);
   selectMe.className = "selectMe";
-
   if (domain.length > LONG_DOMAIN) {
     selectMe.appendChild(makeSnippedText(domain, Math.floor(LONG_DOMAIN / 2)));
   } else {
@@ -321,7 +282,6 @@ function makeRow(isFirst, tuple) {
   domainTd.className = "domainTd";
   domainTd.onclick = handleClick;
   domainTd.oncontextmenu = handleContextMenu;
-
   // Build the "Address" column.
   const addrTd = document.createElement("td");
   let addrClass = "";
@@ -334,7 +294,17 @@ function makeRow(isFirst, tuple) {
   addrTd.appendChild(document.createTextNode(addr));
   addrTd.onclick = handleClick;
   addrTd.oncontextmenu = handleContextMenu;
-
+  
+  // Build the "BGP" column.
+  const bgpTd = document.createElement("td");
+  bgpTd.className = `bgpTd${connectedClass}`;
+  const bgpLink = document.createElement("a");
+  bgpLink.href = `https://bgp.he.net/ip/${addr}`;
+  bgpLink.textContent = "bgp";
+  bgpLink.target = "_blank";
+  bgpLink.style.color = "#0066cc";
+  bgpLink.style.textDecoration = "none";
+  bgpTd.appendChild(bgpLink);
   // Build the (possibly invisible) "WebSocket/Cached" column.
   // We don't need to worry about drawing both, because a cached WebSocket
   // would be nonsensical.
@@ -362,14 +332,13 @@ function makeRow(isFirst, tuple) {
   } else {
     cacheTd.style.paddingLeft = '0';
   }
-
   tr._domain = domain;
   tr.appendChild(domainTd);
   tr.appendChild(addrTd);
+  tr.appendChild(bgpTd);
   tr.appendChild(cacheTd);
   return tr;
 }
-
 // Given a long domain name, generate "prefix...suffix".  When the user
 // clicks "...", all domains are expanded.  The CSS is tricky because
 // we want the original domain to remain intact for clipboard purposes.
@@ -378,16 +347,13 @@ function makeSnippedText(domain, keep) {
   const snipped = domain.substr(keep, domain.length - 2 * keep);
   const suffix = domain.substr(domain.length - keep);
   const f = document.createDocumentFragment();
-
   // Add prefix text.
   f.appendChild(document.createTextNode(prefix));
-
   // Add snipped text, invisible but copyable.
   let snippedText = document.createElement("span");
   snippedText.className = "snippedTextInvisible";
   snippedText.textContent = snipped;
   f.appendChild(snippedText);
-
   // Add clickable "..." image.
   const snipImg = makeImg("snip.png", "");
   snipImg.className = "snipImg";
@@ -397,17 +363,14 @@ function makeSnippedText(domain, keep) {
   snipLink.addEventListener("click", unsnipAll);
   snipLink.appendChild(snipImg);
   f.appendChild(snipLink);
-
   // Add suffix text.
   f.appendChild(document.createTextNode(suffix));
   return f;
 }
-
 function unsnipAll(event) {
   event.preventDefault();
   removeStyles(".snippedTextInvisible", ".snipLinkVisible");
 }
-
 function removeStyles(...selectors) {
   const stylesheet = document.styleSheets[0];
   for (const selector of selectors) {
@@ -419,7 +382,6 @@ function removeStyles(...selectors) {
     }
   }
 }
-
 // Mac OS has an annoying feature where right-click selects the current
 // "word" (i.e. a useless fragment of the address) before showing a
 // context menu.  Detect this by watching for the selection to change
@@ -434,12 +396,10 @@ function handleMouseDown(e) {
     oldRanges.push(sel.getRangeAt(i));
   }
 }
-
 function sameRange(r1, r2) {
   return (r1.compareBoundaryPoints(Range.START_TO_START, r2) == 0 &&
           r1.compareBoundaryPoints(Range.END_TO_END, r2) == 0);
 }
-
 function isSpuriousSelection(sel, newTimeStamp) {
   if (newTimeStamp - oldTimeStamp > 10) {
     return false;
@@ -454,7 +414,6 @@ function isSpuriousSelection(sel, newTimeStamp) {
   }
   return false;
 }
-
 function handleContextMenu(e) {
   const sel = window.getSelection();
   if (isSpuriousSelection(sel, e.timeStamp)) {
@@ -463,17 +422,14 @@ function handleContextMenu(e) {
   selectWholeAddress(this, sel);
   return sel;
 }
-
 // Let the "selectMe" class define a more specific selection range.
 function nodeToRange(node) {
   const range = document.createRange();
   range.selectNodeContents(node.querySelector('.selectMe') || node);
   return range;
 }
-
 function handleClick(e) {
   const sel = window.getSelection();
-
   // If the user clicked an already-selected address, deselect it.
   // Don't check timeStamp because it depends how long they held the button.
   if (e.detail == 1 && oldRanges.length == 1) {
@@ -482,10 +438,8 @@ function handleClick(e) {
       return;
     }
   }
-
   selectWholeAddress(this, sel);
 }
-
 // If the user hasn't manually selected part of the address, then select
 // the whole thing, to make copying easier.
 function selectWholeAddress(node, sel) {
