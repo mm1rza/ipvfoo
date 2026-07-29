@@ -306,6 +306,19 @@ function makeHttpImg(flags) {
       "Failed to parse HTTP status.");
 }
 
+function makeSelectMe(...children) {
+  const span = document.createElement("span");
+  span.className = "selectMe";
+  for (const child of children) {
+    if (child instanceof Node) {
+      span.appendChild(child);
+    } else {
+      span.appendChild(document.createTextNode(child));
+    }
+  }
+  return span;
+}
+
 function makeRow(isFirst, tuple) {
   const domain = tuple[0];
   const addr = tuple[1];
@@ -324,16 +337,8 @@ function makeRow(isFirst, tuple) {
   // Build the "Domain" column.
   const domainTd = document.createElement("td");
   domainTd.appendChild(httpImg);
-
-  const selectMe = document.createElement("span");
-  domainTd.appendChild(selectMe);
-  selectMe.className = "selectMe";
-
-  if (domain.length > LONG_DOMAIN) {
-    selectMe.appendChild(makeSnippedText(domain, Math.floor(LONG_DOMAIN / 2)));
-  } else {
-    selectMe.appendChild(document.createTextNode(domain));
-  }
+  domainTd.appendChild(makeSelectMe(
+      domain.length > LONG_DOMAIN ? makeSnippedText(domain, Math.floor(LONG_DOMAIN / 2)) : domain));
   domainTd.className = "domainTd";
   domainTd.onclick = handleClick;
   domainTd.oncontextmenu = handleContextMenu;
@@ -347,7 +352,13 @@ function makeRow(isFirst, tuple) {
   }
   const connectedClass = (flags & DFLAG_CONNECTED) ? " highlight" : "";
   addrTd.className = `addrTd${addrClass}${connectedClass}`;
-  addrTd.appendChild(document.createTextNode(addr));
+  const match = addr.match(/^(.*:)(\d+[.]\d+[.]\d+[.]\d+)$/);
+  if (match) {
+    addrTd.appendChild(makeSelectMe(match[1], makeSelectMe(match[2])));
+  } else {
+    addrTd.appendChild(makeSelectMe(addr));
+  }
+
   addrTd.onclick = handleClick;
   addrTd.oncontextmenu = handleContextMenu;
 
@@ -476,14 +487,17 @@ function handleContextMenu(e) {
   if (isSpuriousSelection(sel, e.timeStamp)) {
     sel.removeAllRanges();
   }
-  selectWholeAddress(this, sel);
+  selectAddress(this, e.target, sel);
   return sel;
 }
 
-// Let the "selectMe" class define a more specific selection range.
-function nodeToRange(node) {
+// Find the innermost "selectMe" that the user clicked on directly,
+// otherwise find the outermost "selectMe" in the cell.
+// This will either select a NAT64 IPv4 suffix, or the entire address.
+function findSelectMe(node, target) {
   const range = document.createRange();
-  range.selectNodeContents(node.querySelector('.selectMe') || node);
+  range.selectNodeContents(
+      target?.closest(".selectMe") || node.querySelector(".selectMe"));
   return range;
 }
 
@@ -493,20 +507,20 @@ function handleClick(e) {
   // If the user clicked an already-selected address, deselect it.
   // Don't check timeStamp because it depends how long they held the button.
   if (e.detail == 1 && oldRanges.length == 1) {
-    if (sameRange(nodeToRange(this), oldRanges[0])) {
+    if (sameRange(findSelectMe(this, e.target), oldRanges[0])) {
       sel.removeAllRanges();
       return;
     }
   }
 
-  selectWholeAddress(this, sel);
+  selectAddress(this, e.target, sel);
 }
 
 // If the user hasn't manually selected part of the address, then select
 // the whole thing, to make copying easier.
-function selectWholeAddress(node, sel) {
+function selectAddress(node, target, sel) {
   if (sel.isCollapsed || !sel.containsNode(node, true)) {
     sel.removeAllRanges();
-    sel.addRange(nodeToRange(node));
+    sel.addRange(findSelectMe(node, target));
   }
 }
