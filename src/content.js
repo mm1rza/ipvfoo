@@ -79,6 +79,9 @@
   const DFLAG_CONNECTED = 0x400;
   const DFLAG_WEBSOCKET = 0x800;
 
+  let currentSort = { column: 'default', order: 'asc' };
+  let allTuplesCache = [];
+
   function isBottomRow(tuple) {
     if (!tuple) return true;
     const addr = tuple[1];
@@ -94,6 +97,29 @@
     if (aBottom !== bBottom) {
       return aBottom ? 1 : -1;
     }
+
+    if (currentSort.column === 'size') {
+      const aBytes = a[5] || 0;
+      const bBytes = b[5] || 0;
+      if (aBytes !== bBytes) {
+        return currentSort.order === 'asc' ? aBytes - bBytes : bBytes - aBytes;
+      }
+    } else if (currentSort.column === 'hits') {
+      const aHits = a[4] || 0;
+      const bHits = b[4] || 0;
+      if (aHits !== bHits) {
+        return currentSort.order === 'asc' ? aHits - bHits : bHits - aHits;
+      }
+    } else if (currentSort.column === 'ip') {
+      const cmp = (a[1] || '').localeCompare(b[1] || '');
+      if (cmp !== 0) {
+        return currentSort.order === 'asc' ? cmp : -cmp;
+      }
+    } else if (currentSort.column === 'domain') {
+      const cmp = a[0].localeCompare(b[0]);
+      return currentSort.order === 'asc' ? cmp : -cmp;
+    }
+
     return a[0].localeCompare(b[0]);
   }
 
@@ -328,7 +354,7 @@
         <span>🌐 IPvFoo Live</span>
       </div>
       <div class="controls">
-        <button id="btn-rst" class="btn btn-rst" title="Reset Hit & Size Counter">RST</button>
+        <button id="btn-rst" class="btn btn-rst" title="Reset Hit & Size Counter">RESET HITS</button>
         <button id="btn-min" class="btn btn-action" title="Minimize / Sembunyikan">_</button>
         <button id="btn-close" class="btn btn-action" title="Tutup Widget">✕</button>
       </div>
@@ -337,11 +363,11 @@
       <table>
         <thead>
           <tr>
-            <th>Domain</th>
-            <th>IP Address</th>
+            <th id="th-domain" style="cursor:pointer;" title="Klik untuk mengurutkan Domain">Domain <span class="sort-icon"></span></th>
+            <th id="th-ip" style="cursor:pointer;" title="Klik untuk mengurutkan IP">IP Address <span class="sort-icon"></span></th>
             <th>BGP</th>
-            <th style="text-align:center;">Hits</th>
-            <th style="text-align:right;">Size</th>
+            <th id="th-hits" style="text-align:center; cursor:pointer;" title="Klik untuk mengurutkan Hits (Terbanyak/Terkecil)">Hits <span class="sort-icon"></span></th>
+            <th id="th-size" style="text-align:right; cursor:pointer;" title="Klik untuk mengurutkan Size (Terbesar/Terkecil)">Size <span class="sort-icon"></span></th>
           </tr>
         </thead>
         <tbody id="addr_tbody"></tbody>
@@ -363,6 +389,42 @@
   document.documentElement.appendChild(host);
 
   const tbody = shadow.getElementById("addr_tbody");
+
+  // Sorting Header Click Handlers
+  function setSort(col) {
+    if (currentSort.column === col) {
+      currentSort.order = currentSort.order === "asc" ? "desc" : "asc";
+    } else {
+      currentSort.column = col;
+      currentSort.order = (col === "size" || col === "hits") ? "desc" : "asc";
+    }
+    updateHeaderSortIndicators();
+    reRenderTable();
+  }
+
+  function updateHeaderSortIndicators() {
+    const cols = ["domain", "ip", "hits", "size"];
+    cols.forEach((c) => {
+      const el = shadow.getElementById(`th-${c}`);
+      if (el) {
+        const icon = el.querySelector(".sort-icon");
+        if (icon) {
+          if (currentSort.column === c) {
+            icon.textContent = currentSort.order === "asc" ? " ▲" : " ▼";
+            el.style.color = "#00d9ff";
+          } else {
+            icon.textContent = "";
+            el.style.color = "#888";
+          }
+        }
+      }
+    });
+  }
+
+  shadow.getElementById("th-domain").onclick = () => setSort("domain");
+  shadow.getElementById("th-ip").onclick = () => setSort("ip");
+  shadow.getElementById("th-hits").onclick = () => setSort("hits");
+  shadow.getElementById("th-size").onclick = () => setSort("size");
 
   // Draggable Header
   const header = shadow.getElementById("header");
@@ -408,13 +470,11 @@
       try {
         await chrome.runtime.sendMessage({ cmd: "resetHitCounter" });
       } catch (e) {}
-      const rows = tbody.querySelectorAll("tr");
-      rows.forEach((tr) => {
-        const hitsEl = tr.querySelector(".hits-cell");
-        if (hitsEl) { hitsEl.textContent = "0"; hitsEl.className = "hits-cell hits-zero"; }
-        const sizeEl = tr.querySelector(".size-cell");
-        if (sizeEl) { sizeEl.textContent = "0 B"; sizeEl.className = "size-cell size-zero"; }
+      allTuplesCache.forEach((t) => {
+        t[4] = 0;
+        t[5] = 0;
       });
+      reRenderTable();
     }
   };
 
@@ -465,56 +525,37 @@
     }
   }
 
-  function pushAll(tuples) {
+  function reRenderTable() {
     while (tbody.firstChild) {
       tbody.removeChild(tbody.firstChild);
     }
-    const filtered = tuples.filter((t) => !HIDDEN_DOMAINS.includes(t[0]));
-    if (filtered.length > 0) {
-      const mainTuple = filtered[0];
-      const others = filtered.slice(1).sort(compareTuples);
+    if (allTuplesCache.length > 0) {
+      const mainTuple = allTuplesCache[0];
+      const others = allTuplesCache.slice(1).sort(compareTuples);
       tbody.appendChild(createRow(true, mainTuple));
       for (const t of others) {
         tbody.appendChild(createRow(false, t));
       }
-      updateMiniBadge(filtered);
+      updateMiniBadge(allTuplesCache);
     }
+  }
+
+  function pushAll(tuples) {
+    allTuplesCache = tuples.filter((t) => !HIDDEN_DOMAINS.includes(t[0]));
+    reRenderTable();
   }
 
   function pushOne(tuple) {
     const domain = tuple[0];
     if (HIDDEN_DOMAINS.includes(domain)) return;
 
-    let existingRow = null;
-    for (let tr = tbody.firstChild; tr; tr = tr.nextSibling) {
-      if (tr._domain === domain) {
-        existingRow = tr;
-        break;
-      }
+    const idx = allTuplesCache.findIndex((t) => t[0] === domain);
+    if (idx >= 0) {
+      allTuplesCache[idx] = tuple;
+    } else {
+      allTuplesCache.push(tuple);
     }
-
-    if (existingRow) {
-      const isFirst = existingRow === tbody.firstChild;
-      if (isFirst) {
-        const newRow = createRow(true, tuple);
-        tbody.replaceChild(newRow, existingRow);
-        updateAllMiniStats();
-        return;
-      }
-      tbody.removeChild(existingRow);
-    }
-
-    let insertHere = null;
-    for (let tr = tbody.firstChild; tr; tr = tr.nextSibling) {
-      if (tr === tbody.firstChild) continue;
-      if (tr._tuple && compareTuples(tuple, tr._tuple) < 0) {
-        insertHere = tr;
-        break;
-      }
-    }
-    const newRow = createRow(false, tuple);
-    tbody.insertBefore(newRow, insertHere);
-    updateAllMiniStats();
+    reRenderTable();
   }
 
   function updateAllMiniStats() {

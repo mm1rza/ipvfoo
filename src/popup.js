@@ -168,6 +168,8 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
   }
 });
 
+let currentSort = { column: 'default', order: 'asc' };
+
 function isBottomRow(tuple) {
   if (!tuple) return true;
   const addr = tuple[1];
@@ -183,6 +185,29 @@ function compareTuples(a, b) {
   if (aBottom !== bBottom) {
     return aBottom ? 1 : -1;
   }
+
+  if (currentSort.column === 'size') {
+    const aBytes = (a && a[5] !== undefined) ? a[5] : (byteCounter[a[1]] || 0);
+    const bBytes = (b && b[5] !== undefined) ? b[5] : (byteCounter[b[1]] || 0);
+    if (aBytes !== bBytes) {
+      return currentSort.order === 'asc' ? aBytes - bBytes : bBytes - aBytes;
+    }
+  } else if (currentSort.column === 'hits') {
+    const aHits = (a && a[4] !== undefined) ? a[4] : (hitCounter[a[1]] || 0);
+    const bHits = (b && b[4] !== undefined) ? b[4] : (hitCounter[b[1]] || 0);
+    if (aHits !== bHits) {
+      return currentSort.order === 'asc' ? aHits - bHits : bHits - aHits;
+    }
+  } else if (currentSort.column === 'ip') {
+    const cmp = (a[1] || '').localeCompare(b[1] || '');
+    if (cmp !== 0) {
+      return currentSort.order === 'asc' ? cmp : -cmp;
+    }
+  } else if (currentSort.column === 'domain') {
+    const cmp = a[0].localeCompare(b[0]);
+    return currentSort.order === 'asc' ? cmp : -cmp;
+  }
+
   return a[0].localeCompare(b[0]);
 }
 
