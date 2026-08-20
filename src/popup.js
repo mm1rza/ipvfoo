@@ -172,11 +172,13 @@ let currentSort = { column: 'default', order: 'asc' };
 
 function isBottomRow(tuple) {
   if (!tuple) return true;
+  const domain = tuple[0];
   const addr = tuple[1];
   const flags = tuple[3] || 0;
   const isWs = Boolean(flags & DFLAG_WEBSOCKET);
   const noIp = !addr || addr === "(x)" || addr === "(lost)" || addr.startsWith("(");
-  return isWs || noIp;
+  const isAux = HIDDEN_DOMAINS.includes(domain);
+  return isWs || noIp || isAux;
 }
 
 function compareTuples(a, b) {
@@ -489,20 +491,34 @@ function makeRow(isFirst, tuple) {
   addrTd.onclick = handleClick;
   addrTd.oncontextmenu = handleContextMenu;
 
-  const bgpTd = document.createElement("td");
-  bgpTd.className = `bgpTd${connectedClass}`;
-  if (addr && addr !== "(x)" && !addr.startsWith("(")) {
-    const bgpLink = document.createElement("a");
-    bgpLink.href = `https://bgp.he.net/ip/${addr}`;
-    bgpLink.textContent = "bgp";
-    bgpLink.target = "_blank";
-    bgpLink.style.color = "#00d9ff";
-    bgpLink.style.textDecoration = "none";
-    bgpTd.appendChild(bgpLink);
+  const statusTd = document.createElement("td");
+  statusTd.className = `statusTd${connectedClass}`;
+  const status = (tuple && tuple[6] !== undefined) ? tuple[6] : 200;
+  statusTd.textContent = status;
+  statusTd.style.textAlign = "center";
+  statusTd.style.fontFamily = "monospace";
+  statusTd.style.fontSize = "10.5px";
+  statusTd.style.fontWeight = "bold";
+  if (typeof status === "number") {
+    if (status >= 500) statusTd.style.color = "#ff5252";
+    else if (status >= 400) statusTd.style.color = "#ffa726";
+    else if (status >= 300) statusTd.style.color = "#64b5f6";
+    else statusTd.style.color = "#48ff00";
   } else {
-    bgpTd.appendChild(document.createTextNode("(x)"));
-    bgpTd.style.color = "#999";
+    statusTd.style.color = "#ff5252";
   }
+
+  const latTd = document.createElement("td");
+  latTd.className = `latTd${connectedClass}`;
+  const latency = (tuple && tuple[7] !== undefined) ? tuple[7] : 0;
+  latTd.textContent = latency > 0 ? `${latency}ms` : "-";
+  latTd.style.textAlign = "right";
+  latTd.style.fontFamily = "monospace";
+  latTd.style.fontSize = "10.5px";
+  if (latency > 500) latTd.style.color = "#ff5252";
+  else if (latency > 150) latTd.style.color = "#ffd700";
+  else if (latency > 0) latTd.style.color = "#48ff00";
+  else latTd.style.color = "#777";
 
   const hitsTd = document.createElement("td");
   hitsTd.className = `hitsTd${connectedClass}`;
@@ -523,6 +539,31 @@ function makeRow(isFirst, tuple) {
   sizeTd.style.paddingLeft = "4pt";
   sizeTd.style.paddingRight = "4pt";
 
+  const bgpTd = document.createElement("td");
+  bgpTd.className = `bgpTd${connectedClass}`;
+  const asn = tuple && tuple[8];
+  let bgpText = "bgp";
+  let bgpHref = `https://bgp.he.net/ip/${addr}`;
+  if (asn) {
+    const cleanAsn = asn.split(" ")[0];
+    bgpText = cleanAsn;
+    if (cleanAsn.startsWith("AS")) {
+      bgpHref = `https://bgp.he.net/${cleanAsn}`;
+    }
+  }
+  if (addr && addr !== "(x)" && !addr.startsWith("(")) {
+    const bgpLink = document.createElement("a");
+    bgpLink.href = bgpHref;
+    bgpLink.textContent = bgpText;
+    bgpLink.target = "_blank";
+    bgpLink.style.color = "#00d9ff";
+    bgpLink.style.textDecoration = "none";
+    bgpTd.appendChild(bgpLink);
+  } else {
+    bgpTd.appendChild(document.createTextNode("-"));
+    bgpTd.style.color = "#999";
+  }
+
   const cacheTd = document.createElement("td");
   cacheTd.className = `cacheTd${connectedClass}`;
   if (flags & DFLAG_WEBSOCKET) {
@@ -538,9 +579,11 @@ function makeRow(isFirst, tuple) {
   tr._domain = domain;
   tr.appendChild(domainTd);
   tr.appendChild(addrTd);
-  tr.appendChild(bgpTd);
+  tr.appendChild(statusTd);
+  tr.appendChild(latTd);
   tr.appendChild(hitsTd);
   tr.appendChild(sizeTd);
+  tr.appendChild(bgpTd);
   tr.appendChild(cacheTd);
   return tr;
 }

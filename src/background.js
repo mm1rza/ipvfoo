@@ -338,7 +338,7 @@ class TabInfo extends SaveableEntry {
     this.save();
   }
 
-  addDomain(domain, dflags, addr, aflags, bytes = 0) {
+  addDomain(domain, dflags, addr, aflags, bytes = 0, statusCode = 200, latencyMs = 0) {
     let d = this.domains[domain];
     let addressOrFlagsChanged = true;
     if (!d) {
@@ -349,6 +349,8 @@ class TabInfo extends SaveableEntry {
       }
       d = this.domains[domain] =
           new DomainInfo(this, domain, addr || "(lost)", dflags | aflags);
+      if (statusCode) d.statusCode = statusCode;
+      if (latencyMs) d.latencyMs = latencyMs;
       d.countUp();
     } else {
       const oldAddr = d.addr;
@@ -356,6 +358,9 @@ class TabInfo extends SaveableEntry {
 
       // Domain flags just accumulate.
       d.flags |= dflags;
+
+      if (statusCode) d.statusCode = statusCode;
+      if (latencyMs) d.latencyMs = latencyMs;
 
       // The numerical value of aflags determines which address to keep
       // (uncached replaces cached, etc.)
@@ -372,6 +377,7 @@ class TabInfo extends SaveableEntry {
     const effectiveAddr = d.addr || addr;
     if (effectiveAddr && effectiveAddr !== "(x)" && effectiveAddr !== "(lost)" && !effectiveAddr.startsWith("(")) {
       recordIpHit(effectiveAddr, bytes);
+      getAsnInfo(effectiveAddr);
     }
 
     if (addressOrFlagsChanged) {
@@ -388,30 +394,30 @@ class TabInfo extends SaveableEntry {
     let pattern = "?";
     let has4 = false;
     let has6 = false;
-    let tooltip = "";
-    for (const [domain, d] of Object.entries(this.domains)) {
-      if (domain == this.mainDomain) {
-        pattern = d.addrVersion();
-        if (IS_MOBILE) {
-          tooltip = d.addr;  // Limited tooltip space on Android.
-        } else {
-          tooltip = `${d.addr}\n${NAME_VERSION}`;
-        }
-      } else {
+    for (const d of Object.values(this.domains)) {
+      if (d.flags & DFLAG_CONNECTED) {
         switch (d.addrVersion()) {
           case "4": has4 = true; break;
           case "6": has6 = true; break;
         }
       }
     }
-    if (has4) pattern += "4";
-    if (has6) pattern += "6";
+    if (!has4 && !has6) {
+      for (const d of Object.values(this.domains)) {
+        switch (d.addrVersion()) {
+          case "4": has4 = true; break;
+          case "6": has6 = true; break;
+        }
+      }
+    }
+    if (has4 && has6) pattern = "46";
+    else if (has4) pattern = "4";
+    else if (has6) pattern = "6";
 
-    // Firefox might drop support for pageAction someday, but until then
-    // let's keep the icon in the address bar.
+    // Set pageAction icon and tooltip.
     const action = chrome.pageAction || chrome.action;
+    const tooltip = this.mainDomain ? `IPvFoo: ${this.mainDomain}` : "IPvFoo";
 
-    // Don't waste time rewriting the same tooltip.
     if (this.lastTooltip != tooltip) {
       action.setTitle({
         "tabId": this.id(),
@@ -421,9 +427,7 @@ class TabInfo extends SaveableEntry {
       this.save();
     }
 
-    // Don't waste time redrawing the same icon.
     if (this.lastPattern != pattern) {
-      // Briefly defaults to "" on first boot.
       const color = options[this.color] || "darkfg";
       action.setIcon({
         "tabId": this.id(),
@@ -432,10 +436,9 @@ class TabInfo extends SaveableEntry {
           "32": iconPath(pattern, 32, color),
         },
       });
-      // Send icon to the popup window.
       popups.pushPattern(this.id(), pattern, this.color);
       if (action.show) {
-        action.show(this.id());  // Firefox only
+        action.show(this.id());
       }
       this.lastPattern = pattern;
       this.save();
@@ -450,39 +453,46 @@ class TabInfo extends SaveableEntry {
     popups.pushOne(this.id(), this.getTuple(domain));
   }
 
-  // Build some [domain, addr, version, flags, hits, bytes] tuples, for a popup.
+  // Build [domain, addr, version, flags, hits, bytes, statusCode, latencyMs, asn] tuples
   getTuples() {
     const mainDomain = this.mainDomain || "(no domain)";
     const domains = Object.keys(this.domains).sort();
-    const mainTuple = [mainDomain, "(x)", "?", 0, 0, 0];
+    const mainTuple = [mainDomain, "(x)", "?", 0, 0, 0, 200, 0, ""];
     const tuples = [mainTuple];
     for (const domain of domains) {
       const d = this.domains[domain];
       const hits = (d.addr && ipHitCounter[d.addr]) || 0;
       const bytes = (d.addr && ipByteCounter[d.addr]) || 0;
+      const asn = (d.addr && getAsnInfo(d.addr)) || "";
+      const status = d.statusCode || 200;
+      const latency = d.latencyMs || 0;
       if (domain == mainTuple[0]) {
         mainTuple[1] = d.addr;
         mainTuple[2] = d.addrVersion();
         mainTuple[3] = d.flags;
         mainTuple[4] = hits;
         mainTuple[5] = bytes;
+        mainTuple[6] = status;
+        mainTuple[7] = latency;
+        mainTuple[8] = asn;
       } else {
-        tuples.push([domain, d.addr, d.addrVersion(), d.flags, hits, bytes]);
+        tuples.push([domain, d.addr, d.addrVersion(), d.flags, hits, bytes, status, latency, asn]);
       }
     }
     return tuples;
   }
 
-  // Build [domain, addr, version, flags, hits, bytes] tuple, for a popup.
   getTuple(domain) {
     const d = this.domains[domain];
     if (!d) {
-      // Perhaps this.domains was cleared during the request's lifetime.
       return null;
     }
     const hits = (d.addr && ipHitCounter[d.addr]) || 0;
     const bytes = (d.addr && ipByteCounter[d.addr]) || 0;
-    return [domain, d.addr, d.addrVersion(), d.flags, hits, bytes];
+    const asn = (d.addr && getAsnInfo(d.addr)) || "";
+    const status = d.statusCode || 200;
+    const latency = d.latencyMs || 0;
+    return [domain, d.addr, d.addrVersion(), d.flags, hits, bytes, status, latency, asn];
   }
 }
 
@@ -491,6 +501,8 @@ class DomainInfo {
   domain;
   addr;
   flags;
+  statusCode = 200;
+  latencyMs = 0;
 
   count = 0;  // count of active requests
   inhibitZero = false;
@@ -502,19 +514,20 @@ class DomainInfo {
     this.flags = flags;
   }
 
-  // count and DFLAG_CONNECTED will be computed from requestMap.
   toJSON() {
-    return [this.addr, this.flags & ~DFLAG_CONNECTED];
+    return [this.addr, this.flags & ~DFLAG_CONNECTED, this.statusCode || 200, this.latencyMs || 0];
   }
 
   static fromJSON(tabInfo, domain, json) {
-    const [addr, flags] = json;
-    return new DomainInfo(tabInfo, domain, addr, flags);
+    const [addr, flags, statusCode, latencyMs] = json;
+    const di = new DomainInfo(tabInfo, domain, addr, flags);
+    if (statusCode) di.statusCode = statusCode;
+    if (latencyMs) di.latencyMs = latencyMs;
+    return di;
   }
 
   addrVersion() {
     if (this.addr) {
-      // NAT64 addresses use the prefix::a.b.c.d format.
       if (this.addr.indexOf(".") >= 0) return "4";
       if (this.addr.indexOf(":") >= 0) return "6";
     }
@@ -524,7 +537,6 @@ class DomainInfo {
   async countUp() {
     this.flags |= DFLAG_CONNECTED;
     if (++this.count == 1 && !this.inhibitZero) {
-      // Keep the address highlighted for at least 500ms.
       this.inhibitZero = true;
       await sleep(500);
       this.inhibitZero = false;
@@ -547,12 +559,13 @@ class DomainInfo {
 }
 
 class RequestInfo extends SaveableEntry {
-  // Typically this contains one {tabId: tabBorn} entry,
-  // but for Service Worker requests there may be multiple tabs.
   tabIdToBorn = newMap();
   domain = null;
   prefetch = false;
   bytes = 0;
+  startTime = 0;
+  statusCode = 0;
+  latencyMs = 0;
 
   afterLoad() {
     for (const [tabId, tabBorn] of Object.entries(this.tabIdToBorn)) {
@@ -730,6 +743,97 @@ function recordIpHit(addr, bytes = 0) {
   saveHitCounterBackgroundDebounced();
 }
 
+// ASN & Geo IP Cache
+let ipAsnCache = {};
+let asnPending = new Set();
+
+async function loadAsnCache() {
+  try {
+    const res = await chrome.storage.local.get(['ipAsnCache']);
+    if (res.ipAsnCache) ipAsnCache = res.ipAsnCache;
+  } catch (e) {}
+}
+
+function isPrivateIP(addr) {
+  if (!addr || addr === "(x)" || addr === "(lost)" || addr.startsWith("(")) return false;
+  if (addr === "127.0.0.1" || addr === "::1" || addr === "localhost") return true;
+
+  const parts = addr.split(".");
+  if (parts.length === 4) {
+    const o1 = parseInt(parts[0], 10);
+    const o2 = parseInt(parts[1], 10);
+    if (isNaN(o1) || isNaN(o2)) return false;
+
+    // RFC 1918: 10.0.0.0/8
+    if (o1 === 10) return true;
+    // RFC 1918: 172.16.0.0/12 (172.16.0.0 to 172.31.255.255)
+    if (o1 === 172 && o2 >= 16 && o2 <= 31) return true;
+    // RFC 1918: 192.168.0.0/16
+    if (o1 === 192 && o2 === 168) return true;
+    // RFC 3927: 169.254.0.0/16 Link-Local
+    if (o1 === 169 && o2 === 254) return true;
+    // RFC 5735: 127.0.0.0/8 Loopback
+    if (o1 === 127) return true;
+    // RFC 6598: 100.64.0.0/10 CGNAT
+    if (o1 === 100 && o2 >= 64 && o2 <= 127) return true;
+    return false;
+  }
+
+  const lower = addr.toLowerCase();
+  if (lower.startsWith("fc") || lower.startsWith("fd") || lower.startsWith("fe80:")) {
+    return true;
+  }
+  return false;
+}
+
+function getAsnInfo(addr) {
+  if (!addr || addr === "(x)" || addr === "(lost)" || addr.startsWith("(")) {
+    return "";
+  }
+  // Check private / LAN IP ranges strictly following CIDR
+  if (isPrivateIP(addr)) {
+    return "LAN";
+  }
+
+  if (ipAsnCache[addr]) {
+    // If it was wrongly cached as LAN before, discard
+    if (ipAsnCache[addr] === "LAN") {
+      delete ipAsnCache[addr];
+    } else {
+      return ipAsnCache[addr];
+    }
+  }
+
+  // Fetch ASN asynchronously in background if not pending
+  if (!asnPending.has(addr)) {
+    asnPending.add(addr);
+    fetchAsnInfo(addr);
+  }
+
+  return "";
+}
+
+async function fetchAsnInfo(addr) {
+  try {
+    const res = await fetch(`https://ipwhois.app/json/${addr}?objects=asn,org,country_code`);
+    if (res.ok) {
+      const data = await res.json();
+      if (data.asn || data.country_code) {
+        const asnStr = `${data.asn || ""} ${data.country_code || ""}`.trim();
+        ipAsnCache[addr] = asnStr;
+        chrome.storage.local.set({ ipAsnCache });
+        for (const tabInfo of Object.values(tabMap)) {
+          for (const [domain, di] of Object.entries(tabInfo.domains)) {
+            if (di.addr === addr) {
+              tabInfo.pushOne(domain);
+            }
+          }
+        }
+      }
+    }
+  } catch (e) {}
+}
+
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.hasOwnProperty("darkModeOffscreen")) {
     setColorIsDarkMode(REGULAR_COLOR, message.darkModeOffscreen);
@@ -786,6 +890,7 @@ const storageSyncDebouncer = new StorageSyncDebouncer();
 const initStorage = async () => {
   await optionsReady;
   await loadHitCounterBackground();
+  await loadAsnCache();
 
   // These are be no-ops unless initStorage() is called manually.
   clearMap(tabMap);
@@ -1130,6 +1235,7 @@ chrome.webRequest.onBeforeRequest.addListener(wrap(async (details) => {
   }
   requestInfo.domain = null;
   requestInfo.prefetch = prefetch;
+  requestInfo.startTime = Date.now();
   requestInfo.save();
 }), FILTER_ALL_URLS);
 
@@ -1166,14 +1272,20 @@ chrome.webRequest.onHeadersReceived.addListener(wrap(async (details) => {
   await storageReady;
   const requestInfo = requestMap[details.requestId];
   if (!requestInfo) return;
+  if (details.statusCode) {
+    requestInfo.statusCode = details.statusCode;
+  }
+  if (requestInfo.startTime) {
+    requestInfo.latencyMs = Math.max(1, Date.now() - requestInfo.startTime);
+  }
   const clHeader = details.responseHeaders?.find(h => h.name.toLowerCase() === "content-length");
   if (clHeader) {
     const bytes = parseInt(clHeader.value, 10);
     if (!isNaN(bytes) && bytes > 0) {
       requestInfo.bytes = bytes;
-      requestInfo.save();
     }
   }
+  requestInfo.save();
 }), FILTER_ALL_URLS, ["responseHeaders"]);
 
 chrome.webRequest.onResponseStarted.addListener(wrap(async (details) => {
@@ -1242,8 +1354,10 @@ chrome.webRequest.onResponseStarted.addListener(wrap(async (details) => {
   requestInfo.domain = parsed.domain;
   requestInfo.save();
   const bytes = requestInfo.bytes || 0;
+  const status = details.statusCode || requestInfo.statusCode || (fromCache ? 200 : 200);
+  const latency = requestInfo.latencyMs || (requestInfo.startTime ? Math.max(1, Date.now() - requestInfo.startTime) : 0);
   for (const tabInfo of tabInfos) {
-    tabInfo.addDomain(parsed.domain, dflags, addr, aflags, bytes);
+    tabInfo.addDomain(parsed.domain, dflags, addr, aflags, bytes, status, latency);
   }
 }), FILTER_ALL_URLS);
 
@@ -1261,7 +1375,28 @@ const forgetRequest = wrap(async (details) => {
   }
 });
 chrome.webRequest.onCompleted.addListener(forgetRequest, FILTER_ALL_URLS);
-chrome.webRequest.onErrorOccurred.addListener(forgetRequest, FILTER_ALL_URLS);
+
+chrome.webRequest.onErrorOccurred.addListener(wrap(async (details) => {
+  await storageReady;
+  const requestInfo = requestMap.remove(details.requestId);
+  if (!requestInfo?.domain) {
+    return;
+  }
+  const errStatus = details.error ? details.error.replace("net::ERR_", "") : "ERR";
+  const latency = requestInfo.startTime ? Math.max(1, Date.now() - requestInfo.startTime) : 0;
+  for (const [tabId, tabBorn] of Object.entries(requestInfo.tabIdToBorn)) {
+    const tabInfo = tabMap[tabId];
+    if (tabInfo?.born == tabBorn) {
+      const d = tabInfo.domains[requestInfo.domain];
+      if (d) {
+        d.statusCode = errStatus;
+        d.latencyMs = latency;
+        d.countDown();
+        tabInfo.pushOne(requestInfo.domain);
+      }
+    }
+  }
+}), FILTER_ALL_URLS);
 
 // -- contextMenus --
 

@@ -84,11 +84,13 @@
 
   function isBottomRow(tuple) {
     if (!tuple) return true;
+    const domain = tuple[0];
     const addr = tuple[1];
     const flags = tuple[3] || 0;
     const isWs = Boolean(flags & DFLAG_WEBSOCKET);
     const noIp = !addr || addr === "(x)" || addr === "(lost)" || addr.startsWith("(");
-    return isWs || noIp;
+    const isAux = HIDDEN_DOMAINS.includes(domain);
+    return isWs || noIp || isAux;
   }
 
   function compareTuples(a, b) {
@@ -109,6 +111,18 @@
       const bHits = b[4] || 0;
       if (aHits !== bHits) {
         return currentSort.order === 'asc' ? aHits - bHits : bHits - aHits;
+      }
+    } else if (currentSort.column === 'status') {
+      const aStat = String(a[6] || 200);
+      const bStat = String(b[6] || 200);
+      if (aStat !== bStat) {
+        return currentSort.order === 'asc' ? aStat.localeCompare(bStat) : bStat.localeCompare(aStat);
+      }
+    } else if (currentSort.column === 'latency') {
+      const aLat = a[7] || 0;
+      const bLat = b[7] || 0;
+      if (aLat !== bLat) {
+        return currentSort.order === 'asc' ? aLat - bLat : bLat - aLat;
       }
     } else if (currentSort.column === 'ip') {
       const cmp = (a[1] || '').localeCompare(b[1] || '');
@@ -151,16 +165,16 @@
       position: fixed;
       top: 12px;
       right: 12px;
-      width: 440px;
+      width: 580px;
       max-width: calc(100vw - 24px);
       max-height: 85vh;
-      background: rgba(22, 24, 29, 0.95);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
+      background: rgba(18, 20, 26, 0.96);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
       color: #eee;
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      border-radius: 9px;
-      box-shadow: 0 10px 35px rgba(0, 0, 0, 0.6), 0 0 1px rgba(255, 255, 255, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 10px;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.7), 0 0 2px rgba(0, 217, 255, 0.3);
       font-size: 11.5px;
       z-index: 2147483647 !important;
       display: none;
@@ -174,9 +188,9 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 7px 10px;
-      background: rgba(35, 38, 46, 0.9);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 8px 12px;
+      background: rgba(30, 34, 44, 0.95);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.12);
       cursor: move;
     }
 
@@ -186,18 +200,18 @@
       display: flex;
       align-items: center;
       gap: 6px;
-      font-size: 11.5px;
+      font-size: 12px;
       letter-spacing: 0.3px;
     }
 
     #header .controls {
       display: flex;
-      gap: 4px;
+      gap: 5px;
       align-items: center;
     }
 
     .btn {
-      padding: 2px 7px;
+      padding: 2.5px 8px;
       font-size: 11px;
       font-weight: 700;
       border: 1px solid rgba(255, 255, 255, 0.2);
@@ -227,7 +241,7 @@
 
     #table-wrap {
       overflow-y: auto;
-      max-height: calc(85vh - 40px);
+      max-height: calc(85vh - 44px);
       padding: 4px;
     }
 
@@ -240,22 +254,23 @@
 
     th {
       text-align: left;
-      padding: 4px 6px;
+      padding: 5px 6px;
       color: #888;
       font-size: 10px;
       font-weight: 600;
       text-transform: uppercase;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+      user-select: none;
     }
 
     td {
-      padding: 3px 6px;
+      padding: 4px 6px;
       border-bottom: 1px solid rgba(255, 255, 255, 0.05);
       vertical-align: middle;
     }
 
     tr:hover td {
-      background: rgba(255, 255, 255, 0.05);
+      background: rgba(255, 255, 255, 0.06);
     }
 
     .mainRow td {
@@ -263,7 +278,7 @@
     }
 
     .domain-cell {
-      max-width: 170px;
+      max-width: 150px;
       overflow: hidden;
       text-overflow: ellipsis;
       user-select: text;
@@ -272,9 +287,53 @@
     .ip-cell {
       font-family: Consolas, Monaco, monospace;
       user-select: text;
+      display: flex;
+      align-items: center;
+      gap: 5px;
     }
     .ip4 { color: #ff8a80; }
     .ip6 { color: #80ff80; }
+
+    .asn-tag {
+      font-size: 9.5px;
+      padding: 1px 4px;
+      border-radius: 3px;
+      background: rgba(0, 217, 255, 0.15);
+      color: #00d9ff;
+      border: 1px solid rgba(0, 217, 255, 0.3);
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .asn-tag.lan {
+      background: rgba(255, 152, 0, 0.2);
+      color: #ffb74d;
+      border-color: rgba(255, 152, 0, 0.4);
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 1px 5px;
+      border-radius: 3px;
+      font-size: 10px;
+      font-weight: 700;
+      font-family: Consolas, Monaco, monospace;
+      text-align: center;
+    }
+    .status-2xx { background: rgba(76, 175, 80, 0.2); color: #48ff00; }
+    .status-3xx { background: rgba(33, 150, 243, 0.2); color: #64b5f6; }
+    .status-4xx { background: rgba(255, 152, 0, 0.25); color: #ffa726; }
+    .status-5xx, .status-err { background: rgba(244, 67, 54, 0.3); color: #ff5252; font-weight: bold; }
+
+    .lat-cell {
+      font-family: Consolas, Monaco, monospace;
+      font-size: 10.5px;
+      text-align: right;
+    }
+    .lat-fast { color: #48ff00; }
+    .lat-med { color: #ffd700; }
+    .lat-slow { color: #ff5252; font-weight: bold; }
+    .lat-na { color: #777; }
 
     .bgp-link {
       color: #00d9ff;
@@ -306,8 +365,12 @@
       color: #777;
     }
 
+    .row-error td {
+      background: rgba(244, 67, 54, 0.15) !important;
+    }
+
     .highlight td {
-      background: rgba(255, 235, 59, 0.22) !important;
+      background: rgba(255, 235, 59, 0.18) !important;
     }
 
     /* Minimized Badge */
@@ -315,12 +378,12 @@
       position: fixed;
       top: 12px;
       right: 12px;
-      background: rgba(20, 22, 28, 0.95);
+      background: rgba(18, 20, 26, 0.96);
       border: 1px solid rgba(0, 217, 255, 0.4);
-      box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+      box-shadow: 0 4px 18px rgba(0,0,0,0.6);
       color: #eee;
       border-radius: 20px;
-      padding: 5px 12px;
+      padding: 5px 14px;
       font-size: 11px;
       font-weight: 600;
       cursor: pointer;
@@ -332,7 +395,7 @@
     }
     #mini-badge:hover {
       border-color: #00d9ff;
-      background: rgba(30, 34, 44, 0.98);
+      background: rgba(28, 32, 42, 0.98);
     }
     #mini-badge .dot {
       width: 7px;
@@ -351,7 +414,7 @@
   widget.innerHTML = `
     <div id="header">
       <div class="title">
-        <span>🌐 IPvFoo Live</span>
+        <span>🌐 IPvFoo NOC Live Diagnostic</span>
       </div>
       <div class="controls">
         <button id="btn-rst" class="btn btn-rst" title="Reset Hit & Size Counter">RESET HITS</button>
@@ -363,11 +426,13 @@
       <table>
         <thead>
           <tr>
-            <th id="th-domain" style="cursor:pointer;" title="Klik untuk mengurutkan Domain">Domain <span class="sort-icon"></span></th>
-            <th id="th-ip" style="cursor:pointer;" title="Klik untuk mengurutkan IP">IP Address <span class="sort-icon"></span></th>
-            <th>BGP</th>
-            <th id="th-hits" style="text-align:center; cursor:pointer;" title="Klik untuk mengurutkan Hits (Terbanyak/Terkecil)">Hits <span class="sort-icon"></span></th>
-            <th id="th-size" style="text-align:right; cursor:pointer;" title="Klik untuk mengurutkan Size (Terbesar/Terkecil)">Size <span class="sort-icon"></span></th>
+            <th id="th-domain" style="cursor:pointer;" title="Sort Domain">Domain <span class="sort-icon"></span></th>
+            <th id="th-ip" style="cursor:pointer;" title="Sort IP">IP Address <span class="sort-icon"></span></th>
+            <th id="th-status" style="text-align:center; cursor:pointer;" title="Sort HTTP Status Code">Status <span class="sort-icon"></span></th>
+            <th id="th-latency" style="text-align:right; cursor:pointer;" title="Sort Response Latency">Latency <span class="sort-icon"></span></th>
+            <th id="th-hits" style="text-align:center; cursor:pointer;" title="Sort Hits">Hits <span class="sort-icon"></span></th>
+            <th id="th-size" style="text-align:right; cursor:pointer;" title="Sort Payload Size">Size <span class="sort-icon"></span></th>
+            <th style="text-align:center;">ASN / BGP</th>
           </tr>
         </thead>
         <tbody id="addr_tbody"></tbody>
@@ -403,7 +468,7 @@
   }
 
   function updateHeaderSortIndicators() {
-    const cols = ["domain", "ip", "hits", "size"];
+    const cols = ["domain", "ip", "status", "latency", "hits", "size"];
     cols.forEach((c) => {
       const el = shadow.getElementById(`th-${c}`);
       if (el) {
@@ -423,6 +488,8 @@
 
   shadow.getElementById("th-domain").onclick = () => setSort("domain");
   shadow.getElementById("th-ip").onclick = () => setSort("ip");
+  shadow.getElementById("th-status").onclick = () => setSort("status");
+  shadow.getElementById("th-latency").onclick = () => setSort("latency");
   shadow.getElementById("th-hits").onclick = () => setSort("hits");
   shadow.getElementById("th-size").onclick = () => setSort("size");
 
@@ -485,6 +552,9 @@
     const flags = tuple[3] || 0;
     const hits = tuple[4] !== undefined ? tuple[4] : 0;
     const bytes = tuple[5] !== undefined ? tuple[5] : 0;
+    const status = tuple[6] !== undefined ? tuple[6] : 200;
+    const latency = tuple[7] !== undefined ? tuple[7] : 0;
+    const asn = tuple[8] || "";
 
     const tr = document.createElement("tr");
     if (isFirst) tr.className = "mainRow";
@@ -495,16 +565,51 @@
     const lockIcon = (flags & DFLAG_SSL) ? "🔒 " : "";
     const ipClass = version === "6" ? "ip6" : "ip4";
 
+    let statusClass = "status-2xx";
+    if (typeof status === "number") {
+      if (status >= 500) statusClass = "status-5xx";
+      else if (status >= 400) statusClass = "status-4xx";
+      else if (status >= 300) statusClass = "status-3xx";
+      else if (status >= 200) statusClass = "status-2xx";
+    } else {
+      statusClass = "status-err";
+    }
+    const isErr = (typeof status === "number" && status >= 400) || typeof status === "string";
+    if (isErr) tr.classList.add("row-error");
+
+    let latClass = "lat-fast";
+    let latText = `${latency} ms`;
+    if (latency <= 0) {
+      latClass = "lat-na";
+      latText = "-";
+    } else if (latency > 500) {
+      latClass = "lat-slow";
+    } else if (latency > 150) {
+      latClass = "lat-med";
+    }
+
+    let bgpText = "bgp";
+    let bgpHref = `https://bgp.he.net/ip/${addr}`;
+    if (asn) {
+      const cleanAsn = asn.split(" ")[0];
+      bgpText = cleanAsn;
+      if (cleanAsn.startsWith("AS")) {
+        bgpHref = `https://bgp.he.net/${cleanAsn}`;
+      }
+    }
+
     const bgpHtml = (addr && addr !== "(x)" && !addr.startsWith("("))
-      ? `<a href="https://bgp.he.net/ip/${addr}" target="_blank" class="bgp-link">bgp</a>`
-      : `<span style="color:#666;">(x)</span>`;
+      ? `<a href="${bgpHref}" target="_blank" class="bgp-link" title="Lookup ${bgpText} di HE BGP">${bgpText}</a>`
+      : `<span style="color:#666;">-</span>`;
 
     tr.innerHTML = `
       <td class="domain-cell" title="${domain}">${lockIcon}${domain}</td>
       <td class="ip-cell ${ipClass}">${addr || "(x)"}</td>
-      <td>${bgpHtml}</td>
+      <td style="text-align:center;"><span class="status-badge ${statusClass}">${status}</span></td>
+      <td class="lat-cell ${latClass}">${latText}</td>
       <td class="hits-cell ${hits > 0 ? '' : 'hits-zero'}">${hits}</td>
       <td class="size-cell ${bytes > 0 ? '' : 'size-zero'}">${formatBytes(bytes)}</td>
+      <td style="text-align:center;">${bgpHtml}</td>
     `;
     return tr;
   }
@@ -513,6 +618,9 @@
     if (!tuples || tuples.length === 0) return;
     const main = tuples[0];
     const mainAddr = main[1] || "(x)";
+    const mainAsn = main[8] ? ` [${main[8]}]` : "";
+    const mainStatus = main[6] || 200;
+    const mainLat = main[7] ? ` (${main[7]}ms)` : "";
     let totalHits = 0;
     let totalBytes = 0;
     tuples.forEach((t) => {
@@ -521,7 +629,7 @@
     });
     const miniText = shadow.getElementById("mini-text");
     if (miniText) {
-      miniText.textContent = `${mainAddr} | ${totalHits} req | ${formatBytes(totalBytes)}`;
+      miniText.textContent = `${mainAddr}${mainAsn} | ${mainStatus}${mainLat} | ${totalHits} req | ${formatBytes(totalBytes)}`;
     }
   }
 
@@ -541,14 +649,12 @@
   }
 
   function pushAll(tuples) {
-    allTuplesCache = tuples.filter((t) => !HIDDEN_DOMAINS.includes(t[0]));
+    allTuplesCache = tuples;
     reRenderTable();
   }
 
   function pushOne(tuple) {
     const domain = tuple[0];
-    if (HIDDEN_DOMAINS.includes(domain)) return;
-
     const idx = allTuplesCache.findIndex((t) => t[0] === domain);
     if (idx >= 0) {
       allTuplesCache[idx] = tuple;
