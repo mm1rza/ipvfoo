@@ -151,6 +151,21 @@
     return `${val < 10 ? val.toFixed(1) : Math.round(val)} ${sizes[i]}`;
   }
 
+  function formatSpeed(bytesPerSec) {
+    if (!bytesPerSec || bytesPerSec <= 0) return "";
+    const k = 1024;
+    const sizes = ["B/s", "KB/s", "MB/s", "GB/s"];
+    const i = Math.min(Math.floor(Math.log(bytesPerSec) / Math.log(k)), sizes.length - 1);
+    const val = bytesPerSec / Math.pow(k, i);
+    return `${val < 10 ? val.toFixed(1) : Math.round(val)} ${sizes[i]}`;
+  }
+
+  let lastBytesTimestamp = Date.now();
+  let lastTotalBytes = 0;
+  let currentSpeedBps = 0;
+  let domainSpeedMap = {};
+  let lastDomainBytes = {};
+
   // Create host element & attach Shadow DOM
   const host = document.createElement("div");
   host.id = "ipvfoo-overlay-host";
@@ -370,6 +385,33 @@
       color: #777;
     }
 
+    .widget-speed {
+      font-size: 10px;
+      font-weight: 700;
+      color: #00d9ff;
+      background: rgba(0, 217, 255, 0.15);
+      border: 1px solid rgba(0, 217, 255, 0.35);
+      padding: 1px 6px;
+      border-radius: 4px;
+      margin-left: 8px;
+      display: none;
+      align-items: center;
+      gap: 3px;
+      line-height: 1.3;
+    }
+
+    .speed-tag {
+      display: inline-block;
+      margin-left: 4px;
+      padding: 1px 4px;
+      font-size: 9px;
+      font-weight: 700;
+      color: #000;
+      background: #00d9ff;
+      border-radius: 3px;
+      line-height: 1.1;
+    }
+
     .row-error td {
       background: rgba(244, 67, 54, 0.15) !important;
     }
@@ -418,8 +460,9 @@
   widget.id = "widget";
   widget.innerHTML = `
     <div id="header">
-      <div class="title">
+      <div class="title" style="display:flex; align-items:center;">
         <span>IPvFoo</span>
+        <span id="widget-speed" class="widget-speed"></span>
       </div>
       <div class="controls">
         <button id="btn-rst" class="btn btn-rst" title="Reset Hit & Size Counter">RESET HITS</button>
@@ -608,13 +651,16 @@
       ? `<a href="${bgpHref}" target="_blank" class="bgp-link" title="Lookup ${bgpText} di HE BGP">${bgpText}</a>`
       : `<span style="color:#666;">-</span>`;
 
+    const dSpeed = domainSpeedMap[domain] || 0;
+    const speedHtml = dSpeed >= 200 ? ` <span class="speed-tag">⚡${formatSpeed(dSpeed)}</span>` : "";
+
     tr.innerHTML = `
       <td class="domain-cell" title="Klik untuk copy: ${domain}">${lockIcon}${domain}</td>
       <td class="ip-cell ${ipClass}" title="Klik untuk copy: ${addr || '(x)'}">${addr || "(x)"}</td>
       <td style="text-align:center;"><span class="status-badge ${statusClass}">${status}</span></td>
       <td class="lat-cell ${latClass}">${latText}</td>
       <td class="hits-cell ${hits > 0 ? '' : 'hits-zero'}">${hits}</td>
-      <td class="size-cell ${bytes > 0 ? '' : 'size-zero'}">${formatBytes(bytes)}</td>
+      <td class="size-cell ${bytes > 0 ? '' : 'size-zero'}">${formatBytes(bytes)}${speedHtml}</td>
       <td style="text-align:center;">${bgpHtml}</td>
     `;
 
@@ -701,11 +747,84 @@
       totalHits += t[4] || 0;
       totalBytes += t[5] || 0;
     });
+    const speedStr = currentSpeedBps >= 200 ? ` | ⚡ ${formatSpeed(currentSpeedBps)}` : "";
     const miniText = shadow.getElementById("mini-text");
     if (miniText) {
-      miniText.textContent = `${mainAddr}${mainAsn} | ${mainStatus}${mainLat} | ${totalHits} req | ${formatBytes(totalBytes)}`;
+      miniText.textContent = `${mainAddr}${mainAsn} | ${mainStatus}${mainLat} | ${totalHits} req | ${formatBytes(totalBytes)}${speedStr}`;
     }
   }
+
+  function calculateSpeed() {
+    const now = Date.now();
+    const dt = (now - lastBytesTimestamp) / 1000;
+    if (dt <= 0.3) return;
+
+    let currentTotalBytes = 0;
+    const currentDomainBytes = {};
+
+    allTuplesCache.forEach((t) => {
+      const d = t[0];
+      const b = t[5] || 0;
+      currentTotalBytes += b;
+      currentDomainBytes[d] = b;
+    });
+
+    const byteDiff = Math.max(0, currentTotalBytes - lastTotalBytes);
+    const instantSpeed = byteDiff / dt;
+
+    if (byteDiff > 0) {
+      currentSpeedBps = (currentSpeedBps === 0) ? instantSpeed : (currentSpeedBps * 0.4 + instantSpeed * 0.6);
+    } else {
+      currentSpeedBps = currentSpeedBps * 0.5;
+      if (currentSpeedBps < 200) currentSpeedBps = 0;
+    }
+
+    for (const [domain, b] of Object.entries(currentDomainBytes)) {
+      const prevB = lastDomainBytes[domain] || 0;
+      const dDiff = Math.max(0, b - prevB);
+      if (dDiff > 0) {
+        domainSpeedMap[domain] = (domainSpeedMap[domain] ? domainSpeedMap[domain] * 0.4 : 0) + (dDiff / dt) * 0.6;
+      } else {
+        domainSpeedMap[domain] = (domainSpeedMap[domain] || 0) * 0.5;
+        if (domainSpeedMap[domain] < 200) delete domainSpeedMap[domain];
+      }
+    }
+
+    lastTotalBytes = currentTotalBytes;
+    lastDomainBytes = currentDomainBytes;
+    lastBytesTimestamp = now;
+
+    // Update Widget Header Speed Badge
+    const speedEl = shadow.getElementById("widget-speed");
+    if (speedEl) {
+      if (currentSpeedBps >= 200) {
+        speedEl.textContent = `⚡ ${formatSpeed(currentSpeedBps)}`;
+        speedEl.style.display = "inline-flex";
+      } else {
+        speedEl.style.display = "none";
+      }
+    }
+
+    // Update Mini Badge text
+    updateMiniBadge(allTuplesCache);
+
+    // Update active domain speed tags in visible table rows
+    if (tbody) {
+      for (let tr = tbody.firstChild; tr; tr = tr.nextSibling) {
+        if (tr._domain && tr._tuple) {
+          const dSpeed = domainSpeedMap[tr._domain] || 0;
+          const sizeTd = tr.querySelector(".size-cell");
+          if (sizeTd) {
+            const bytes = tr._tuple[5] || 0;
+            const speedHtml = dSpeed >= 200 ? ` <span class="speed-tag">⚡${formatSpeed(dSpeed)}</span>` : "";
+            sizeTd.innerHTML = `${formatBytes(bytes)}${speedHtml}`;
+          }
+        }
+      }
+    }
+  }
+
+  setInterval(calculateSpeed, 800);
 
   function reRenderTable() {
     while (tbody.firstChild) {

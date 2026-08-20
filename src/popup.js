@@ -30,6 +30,21 @@ function formatBytes(bytes) {
   return `${val < 10 ? val.toFixed(1) : Math.round(val)} ${sizes[i]}`;
 }
 
+function formatSpeed(bytesPerSec) {
+  if (!bytesPerSec || bytesPerSec <= 0) return "";
+  const k = 1024;
+  const sizes = ["B/s", "KB/s", "MB/s", "GB/s"];
+  const i = Math.min(Math.floor(Math.log(bytesPerSec) / Math.log(k)), sizes.length - 1);
+  const val = bytesPerSec / Math.pow(k, i);
+  return `${val < 10 ? val.toFixed(1) : Math.round(val)} ${sizes[i]}`;
+}
+
+let lastBytesTimestamp = Date.now();
+let lastTotalBytes = 0;
+let currentSpeedBps = 0;
+let domainSpeedMap = {};
+let lastDomainBytes = {};
+
 // --- DAFTAR DOMAIN YANG DISEMBUNYIKAN ---
 const HIDDEN_DOMAINS = [
   "googleads.g.doubleclick.net",
@@ -345,6 +360,73 @@ function pushAll(tuples, pattern, color, spillCount, sawHttpGt1) {
   pushSpillCount(spillCount);
 }
 
+function calculatePopupSpeed() {
+  if (!table) return;
+  const now = Date.now();
+  const dt = (now - lastBytesTimestamp) / 1000;
+  if (dt <= 0.3) return;
+
+  let currentTotalBytes = 0;
+  const currentDomainBytes = {};
+
+  for (let tr = table.firstChild; tr; tr = tr.nextSibling) {
+    if (tr._tuple && tr._domain) {
+      const b = (tr._tuple[5] !== undefined) ? tr._tuple[5] : (byteCounter[tr._tuple[1]] || 0);
+      currentTotalBytes += b;
+      currentDomainBytes[tr._domain] = b;
+    }
+  }
+
+  const byteDiff = Math.max(0, currentTotalBytes - lastTotalBytes);
+  const instantSpeed = byteDiff / dt;
+
+  if (byteDiff > 0) {
+    currentSpeedBps = (currentSpeedBps === 0) ? instantSpeed : (currentSpeedBps * 0.4 + instantSpeed * 0.6);
+  } else {
+    currentSpeedBps = currentSpeedBps * 0.5;
+    if (currentSpeedBps < 200) currentSpeedBps = 0;
+  }
+
+  for (const [domain, b] of Object.entries(currentDomainBytes)) {
+    const prevB = lastDomainBytes[domain] || 0;
+    const dDiff = Math.max(0, b - prevB);
+    if (dDiff > 0) {
+      domainSpeedMap[domain] = (domainSpeedMap[domain] ? domainSpeedMap[domain] * 0.4 : 0) + (dDiff / dt) * 0.6;
+    } else {
+      domainSpeedMap[domain] = (domainSpeedMap[domain] || 0) * 0.5;
+      if (domainSpeedMap[domain] < 200) delete domainSpeedMap[domain];
+    }
+  }
+
+  lastTotalBytes = currentTotalBytes;
+  lastDomainBytes = currentDomainBytes;
+  lastBytesTimestamp = now;
+
+  const speedBadge = document.getElementById("speed_badge");
+  if (speedBadge) {
+    if (currentSpeedBps >= 200) {
+      speedBadge.textContent = `⚡ ${formatSpeed(currentSpeedBps)}`;
+      speedBadge.style.display = "inline-block";
+    } else {
+      speedBadge.style.display = "none";
+    }
+  }
+
+  for (let tr = table.firstChild; tr; tr = tr.nextSibling) {
+    if (tr._domain && tr._tuple) {
+      const dSpeed = domainSpeedMap[tr._domain] || 0;
+      const sizeTd = tr.querySelector(".sizeTd");
+      if (sizeTd) {
+        const bytes = (tr._tuple[5] !== undefined) ? tr._tuple[5] : (byteCounter[tr._tuple[1]] || 0);
+        const speedHtml = dSpeed >= 200 ? ` <span class="speed-tag">⚡${formatSpeed(dSpeed)}</span>` : "";
+        sizeTd.innerHTML = `${formatBytes(bytes)}${speedHtml}`;
+      }
+    }
+  }
+}
+
+setInterval(calculatePopupSpeed, 800);
+
 // Jangan tambahkan jika domain ada di daftar hidden & sortir posisi yang sesuai
 async function pushOne(tuple) {
   const domain = tuple[0];
@@ -578,7 +660,9 @@ function makeRow(isFirst, tuple) {
   const sizeTd = document.createElement("td");
   sizeTd.className = `sizeTd${connectedClass}`;
   const bytes = (tuple && tuple[5] !== undefined) ? tuple[5] : (byteCounter[addr] || 0);
-  sizeTd.appendChild(document.createTextNode(formatBytes(bytes)));
+  const dSpeed = domainSpeedMap[domain] || 0;
+  const speedHtml = dSpeed >= 200 ? ` <span class="speed-tag">⚡${formatSpeed(dSpeed)}</span>` : "";
+  sizeTd.innerHTML = `${formatBytes(bytes)}${speedHtml}`;
   sizeTd.style.textAlign = "right";
   sizeTd.style.color = bytes > 0 ? "#ffd700" : "#999";
   sizeTd.style.fontSize = "11px";

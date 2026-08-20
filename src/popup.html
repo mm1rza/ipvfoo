@@ -216,6 +216,30 @@ limitations under the License.
       color: #666;
     }
 
+    .header_speed {
+      font-size: 10px;
+      font-weight: bold;
+      color: #00d9ff;
+      background: rgba(0, 217, 255, 0.15);
+      border: 1px solid rgba(0, 217, 255, 0.4);
+      border-radius: 3px;
+      padding: 1px 5px;
+      margin-left: 6px;
+      display: none;
+    }
+
+    .speed-tag {
+      display: inline-block;
+      margin-left: 3px;
+      padding: 0px 3px;
+      font-size: 9px;
+      font-weight: bold;
+      color: #000;
+      background: #00d9ff;
+      border-radius: 2px;
+      line-height: 1.1;
+    }
+
     .header_bar .btn_group {
       display: flex;
       gap: 4px;
@@ -347,7 +371,10 @@ limitations under the License.
 <body>
   <div class="border">
     <div class="header_bar">
-      <span class="title">IPvFoo</span>
+      <div style="display:flex; align-items:center;">
+        <span class="title">IPvFoo</span>
+        <span id="speed_badge" class="header_speed"></span>
+      </div>
       <div class="btn_group">
         <button id="rst_btn" class="header_btn header_btn_rst" title="Reset Hit & Size Counter">RESET HITS</button>
         <button id="close_btn" class="header_btn header_btn_close" title="Tutup Popup">X</button>
