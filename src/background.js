@@ -77,7 +77,7 @@ function wrap(f) {
 
 function parseUrl(url) {
   let domain = null;
-  let ssl = false;
+  let tls = false;
   let ws = false;
 
   const u = new URL(url);
@@ -89,17 +89,29 @@ function parseUrl(url) {
     domain = u.hostname || "";
     switch (u.protocol) {
       case "https:":
-        ssl = true;
+        tls = true;
         break;
       case "wss:":
-        ssl = true;
+        tls = true;
         // fallthrough
       case "ws:":
         ws = true;
         break;
     }
   }
-  return { domain: domain, ssl: ssl, ws: ws, origin: u.origin };
+  return { domain: domain, tls: tls, ws: ws, origin: u.origin };
+}
+
+function httpFlags(tls, statusLine) {
+  if (!tls) return DFLAG_NO_TLS;
+  const m = statusLine.match(/^HTTP\/(\d+)/);
+  if (m) {
+    const v = parseInt(m[1], 10);
+    if (v == 1) return DFLAG_H1;
+    if (v == 2) return DFLAG_H2;
+    if (v == 3) return DFLAG_H3;
+  }
+  return 0;  // show "?" if unknown.
 }
 
 function updateNAT64(domain, addr) {
@@ -464,7 +476,9 @@ class TabInfo extends SaveableEntry {
   }
 
   pushAll() {
-    popups.pushAll(this.id(), this.getTuples(), this.lastPattern, this.color, this.spillCount);
+    popups.pushAll(
+        this.id(), this.getTuples(), this.lastPattern, this.color,
+        this.spillCount, options[SAW_HTTP_GT_1]);
   }
 
   pushOne(domain) {
@@ -976,7 +990,7 @@ class Popups {
     }
   }
 
-  pushAll(tabId, tuples, pattern, color, spillCount) {
+  pushAll(tabId, tuples, pattern, color, spillCount, sawHttpGt1) {
     if (this.ports[tabId]) {
       for (const port of this.ports[tabId]) {
         try {
@@ -986,6 +1000,7 @@ class Popups {
             pattern: pattern,
             color: color,
             spillCount: spillCount,
+            sawHttpGt1: sawHttpGt1,
           });
         } catch (e) {}
       }
@@ -1514,8 +1529,12 @@ chrome.webRequest.onResponseStarted.addListener(wrap(async (details) => {
 
   // Domain flags
   const dflags =
-      (parsed.ssl ? DFLAG_SSL : DFLAG_NOSSL) |
+      httpFlags(parsed.tls, details.statusLine) |
       (parsed.ws ? DFLAG_WEBSOCKET : 0);
+
+  if (dflags & (DFLAG_H2 | DFLAG_H3)) {
+    sawHttpGt1();
+  }
 
   // Address flags
   const aflags =

@@ -19,6 +19,7 @@ const tabId = window.location.hash.substr(1);
 let table = null;
 let hitCounter = {};
 let byteCounter = {};
+let gSawHttpGt1 = false;
 
 function formatBytes(bytes) {
   if (!bytes || bytes <= 0) return "0 B";
@@ -245,6 +246,14 @@ window.onload = async function () {
     connectToExtension();
   } else if (tabId) {
     throw new Error(`Bad tabId: ${tabId}`);
+  } else {
+    console.log("No tabId, using test table");
+    const TEST_TUPLES = [
+      ["ipv6.example.com", "2001:db8::f00", "6", DFLAG_H1, 10, 1048576, 200, 25, "AS15169"],
+      ["ipv4.example.com", "192.0.2.9", "4", DFLAG_NO_TLS, 5, 2048, 200, 40, "AS13335"],
+      ["cached.example.com", "2001:db8::f00", "6", DFLAG_H3 | AFLAG_CACHE, 2, 512, 304, 5, "AS15169"],
+    ];
+    pushAll(TEST_TUPLES, "646", REGULAR_COLOR, 0, true);
   }
 };
 
@@ -302,7 +311,7 @@ function connectToExtension() {
     document.bgColor = "";
     switch (msg.cmd) {
       case "pushAll":
-        return pushAll(msg.tuples, msg.pattern, msg.color, msg.spillCount);
+        return pushAll(msg.tuples, msg.pattern, msg.color, msg.spillCount, msg.sawHttpGt1);
       case "pushOne":
         return pushOne(msg.tuple);
       case "pushPattern":
@@ -319,8 +328,9 @@ function connectToExtension() {
   });
 }
 
-// MODIFIKASI: Filter semua domain saat pertama kali dimuat & taruh domain tanpa IP/WS di paling bawah
-function pushAll(tuples, pattern, color, spillCount) {
+// Clear the table, and fill it with new data.
+function pushAll(tuples, pattern, color, spillCount, sawHttpGt1) {
+  gSawHttpGt1 = sawHttpGt1;
   removeChildren(table);
   const filteredTuples = tuples.filter(t => !HIDDEN_DOMAINS.includes(t[0]));
   if (filteredTuples.length > 0) {
@@ -335,7 +345,7 @@ function pushAll(tuples, pattern, color, spillCount) {
   pushSpillCount(spillCount);
 }
 
-// MODIFIKASI: Jangan tambahkan jika domain ada di daftar hidden & sortir posisi yang sesuai
+// Jangan tambahkan jika domain ada di daftar hidden & sortir posisi yang sesuai
 async function pushOne(tuple) {
   const domain = tuple[0];
   if (HIDDEN_DOMAINS.includes(domain)) {
@@ -443,15 +453,49 @@ function makeImg(src, title) {
   return img;
 }
 
-function makeSslImg(flags) {
-  switch (flags & (DFLAG_SSL | DFLAG_NOSSL)) {
-    case DFLAG_SSL | DFLAG_NOSSL:
-      return makeImg("gray_schrodingers_lock.png", "Mixture of HTTPS and non-HTTPS connections.");
-    case DFLAG_SSL:
-      return makeImg("gray_lock.png", "Connection uses HTTPS.\nWarning: IPvFoo does not verify the integrity of encryption.");
-    default:
-      return makeImg("gray_unlock.png", "Connection does not use HTTPS.");
+function makeHttpImg(flags) {
+  if (flags & DFLAG_NO_TLS) {
+    return makeImg(
+        "gray_unlock.png",
+        "Some connections do not use TLS.");
   }
+  if (gSawHttpGt1) {
+    if (flags & DFLAG_H3) {
+      return makeImg(
+          "gray_h3.png",
+          "HTTP/3 (with TLS) is the max version seen.");
+    }
+    if (flags & DFLAG_H2) {
+      return makeImg(
+          "gray_h2.png",
+          "HTTP/2 (with TLS) is the max version seen.");
+    }
+    if (flags & DFLAG_H1) {
+      return makeImg(
+          "gray_h1.png",
+          "HTTP/1.x (with TLS) is the max version seen.");
+    }
+  } else if (flags & (DFLAG_H1 | DFLAG_H2 | DFLAG_H3 | DFLAG_SSL)) {
+    return makeImg(
+        "gray_lock.png",
+        "All connections use TLS.");
+  }
+  return makeImg(
+      "gray_question.png",
+      "Failed to parse HTTP status.");
+}
+
+function makeSelectMe(...children) {
+  const span = document.createElement("span");
+  span.className = "selectMe";
+  for (const child of children) {
+    if (child instanceof Node) {
+      span.appendChild(child);
+    } else {
+      span.appendChild(document.createTextNode(child));
+    }
+  }
+  return span;
 }
 
 function makeRow(isFirst, tuple) {
@@ -463,18 +507,15 @@ function makeRow(isFirst, tuple) {
   if (isFirst) tr.className = "mainRow";
   tr._tuple = tuple;
 
-  const sslImg = makeSslImg(flags);
-  sslImg.className = "sslImg";
+  // Build the HTTP icon for the "zeroth" pseudo-column.
+  const httpImg = makeHttpImg(flags);
+  httpImg.className = "httpImg";
+
+  // Build the "Domain" column.
   const domainTd = document.createElement("td");
-  domainTd.appendChild(sslImg);
-  const selectMe = document.createElement("span");
-  domainTd.appendChild(selectMe);
-  selectMe.className = "selectMe";
-  if (domain.length > LONG_DOMAIN) {
-    selectMe.appendChild(makeSnippedText(domain, Math.floor(LONG_DOMAIN / 2)));
-  } else {
-    selectMe.appendChild(document.createTextNode(domain));
-  }
+  domainTd.appendChild(httpImg);
+  domainTd.appendChild(makeSelectMe(
+      domain.length > LONG_DOMAIN ? makeSnippedText(domain, Math.floor(LONG_DOMAIN / 2)) : domain));
   domainTd.className = "domainTd";
   domainTd.onclick = handleClick;
   domainTd.oncontextmenu = handleContextMenu;
@@ -487,7 +528,13 @@ function makeRow(isFirst, tuple) {
   }
   const connectedClass = (flags & DFLAG_CONNECTED) ? " highlight" : "";
   addrTd.className = `addrTd${addrClass}${connectedClass}`;
-  addrTd.appendChild(document.createTextNode(addr));
+  const match = addr.match(/^(.*:)(\d+[.]\d+[.]\d+[.]\d+)$/);
+  if (match) {
+    addrTd.appendChild(makeSelectMe(match[1], makeSelectMe(match[2])));
+  } else {
+    addrTd.appendChild(makeSelectMe(addr));
+  }
+
   addrTd.onclick = handleClick;
   addrTd.oncontextmenu = handleContextMenu;
 
@@ -654,14 +701,20 @@ function isSpuriousSelection(sel, newTimeStamp) {
 
 function handleContextMenu(e) {
   const sel = window.getSelection();
-  if (isSpuriousSelection(sel, e.timeStamp)) sel.removeAllRanges();
-  selectWholeAddress(this, sel);
+  if (isSpuriousSelection(sel, e.timeStamp)) {
+    sel.removeAllRanges();
+  }
+  selectAddress(this, e.target, sel);
   return sel;
 }
 
-function nodeToRange(node) {
+// Find the innermost "selectMe" that the user clicked on directly,
+// otherwise find the outermost "selectMe" in the cell.
+// This will either select a NAT64 IPv4 suffix, or the entire address.
+function findSelectMe(node, target) {
   const range = document.createRange();
-  range.selectNodeContents(node.querySelector('.selectMe') || node);
+  range.selectNodeContents(
+      target?.closest(".selectMe") || node.querySelector(".selectMe"));
   return range;
 }
 
@@ -713,17 +766,20 @@ function handleClick(e) {
   }
   const sel = window.getSelection();
   if (e.detail == 1 && oldRanges.length == 1) {
-    if (sameRange(nodeToRange(this), oldRanges[0])) {
+    if (sameRange(findSelectMe(this, e.target), oldRanges[0])) {
       sel.removeAllRanges();
       return;
     }
   }
-  selectWholeAddress(this, sel);
+
+  selectAddress(this, e.target, sel);
 }
 
-function selectWholeAddress(node, sel) {
+// If the user hasn't manually selected part of the address, then select
+// the whole thing, to make copying easier.
+function selectAddress(node, target, sel) {
   if (sel.isCollapsed || !sel.containsNode(node, true)) {
     sel.removeAllRanges();
-    sel.addRange(nodeToRange(node));
+    sel.addRange(findSelectMe(node, target));
   }
 }
