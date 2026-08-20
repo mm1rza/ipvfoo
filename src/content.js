@@ -124,6 +124,11 @@
       if (aLat !== bLat) {
         return currentSort.order === 'asc' ? aLat - bLat : bLat - aLat;
       }
+    } else if (currentSort.column === 'bgp') {
+      const cmp = (a[8] || '').localeCompare(b[8] || '');
+      if (cmp !== 0) {
+        return currentSort.order === 'asc' ? cmp : -cmp;
+      }
     } else if (currentSort.column === 'ip') {
       const cmp = (a[1] || '').localeCompare(b[1] || '');
       if (cmp !== 0) {
@@ -432,7 +437,7 @@
             <th id="th-latency" style="text-align:right; cursor:pointer;" title="Sort Response Latency">Latency <span class="sort-icon"></span></th>
             <th id="th-hits" style="text-align:center; cursor:pointer;" title="Sort Hits">Hits <span class="sort-icon"></span></th>
             <th id="th-size" style="text-align:right; cursor:pointer;" title="Sort Payload Size">Size <span class="sort-icon"></span></th>
-            <th style="text-align:center;">ASN / BGP</th>
+            <th id="th-bgp" style="text-align:center; cursor:pointer;" title="Sort BGP">BGP <span class="sort-icon"></span></th>
           </tr>
         </thead>
         <tbody id="addr_tbody"></tbody>
@@ -468,7 +473,7 @@
   }
 
   function updateHeaderSortIndicators() {
-    const cols = ["domain", "ip", "status", "latency", "hits", "size"];
+    const cols = ["domain", "ip", "status", "latency", "hits", "size", "bgp"];
     cols.forEach((c) => {
       const el = shadow.getElementById(`th-${c}`);
       if (el) {
@@ -492,6 +497,7 @@
   shadow.getElementById("th-latency").onclick = () => setSort("latency");
   shadow.getElementById("th-hits").onclick = () => setSort("hits");
   shadow.getElementById("th-size").onclick = () => setSort("size");
+  shadow.getElementById("th-bgp").onclick = () => setSort("bgp");
 
   // Draggable Header
   const header = shadow.getElementById("header");

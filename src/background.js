@@ -391,6 +391,20 @@ class TabInfo extends SaveableEntry {
     this.pushOne(domain);
   }
 
+  addBytes(domain, addr, bytes) {
+    if (!bytes || bytes <= 0) return;
+    const d = this.domains[domain];
+    if (d) {
+      d.bytes = (d.bytes || 0) + bytes;
+    }
+    const effectiveAddr = (d && d.addr) || addr;
+    if (effectiveAddr && effectiveAddr !== "(x)" && effectiveAddr !== "(lost)" && !effectiveAddr.startsWith("(")) {
+      recordIpHit(effectiveAddr, bytes, false);
+    }
+    this.pushOne(domain);
+    this.save();
+  }
+
   updateIcon() {
     if (!(this.#state == TAB_ALIVE)) {
       return;
@@ -569,8 +583,10 @@ class DomainInfo {
 class RequestInfo extends SaveableEntry {
   tabIdToBorn = newMap();
   domain = null;
+  addr = null;
   prefetch = false;
   bytes = 0;
+  appliedBytes = 0;
   startTime = 0;
   statusCode = 0;
   latencyMs = 0;
@@ -734,7 +750,7 @@ function saveHitCounterBackgroundDebounced() {
   }, 1000);
 }
 
-function recordIpHit(addr, bytes = 0) {
+function recordIpHit(addr, bytes = 0, incHit = true) {
   if (!addr || addr === "(x)" || addr === "(lost)" || addr.startsWith("(")) {
     return;
   }
@@ -744,7 +760,9 @@ function recordIpHit(addr, bytes = 0) {
     ipByteCounter = {};
     lastResetDate = today;
   }
-  ipHitCounter[addr] = (ipHitCounter[addr] || 0) + 1;
+  if (incHit) {
+    ipHitCounter[addr] = (ipHitCounter[addr] || 0) + 1;
+  }
   if (bytes > 0) {
     ipByteCounter[addr] = (ipByteCounter[addr] || 0) + bytes;
   }
@@ -1205,6 +1223,128 @@ function isProperMainFrame(details) {
       !details.documentId;
 }
 
+function extractBytes(url, responseHeaders, requestHeaders) {
+  let bytes = 0;
+
+  // 1. Check Response Headers
+  if (responseHeaders && Array.isArray(responseHeaders)) {
+    for (const h of responseHeaders) {
+      if (!h || !h.name || !h.value) continue;
+      const name = h.name.toLowerCase();
+      const val = h.value;
+      if (name === "content-length" ||
+          name === "x-head-content-length" ||
+          name === "x-content-length" ||
+          name === "x-encoded-content-length" ||
+          name === "x-response-content-length" ||
+          name === "x-original-content-length" ||
+          name === "x-goog-stored-content-length") {
+        const num = parseInt(val, 10);
+        if (!isNaN(num) && num > 0) {
+          bytes = Math.max(bytes, num);
+        }
+      } else if (name === "content-range") {
+        const match = /bytes\s+(\d+)-(\d+)/i.exec(val);
+        if (match) {
+          const start = parseInt(match[1], 10);
+          const end = parseInt(match[2], 10);
+          if (!isNaN(start) && !isNaN(end) && end >= start) {
+            bytes = Math.max(bytes, end - start + 1);
+          }
+        }
+      }
+    }
+  }
+
+  // 2. Check Request Headers (Range: bytes=start-end)
+  if (bytes === 0 && requestHeaders && Array.isArray(requestHeaders)) {
+    for (const h of requestHeaders) {
+      if (!h || !h.name || !h.value) continue;
+      if (h.name.toLowerCase() === "range") {
+        const match = /bytes=(\d+)-(\d+)/i.exec(h.value);
+        if (match) {
+          const start = parseInt(match[1], 10);
+          const end = parseInt(match[2], 10);
+          if (!isNaN(start) && !isNaN(end) && end >= start) {
+            bytes = Math.max(bytes, end - start + 1);
+          }
+        }
+      }
+    }
+  }
+
+  // 3. Check URL Query Parameters (YouTube / Google Video / Media streams: range=start-end, clen=total, etc.)
+  if (bytes === 0 && url) {
+    let decodedUrl = url;
+    try {
+      decodedUrl = decodeURIComponent(url);
+    } catch (e) {}
+
+    // YouTube / video range parameter: e.g. range=0-1048575 or &range=1048576-2097151 or range=0:1048575 or range=0,1048575
+    const rangeMatch = /[?&](?:range|bytes)=(\d+)[-,:](\d+)/i.exec(decodedUrl);
+    if (rangeMatch) {
+      const start = parseInt(rangeMatch[1], 10);
+      const end = parseInt(rangeMatch[2], 10);
+      if (!isNaN(start) && !isNaN(end) && end >= start) {
+        bytes = Math.max(bytes, end - start + 1);
+      }
+    } else {
+      const openRangeMatch = /[?&](?:range|bytes)=(\d+)-/i.exec(decodedUrl);
+      const clenMatch = /[?&](?:clen|contentlength|content_length)=(\d+)/i.exec(decodedUrl);
+      if (openRangeMatch && clenMatch) {
+        const start = parseInt(openRangeMatch[1], 10);
+        const clen = parseInt(clenMatch[1], 10);
+        if (!isNaN(start) && !isNaN(clen) && clen > start) {
+          bytes = Math.max(bytes, clen - start);
+        }
+      } else if (clenMatch) {
+        const clen = parseInt(clenMatch[1], 10);
+        if (!isNaN(clen) && clen > 0) {
+          bytes = Math.max(bytes, clen);
+        }
+      }
+    }
+
+    if (bytes === 0) {
+      const sizeMatch = /[?&](?:size|file_size|filesize|length)=(\d+)/i.exec(decodedUrl);
+      if (sizeMatch) {
+        const s = parseInt(sizeMatch[1], 10);
+        if (!isNaN(s) && s > 0 && s < 2147483648) {
+          bytes = Math.max(bytes, s);
+        }
+      }
+    }
+
+    // Special YouTube videoplayback fallback
+    if (bytes === 0 && decodedUrl.includes("videoplayback")) {
+      const rbufMatch = /[?&]rbuf=(\d+)/i.exec(decodedUrl);
+      if (rbufMatch) {
+        const r = parseInt(rbufMatch[1], 10);
+        if (!isNaN(r) && r > 0) {
+          bytes = Math.max(bytes, r);
+        }
+      }
+    }
+  }
+
+  return bytes;
+}
+
+function applyNewBytes(requestInfo, newBytes) {
+  if (!requestInfo || !newBytes || newBytes <= (requestInfo.appliedBytes || 0)) return;
+  const diff = newBytes - (requestInfo.appliedBytes || 0);
+  requestInfo.bytes = newBytes;
+  requestInfo.appliedBytes = newBytes;
+  if (requestInfo.domain) {
+    for (const [tabId, tabBorn] of Object.entries(requestInfo.tabIdToBorn)) {
+      const tabInfo = tabMap[tabId];
+      if (tabInfo && tabInfo.born == tabBorn) {
+        tabInfo.addBytes(requestInfo.domain, requestInfo.addr, diff);
+      }
+    }
+  }
+}
+
 chrome.webRequest.onBeforeRequest.addListener(wrap(async (details) => {
   debugLog("wR.oBR", details?.tabId, details?.url, details);
   await storageReady;
@@ -1251,6 +1391,10 @@ chrome.webRequest.onBeforeRequest.addListener(wrap(async (details) => {
   requestInfo.domain = null;
   requestInfo.prefetch = prefetch;
   requestInfo.startTime = Date.now();
+  const urlBytes = extractBytes(details.url, null, null);
+  if (urlBytes > 0) {
+    requestInfo.bytes = urlBytes;
+  }
   requestInfo.save();
 }), FILTER_ALL_URLS);
 
@@ -1283,6 +1427,18 @@ chrome.webRequest.onBeforeRedirect.addListener(wrap(async (details) => {
 
 }), FILTER_ALL_URLS);
 
+chrome.webRequest.onBeforeSendHeaders?.addListener(wrap(async (details) => {
+  await storageReady;
+  const requestInfo = requestMap[details.requestId];
+  if (!requestInfo) return;
+  const reqBytes = extractBytes(details.url, null, details.requestHeaders);
+  if (reqBytes > (requestInfo.bytes || 0)) {
+    requestInfo.bytes = reqBytes;
+    applyNewBytes(requestInfo, reqBytes);
+    requestInfo.save();
+  }
+}), FILTER_ALL_URLS, ["requestHeaders", "extraHeaders"]);
+
 chrome.webRequest.onHeadersReceived.addListener(wrap(async (details) => {
   await storageReady;
   const requestInfo = requestMap[details.requestId];
@@ -1293,15 +1449,17 @@ chrome.webRequest.onHeadersReceived.addListener(wrap(async (details) => {
   if (requestInfo.startTime) {
     requestInfo.latencyMs = Math.max(1, Date.now() - requestInfo.startTime);
   }
-  const clHeader = details.responseHeaders?.find(h => h.name.toLowerCase() === "content-length");
-  if (clHeader) {
-    const bytes = parseInt(clHeader.value, 10);
-    if (!isNaN(bytes) && bytes > 0) {
-      requestInfo.bytes = bytes;
+  const respBytes = extractBytes(details.url, details.responseHeaders, null);
+  if (respBytes > 0) {
+    applyNewBytes(requestInfo, respBytes);
+  } else if (!requestInfo.bytes && details.url) {
+    const urlBytes = extractBytes(details.url, null, null);
+    if (urlBytes > 0) {
+      applyNewBytes(requestInfo, urlBytes);
     }
   }
   requestInfo.save();
-}), FILTER_ALL_URLS, ["responseHeaders"]);
+}), FILTER_ALL_URLS, ["responseHeaders", "extraHeaders"]);
 
 chrome.webRequest.onResponseStarted.addListener(wrap(async (details) => {
   //debugLog("wR.oRS", details?.tabId, details?.url, details);
@@ -1365,10 +1523,17 @@ chrome.webRequest.onResponseStarted.addListener(wrap(async (details) => {
       (details.tabId <= 0 ? AFLAG_WORKER : 0) |
       (fromCache ? AFLAG_CACHE : 0);
 
-  if (requestInfo.domain) throw `Duplicate onResponseStarted: ${parsed.domain}`;
   requestInfo.domain = parsed.domain;
+  requestInfo.addr = addr;
+  let bytes = requestInfo.bytes || 0;
+  if (bytes === 0 && details.url) {
+    bytes = extractBytes(details.url, details.responseHeaders, null);
+    if (bytes > 0) {
+      requestInfo.bytes = bytes;
+    }
+  }
+  requestInfo.appliedBytes = bytes;
   requestInfo.save();
-  const bytes = requestInfo.bytes || 0;
   const status = details.statusCode || requestInfo.statusCode || (fromCache ? 200 : 200);
   const latency = requestInfo.latencyMs || (requestInfo.startTime ? Math.max(1, Date.now() - requestInfo.startTime) : 0);
   for (const tabInfo of tabInfos) {
@@ -1381,6 +1546,10 @@ const forgetRequest = wrap(async (details) => {
   const requestInfo = requestMap.remove(details.requestId);
   if (!requestInfo?.domain) {
     return;
+  }
+  const finalBytes = extractBytes(details.url, null, null);
+  if (finalBytes > (requestInfo.appliedBytes || 0)) {
+    applyNewBytes(requestInfo, finalBytes);
   }
   for (const [tabId, tabBorn] of Object.entries(requestInfo.tabIdToBorn)) {
     const tabInfo = tabMap[tabId];
