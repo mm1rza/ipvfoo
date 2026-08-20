@@ -90,39 +90,71 @@ async function loadHitCounter() {
   try {
     const result = await chrome.storage.local.get(['ipHitCounter', 'lastResetDate']);
     const today = new Date().toDateString();
-    const lastReset = result.lastResetDate;
-    
-    if (lastReset !== today) {
+    if (result.lastResetDate !== today) {
       hitCounter = {};
-      await chrome.storage.local.set({ ipHitCounter: {}, lastResetDate: today });
-    } else if (result.ipHitCounter) {
-      hitCounter = result.ipHitCounter;
+    } else {
+      hitCounter = result.ipHitCounter || {};
     }
   } catch (e) {
     console.log('Could not load hit counter:', e);
   }
 }
 
-async function saveHitCounter() {
+async function resetAllCounters() {
+  hitCounter = {};
   try {
-    await chrome.storage.local.set({ ipHitCounter: hitCounter });
+    await chrome.runtime.sendMessage({ cmd: "resetHitCounter" });
   } catch (e) {
-    console.log('Could not save hit counter:', e);
+    await chrome.storage.local.set({ ipHitCounter: {}, lastResetDate: new Date().toDateString() });
+  }
+  if (table && table.firstChild) {
+    for (let tr = table.firstChild; tr; tr = tr.nextSibling) {
+      const hitsTd = tr.querySelector('.hitsTd');
+      if (hitsTd) {
+        hitsTd.textContent = "0";
+        hitsTd.style.color = "#999";
+        hitsTd.style.fontWeight = "normal";
+      }
+    }
   }
 }
 
-async function resetAllCounters() {
-  hitCounter = {};
-  await chrome.storage.local.set({ ipHitCounter: {}, lastResetDate: new Date().toDateString() });
-  if (table && table.firstChild) {
-    const rows = Array.from(table.children);
-    rows.forEach((tr, index) => {
-      if (tr._tuple) {
-        const newRow = makeRow(index === 0, tr._tuple);
-        tr.parentNode.replaceChild(newRow, tr);
+chrome.storage.onChanged.addListener((changes, areaName) => {
+  if (areaName === 'local' && changes.ipHitCounter) {
+    hitCounter = changes.ipHitCounter.newValue || {};
+    if (table) {
+      for (let tr = table.firstChild; tr; tr = tr.nextSibling) {
+        if (tr._tuple) {
+          const addr = tr._tuple[1];
+          const hitsTd = tr.querySelector('.hitsTd');
+          if (hitsTd) {
+            const hits = hitCounter[addr] || 0;
+            hitsTd.textContent = hits;
+            hitsTd.style.color = hits > 0 ? "#48ff00" : "#999";
+            hitsTd.style.fontWeight = hits > 0 ? "bold" : "normal";
+          }
+        }
       }
-    });
+    }
   }
+});
+
+function isBottomRow(tuple) {
+  if (!tuple) return true;
+  const addr = tuple[1];
+  const flags = tuple[3] || 0;
+  const isWs = Boolean(flags & DFLAG_WEBSOCKET);
+  const noIp = !addr || addr === "(x)" || addr === "(lost)" || addr.startsWith("(");
+  return isWs || noIp;
+}
+
+function compareTuples(a, b) {
+  const aBottom = isBottomRow(a);
+  const bBottom = isBottomRow(b);
+  if (aBottom !== bBottom) {
+    return aBottom ? 1 : -1;
+  }
+  return a[0].localeCompare(b[0]);
 }
 
 window.onload = async function() {
@@ -225,46 +257,59 @@ function connectToExtension() {
   });
 }
 
-// MODIFIKASI: Filter semua domain saat pertama kali dimuat
+// MODIFIKASI: Filter semua domain saat pertama kali dimuat & taruh domain tanpa IP/WS di paling bawah
 function pushAll(tuples, pattern, color, spillCount) {
   removeChildren(table);
   const filteredTuples = tuples.filter(t => !HIDDEN_DOMAINS.includes(t[0]));
-  for (let i = 0; i < filteredTuples.length; i++) {
-    table.appendChild(makeRow(i == 0, filteredTuples[i]));
+  if (filteredTuples.length > 0) {
+    const mainTuple = filteredTuples[0];
+    const otherTuples = filteredTuples.slice(1).sort(compareTuples);
+    table.appendChild(makeRow(true, mainTuple));
+    for (let i = 0; i < otherTuples.length; i++) {
+      table.appendChild(makeRow(false, otherTuples[i]));
+    }
   }
   pushPattern(pattern, color);
   pushSpillCount(spillCount);
 }
 
-// MODIFIKASI: Jangan tambahkan jika domain ada di daftar hidden
+// MODIFIKASI: Jangan tambahkan jika domain ada di daftar hidden & sortir posisi yang sesuai
 async function pushOne(tuple) {
   const domain = tuple[0];
-  const addr = tuple[1];
-  
   if (HIDDEN_DOMAINS.includes(domain)) {
     return; // Stop di sini, jangan diproses
   }
 
-  if (addr && addr !== "(x)" && !addr.startsWith("(")) {
-    hitCounter[addr] = (hitCounter[addr] || 0) + 1;
-    saveHitCounter();
-  }
-  
-  let insertHere = null;
-  let isFirst = true;
+  let existingRow = null;
   for (let tr = table.firstChild; tr; tr = tr.nextSibling) {
-    if (tr._domain == domain) {
-      minimalCopy(makeRow(isFirst, tuple), tr);
+    if (tr._domain === domain) {
+      existingRow = tr;
+      break;
+    }
+  }
+
+  if (existingRow) {
+    const wasFirst = existingRow === table.firstChild;
+    if (wasFirst) {
+      minimalCopy(makeRow(true, tuple), existingRow);
+      existingRow._tuple = tuple;
       return;
     }
-    if (isFirst) {
-      isFirst = false;
-    } else if (tr._domain > domain) {
+    table.removeChild(existingRow);
+  }
+
+  let insertHere = null;
+  for (let tr = table.firstChild; tr; tr = tr.nextSibling) {
+    if (tr === table.firstChild) {
+      continue;
+    }
+    if (tr._tuple && compareTuples(tuple, tr._tuple) < 0) {
       insertHere = tr;
       break;
     }
   }
-  table.insertBefore(makeRow(false, tuple), insertHere);
+  const newRow = makeRow(false, tuple);
+  table.insertBefore(newRow, insertHere);
   if (IS_MOBILE) { zoomHack(); } else { scrollbarHack(); }
 }
 

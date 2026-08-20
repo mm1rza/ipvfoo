@@ -660,12 +660,67 @@ function lookupOriginMap(origin) {
   }
 })();
 
-chrome.runtime.onMessage.addListener((message) => {
+// -- IP Hit Counter (Background Persistent Tracking) --
+let ipHitCounter = {};
+let lastResetDate = "";
+let hitCounterSaveTimeout = null;
+
+async function loadHitCounterBackground() {
+  try {
+    const result = await chrome.storage.local.get(['ipHitCounter', 'lastResetDate']);
+    const today = new Date().toDateString();
+    if (result.lastResetDate !== today) {
+      ipHitCounter = {};
+      lastResetDate = today;
+      await chrome.storage.local.set({ ipHitCounter: {}, lastResetDate: today });
+    } else {
+      ipHitCounter = result.ipHitCounter || {};
+      lastResetDate = result.lastResetDate || today;
+    }
+  } catch (e) {
+    console.error("Could not load hit counter in background:", e);
+  }
+}
+
+function saveHitCounterBackgroundDebounced() {
+  if (hitCounterSaveTimeout) clearTimeout(hitCounterSaveTimeout);
+  hitCounterSaveTimeout = setTimeout(async () => {
+    try {
+      await chrome.storage.local.set({ ipHitCounter: ipHitCounter, lastResetDate: lastResetDate });
+    } catch (e) {
+      console.error("Could not save hit counter in background:", e);
+    }
+  }, 1000);
+}
+
+function recordIpHit(addr) {
+  if (!addr || addr === "(x)" || addr === "(lost)" || addr.startsWith("(")) {
+    return;
+  }
+  const today = new Date().toDateString();
+  if (lastResetDate !== today) {
+    ipHitCounter = {};
+    lastResetDate = today;
+  }
+  ipHitCounter[addr] = (ipHitCounter[addr] || 0) + 1;
+  saveHitCounterBackgroundDebounced();
+}
+
+loadHitCounterBackground();
+
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.hasOwnProperty("darkModeOffscreen")) {
     setColorIsDarkMode(REGULAR_COLOR, message.darkModeOffscreen);
   }
   if (message.hasOwnProperty("setStorageSyncDebounce")) {
     storageSyncDebouncer.set(message.setStorageSyncDebounce);
+  }
+  if (message?.cmd === "resetHitCounter") {
+    ipHitCounter = {};
+    lastResetDate = new Date().toDateString();
+    chrome.storage.local.set({ ipHitCounter: {}, lastResetDate: lastResetDate });
+    if (hitCounterSaveTimeout) clearTimeout(hitCounterSaveTimeout);
+    sendResponse?.({ status: "ok" });
   }
 });
 
@@ -1081,6 +1136,9 @@ chrome.webRequest.onResponseStarted.addListener(wrap(async (details) => {
     }
   }
   addr = reformatForNAT64(addr) || "(x)";
+  if (addr && addr !== "(x)") {
+    recordIpHit(addr);
+  }
 
   // Domain flags
   const dflags =
