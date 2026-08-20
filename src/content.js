@@ -124,11 +124,6 @@
       if (aLat !== bLat) {
         return currentSort.order === 'asc' ? aLat - bLat : bLat - aLat;
       }
-    } else if (currentSort.column === 'upstream') {
-      const cmp = (a[9] || '').localeCompare(b[9] || '');
-      if (cmp !== 0) {
-        return currentSort.order === 'asc' ? cmp : -cmp;
-      }
     } else if (currentSort.column === 'bgp') {
       const cmp = (a[8] || '').localeCompare(b[8] || '');
       if (cmp !== 0) {
@@ -369,33 +364,6 @@
     }
     .bgp-link:hover {
       text-decoration: underline;
-    }
-
-    .upstream-badge {
-      display: inline-block;
-      padding: 1px 6px;
-      border-radius: 4px;
-      font-size: 9.5px;
-      font-weight: 700;
-      background: rgba(0, 217, 255, 0.12);
-      color: #00d9ff;
-      border: 1px solid rgba(0, 217, 255, 0.35);
-      cursor: pointer;
-      transition: all 0.2s;
-      white-space: nowrap;
-    }
-    .upstream-badge:hover {
-      background: #00d9ff;
-      color: #000;
-    }
-    .upstream-active {
-      background: rgba(72, 255, 0, 0.15);
-      color: #48ff00;
-      border-color: rgba(72, 255, 0, 0.45);
-    }
-    .upstream-active:hover {
-      background: #48ff00;
-      color: #000;
     }
 
     .hits-cell {
@@ -749,7 +717,6 @@
             <th id="th-latency" style="text-align:right; cursor:pointer;" title="Sort Response Latency">Latency <span class="sort-icon"></span></th>
             <th id="th-hits" style="text-align:center; cursor:pointer;" title="Sort Hits">Hits <span class="sort-icon"></span></th>
             <th id="th-size" style="text-align:right; cursor:pointer;" title="Sort Payload Size">Size <span class="sort-icon"></span></th>
-            <th id="th-upstream" style="text-align:center; cursor:pointer;" title="Sort Upstream (HalloNet LG)">Upstream <span class="sort-icon"></span></th>
             <th id="th-bgp" style="text-align:center; cursor:pointer;" title="Sort BGP">BGP <span class="sort-icon"></span></th>
           </tr>
         </thead>
@@ -786,7 +753,7 @@
   }
 
   function updateHeaderSortIndicators() {
-    const cols = ["domain", "ip", "status", "latency", "hits", "size", "upstream", "bgp"];
+    const cols = ["domain", "ip", "status", "latency", "hits", "size", "bgp"];
     cols.forEach((c) => {
       const el = shadow.getElementById(`th-${c}`);
       if (el) {
@@ -810,7 +777,6 @@
   shadow.getElementById("th-latency").onclick = () => setSort("latency");
   shadow.getElementById("th-hits").onclick = () => setSort("hits");
   shadow.getElementById("th-size").onclick = () => setSort("size");
-  shadow.getElementById("th-upstream").onclick = () => setSort("upstream");
   shadow.getElementById("th-bgp").onclick = () => setSort("bgp");
 
   // Draggable Header
@@ -856,7 +822,7 @@
     if (confirm("Reset Hit & Size Counter?")) {
       try {
         await chrome.runtime.sendMessage({ cmd: "resetHitCounter" });
-      } catch (e) {}
+      } catch (e) { }
       allTuplesCache.forEach((t) => {
         t[4] = 0;
         t[5] = 0;
@@ -875,7 +841,6 @@
     const status = tuple[6] !== undefined ? tuple[6] : 200;
     const latency = tuple[7] !== undefined ? tuple[7] : 0;
     const asn = tuple[8] || "";
-    const upstream = tuple[9] || "-";
 
     const tr = document.createElement("tr");
     if (isFirst) tr.className = "mainRow";
@@ -923,12 +888,8 @@
       ? `<a href="${bgpHref}" target="_blank" class="bgp-link" title="Lookup ${bgpText} di HE BGP">${bgpText}</a>`
       : `<span style="color:#666;">-</span>`;
 
-    let upstreamHtml = `<span style="color:#666;">-</span>`;
-    if (upstream === "...") {
-      upstreamHtml = `<span style="color:#8fa0b5; font-size:10px;" title="Mencari Upstream HalloNet...">⏳</span>`;
-    } else if (addr && addr !== "(x)" && !addr.startsWith("(") && upstream !== "-") {
-      upstreamHtml = `<span class="upstream-badge upstream-active" title="Klik untuk lihat Full Traceroute (HalloNet LG)">${upstream}</span>`;
-    }
+    const dSpeed = domainSpeedMap[domain] || 0;
+    const speedHtml = dSpeed >= 200 ? `<span class="speed-tag">⚡${formatSpeed(dSpeed)}</span> ` : "";
 
     tr.innerHTML = `
       <td class="domain-cell" title="Klik untuk copy: ${domain}">${lockIcon}${domain}</td>
@@ -937,7 +898,6 @@
       <td class="lat-cell ${latClass}">${latText}</td>
       <td class="hits-cell ${hits > 0 ? '' : 'hits-zero'}">${hits}</td>
       <td class="size-cell ${bytes > 0 ? '' : 'size-zero'}">${speedHtml}${formatBytes(bytes)}</td>
-      <td class="upstream-cell" style="text-align:center;">${upstreamHtml}</td>
       <td style="text-align:center;">${bgpHtml}</td>
     `;
 
@@ -956,15 +916,6 @@
       ipTd.onclick = (e) => {
         e.stopPropagation();
         copyToClipboard(addr, "IP");
-      };
-    }
-
-    const upstreamTd = tr.querySelector(".upstream-cell");
-    if (upstreamTd && addr && addr !== "(x)" && !addr.startsWith("(")) {
-      upstreamTd.style.cursor = "pointer";
-      upstreamTd.onclick = (e) => {
-        e.stopPropagation();
-        openBgpVisualizer(addr, domain, asn);
       };
     }
 

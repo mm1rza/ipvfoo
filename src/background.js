@@ -93,7 +93,7 @@ function parseUrl(url) {
         break;
       case "wss:":
         tls = true;
-        // fallthrough
+      // fallthrough
       case "ws:":
         ws = true;
         break;
@@ -119,18 +119,18 @@ function updateNAT64(domain, addr) {
     return;
   }
   const packed = parseIP(addr);
-  if (packed.length != 128/4) {
+  if (packed.length != 128 / 4) {
     return;  // not an IPv6 address
   }
   // Heuristic: Don't consider this a NAT64 prefix if the embedded
   // IPv4 address falls under 0.x.x.x/8.  This filters out cases where all
   // traffic is proxied to the same address, assuming that most proxies
   // have a low-numbered suffix like ::1.
-  if (packed.substr(96/4, 2) == '00') {
+  if (packed.substr(96 / 4, 2) == '00') {
     return;
   }
   // If this is a new prefix, the watchOptions callback will handle it.
-  addPackedNAT64(packed.slice(0, 96/4));
+  addPackedNAT64(packed.slice(0, 96 / 4));
 }
 
 class SaveableEntry {
@@ -181,7 +181,7 @@ class SaveableEntry {
         return;
       }
       //console.log("saving", key, j);
-      await chrome.storage.session.set({[key]: j});
+      await chrome.storage.session.set({ [key]: j });
       this.#savedJSON = j;
     }
   }
@@ -223,7 +223,7 @@ class SaveableMap {
     let id;
     try {
       id = this.validateId(suffix);
-    } catch(err) {
+    } catch (err) {
       console.error(err);
       return false;
     }
@@ -249,154 +249,6 @@ class SaveableMap {
     }
     return o;
   }
-}
-
-// -- Upstream & BGP Auto Detection --
-let asnCache = {};
-let upstreamCache = {};
-const pendingUpstreamRequests = {};
-
-// Load persistent cache from chrome.storage.local on startup
-chrome.storage.local.get(['upstreamCache', 'asnCache'], (result) => {
-  if (result.upstreamCache) {
-    upstreamCache = Object.assign({}, result.upstreamCache, upstreamCache);
-  }
-  if (result.asnCache) {
-    asnCache = Object.assign({}, result.asnCache, asnCache);
-  }
-});
-
-function saveUpstreamCache() {
-  chrome.storage.local.set({ upstreamCache, asnCache });
-}
-
-function isPrivateOrLocalIp(ip) {
-  if (!ip || ip === "*" || ip === "-") return true;
-  if (ip.startsWith("10.") || ip.startsWith("192.168.") || ip.startsWith("127.") || ip.startsWith("169.254.")) return true;
-  if (ip.startsWith("103.216.106.")) return true; // HalloNet Gateway
-  if (/^172\.(1[6-9]|2[0-9]|3[0-1])\./.test(ip)) return true;
-  if (/^100\.(6[4-9]|[7-9][0-9]|1[0-1][0-9]|12[0-7])\./.test(ip)) return true; // CGNAT (100.64.0.0/10)
-  return false;
-}
-
-function detectUpstreamFromHops(hops) {
-  if (!hops || !Array.isArray(hops)) return "-";
-  
-  // 1. Check for specific known provider keywords across hops
-  for (let i = 0; i < hops.length; i++) {
-    const h = hops[i];
-    if (!h || !h.ip) continue;
-    const str = `${h.asn || ''} ${h.host || ''} ${h.ip || ''}`;
-    if (/iforte/i.test(str)) return "iForte";
-    if (/fiberstar|cbn/i.test(str)) return "FiberStar";
-    if (/rapid/i.test(str)) return "RapidNet";
-    if (/telin/i.test(str)) return "Telin";
-    if (/telkom|indihome|astinet/i.test(str)) return "Telkom";
-    if (/indosat|lintasarta/i.test(str)) return "Indosat";
-    if (/openixp|iix|jkt-ix|cdix/i.test(str)) return "OpenIXP";
-    if (/google/i.test(str)) return "Google";
-    if (/cloudflare/i.test(str)) return "Cloudflare";
-    if (/akamai/i.test(str)) return "Akamai";
-  }
-
-  // 2. If no specific keyword, find the FIRST PUBLIC (non-local) hop after HalloNet gateway
-  for (let i = 0; i < hops.length; i++) {
-    const h = hops[i];
-    if (!h || !h.ip) continue;
-    if (isPrivateOrLocalIp(h.ip)) continue;
-    if (h.host && /hallonet/i.test(h.host)) continue;
-    if (h.asn && /hallonet/i.test(h.asn)) continue;
-
-    // Found the first public upstream/peering hop!
-    if (h.asn) {
-      const nameParts = h.asn.split(" - ");
-      const shortName = nameParts.length > 1 ? nameParts[1] : nameParts[0];
-      return shortName.replace(/^AS\d+\s+/, "").slice(0, 16) || h.asn.split(" ")[0];
-    }
-    if (h.host && h.host !== h.ip) {
-      return h.host.split(".")[0];
-    }
-    return h.ip;
-  }
-
-  return "-";
-}
-
-async function fetchHalloNetUpstream(ip) {
-  if (!ip || ip === "(x)" || ip.startsWith("(")) {
-    return { error: "Invalid IP address" };
-  }
-  try {
-    const res = await fetch(`https://lg.hallonet.id/api/traceroute-upstream.php?target=${encodeURIComponent(ip)}`);
-    const data = await res.json();
-    return data;
-  } catch (err) {
-    console.error("fetchHalloNetUpstream error:", err);
-    return { error: err.message || "Gagal menghubungi Looking Glass HalloNet (Upstream)" };
-  }
-}
-
-async function fetchHalloNetTraceroute(ip) {
-  if (!ip || ip === "(x)" || ip.startsWith("(")) {
-    return { error: "Invalid IP address" };
-  }
-  try {
-    const res = await fetch(`https://lg.hallonet.id/api/traceroute.php?target=${encodeURIComponent(ip)}`);
-    const data = await res.json();
-    return data;
-  } catch (err) {
-    console.error("fetchHalloNetTraceroute error:", err);
-    return { error: err.message || "Gagal menghubungi Looking Glass HalloNet" };
-  }
-}
-
-function getUpstreamInfo(addr) {
-  if (!addr || addr === "(x)" || addr.startsWith("(")) return "-";
-  
-  // 1. Instant Cache Check (0ms response)
-  if (upstreamCache[addr]) {
-    return upstreamCache[addr];
-  }
-
-  // 2. Prevent duplicate requests (1 IP only requested 1 time EVER)
-  if (pendingUpstreamRequests[addr]) {
-    return "...";
-  }
-  pendingUpstreamRequests[addr] = true;
-
-  fetchHalloNetUpstream(addr).then((data) => {
-    delete pendingUpstreamRequests[addr];
-    if (data && data.status === "success") {
-      let detected = data.upstream || data.detected_upstream || (data.hops ? detectUpstreamFromHops(data.hops) : "-");
-      if (!detected || detected === "-") {
-        detected = detectUpstreamFromHops(data.hops || []);
-      }
-      upstreamCache[addr] = detected;
-      const lastHop = data.hops && data.hops.length > 0 ? data.hops[data.hops.length - 1] : null;
-      if (lastHop && lastHop.asn) {
-        asnCache[addr] = lastHop.asn;
-      }
-      saveUpstreamCache();
-
-      // Trigger instant update to all active tabs
-      for (const tabInfo of Object.values(tabMap)) {
-        for (const [domain, di] of Object.entries(tabInfo.domains)) {
-          if (di.addr === addr) {
-            tabInfo.pushOne(domain);
-          }
-        }
-      }
-    }
-  }).catch(() => {
-    delete pendingUpstreamRequests[addr];
-  });
-
-  return "...";
-}
-
-function getAsnInfo(addr) {
-  if (!addr || addr === "(x)" || addr.startsWith("(")) return "";
-  return asnCache[addr] || "";
 }
 
 // -- TabInfo --
@@ -437,7 +289,7 @@ class TabInfo extends SaveableEntry {
   tooYoungToDie() {
     // Spare new tabs from garbage collection for a minute or so.
     return (this.#state == TAB_BIRTH &&
-            this.born >= Date.now() - 60*SECONDS);
+      this.born >= Date.now() - 60 * SECONDS);
   }
 
   makeAlive() {
@@ -446,10 +298,6 @@ class TabInfo extends SaveableEntry {
     }
     this.#state = TAB_ALIVE;
     this.updateIcon();
-  }
-
-  dead() {
-    return this.#state == TAB_DEAD;
   }
 
   remove() {
@@ -482,8 +330,6 @@ class TabInfo extends SaveableEntry {
       changed = true;
     }
     this.committed = true;
-    updateOriginMap(this.id(), this.mainOrigin, origin);
-    this.mainOrigin = origin;
 
     // This is usually redundant, but lastPattern takes care of it.
     this.updateIcon();
@@ -514,7 +360,7 @@ class TabInfo extends SaveableEntry {
         return;
       }
       d = this.domains[domain] =
-          new DomainInfo(this, domain, addr || "(lost)", dflags | aflags);
+        new DomainInfo(this, domain, addr || "(lost)", dflags | aflags);
       if (statusCode) d.statusCode = statusCode;
       if (latencyMs) d.latencyMs = latencyMs;
       d.hits = 1;
@@ -548,7 +394,6 @@ class TabInfo extends SaveableEntry {
     if (effectiveAddr && effectiveAddr !== "(x)" && effectiveAddr !== "(lost)" && !effectiveAddr.startsWith("(")) {
       recordIpHit(effectiveAddr, bytes);
       getAsnInfo(effectiveAddr);
-      getUpstreamInfo(effectiveAddr);
     }
 
     if (addressOrFlagsChanged) {
@@ -567,7 +412,6 @@ class TabInfo extends SaveableEntry {
     const effectiveAddr = (d && d.addr) || addr;
     if (effectiveAddr && effectiveAddr !== "(x)" && effectiveAddr !== "(lost)" && !effectiveAddr.startsWith("(")) {
       recordIpHit(effectiveAddr, bytes, false);
-      getUpstreamInfo(effectiveAddr);
     }
     this.pushOne(domain);
     this.save();
@@ -633,26 +477,25 @@ class TabInfo extends SaveableEntry {
 
   pushAll() {
     popups.pushAll(
-        this.id(), this.getTuples(), this.lastPattern, this.color,
-        this.spillCount, options[SAW_HTTP_GT_1]);
+      this.id(), this.getTuples(), this.lastPattern, this.color,
+      this.spillCount, options[SAW_HTTP_GT_1]);
   }
 
   pushOne(domain) {
     popups.pushOne(this.id(), this.getTuple(domain));
   }
 
-  // Build [domain, addr, version, flags, hits, bytes, statusCode, latencyMs, asn, upstream] tuples
+  // Build [domain, addr, version, flags, hits, bytes, statusCode, latencyMs, asn] tuples
   getTuples() {
     const mainDomain = this.mainDomain || "(no domain)";
     const domains = Object.keys(this.domains).sort();
-    const mainTuple = [mainDomain, "(x)", "?", 0, 0, 0, 200, 0, "", "-"];
+    const mainTuple = [mainDomain, "(x)", "?", 0, 0, 0, 200, 0, ""];
     const tuples = [mainTuple];
     for (const domain of domains) {
       const d = this.domains[domain];
       const hits = d.hits || 0;
       const bytes = d.bytes || 0;
       const asn = (d.addr && getAsnInfo(d.addr)) || "";
-      const upstream = (d.addr && getUpstreamInfo(d.addr)) || "-";
       const status = d.statusCode || 200;
       const latency = d.latencyMs || 0;
       if (domain == mainTuple[0]) {
@@ -664,9 +507,8 @@ class TabInfo extends SaveableEntry {
         mainTuple[6] = status;
         mainTuple[7] = latency;
         mainTuple[8] = asn;
-        mainTuple[9] = upstream;
       } else {
-        tuples.push([domain, d.addr, d.addrVersion(), d.flags, hits, bytes, status, latency, asn, upstream]);
+        tuples.push([domain, d.addr, d.addrVersion(), d.flags, hits, bytes, status, latency, asn]);
       }
     }
     return tuples;
@@ -680,10 +522,9 @@ class TabInfo extends SaveableEntry {
     const hits = d.hits || 0;
     const bytes = d.bytes || 0;
     const asn = (d.addr && getAsnInfo(d.addr)) || "";
-    const upstream = (d.addr && getUpstreamInfo(d.addr)) || "-";
     const status = d.statusCode || 200;
     const latency = d.latencyMs || 0;
-    return [domain, d.addr, d.addrVersion(), d.flags, hits, bytes, status, latency, asn, upstream];
+    return [domain, d.addr, d.addrVersion(), d.flags, hits, bytes, status, latency, asn];
   }
 }
 
@@ -813,7 +654,7 @@ function ipCacheGrew() {
   ipCacheSize = flat.length;  // redundant
   for (const cachedAddr of flat) {
     ipCache.remove(cachedAddr.id());
-    if (--ipCacheSize <= IP_CACHE_LIMIT/2) {
+    if (--ipCacheSize <= IP_CACHE_LIMIT / 2) {
       break;
     }
   }
@@ -950,7 +791,7 @@ async function loadAsnCache() {
   try {
     const res = await chrome.storage.local.get(['ipAsnCache']);
     if (res.ipAsnCache) ipAsnCache = res.ipAsnCache;
-  } catch (e) {}
+  } catch (e) { }
 }
 
 function isPrivateIP(addr) {
@@ -1030,7 +871,7 @@ async function fetchAsnInfo(addr) {
         }
       }
     }
-  } catch (e) {}
+  } catch (e) { }
 }
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
@@ -1161,7 +1002,7 @@ class Popups {
             spillCount: spillCount,
             sawHttpGt1: sawHttpGt1,
           });
-        } catch (e) {}
+        } catch (e) { }
       }
     }
   }
@@ -1175,7 +1016,7 @@ class Popups {
             cmd: "pushOne",
             tuple: tuple,
           });
-        } catch (e) {}
+        } catch (e) { }
       }
     }
   }
@@ -1189,7 +1030,7 @@ class Popups {
             pattern: pattern,
             color: color,
           });
-        } catch (e) {}
+        } catch (e) { }
       }
     }
   }
@@ -1202,7 +1043,7 @@ class Popups {
             cmd: "pushSpillCount",
             spillCount: count,
           });
-        } catch (e) {}
+        } catch (e) { }
       }
     }
   }
@@ -1214,7 +1055,7 @@ class Popups {
           port.postMessage({
             cmd: "toggleOverlay",
           });
-        } catch (e) {}
+        } catch (e) { }
       }
     }
   }
@@ -1226,7 +1067,7 @@ class Popups {
           port.postMessage({
             cmd: "shake",
           });
-        } catch (e) {}
+        } catch (e) { }
       }
     }
   }
@@ -1311,7 +1152,7 @@ class TabTracker {
           this.#removeTab(tabId, "pollAllTabs");
         }
       }
-      await sleep(300*SECONDS);
+      await sleep(300 * SECONDS);
     }
   }
 
@@ -1394,7 +1235,7 @@ chrome.tabs.onUpdated.addListener(wrap(async (tabId, changeInfo, tab) => {
 // rather than a top-level navigation to a new URL.
 function isProperMainFrame(details) {
   return (details.type == "main_frame" || details.type == "outermost_frame") &&
-      !details.documentId;
+    !details.documentId;
 }
 
 function extractBytes(url, responseHeaders, requestHeaders) {
@@ -1407,12 +1248,12 @@ function extractBytes(url, responseHeaders, requestHeaders) {
       const name = h.name.toLowerCase();
       const val = h.value;
       if (name === "content-length" ||
-          name === "x-head-content-length" ||
-          name === "x-content-length" ||
-          name === "x-encoded-content-length" ||
-          name === "x-response-content-length" ||
-          name === "x-original-content-length" ||
-          name === "x-goog-stored-content-length") {
+        name === "x-head-content-length" ||
+        name === "x-content-length" ||
+        name === "x-encoded-content-length" ||
+        name === "x-response-content-length" ||
+        name === "x-original-content-length" ||
+        name === "x-goog-stored-content-length") {
         const num = parseInt(val, 10);
         if (!isNaN(num) && num > 0) {
           bytes = Math.max(bytes, num);
@@ -1452,7 +1293,7 @@ function extractBytes(url, responseHeaders, requestHeaders) {
     let decodedUrl = url;
     try {
       decodedUrl = decodeURIComponent(url);
-    } catch (e) {}
+    } catch (e) { }
 
     // YouTube / video range parameter: e.g. range=0-1048575 or &range=1048576-2097151 or range=0:1048575 or range=0,1048575
     const rangeMatch = /[?&](?:range|bytes)=(\d+)[-,:](\d+)/i.exec(decodedUrl);
@@ -1688,8 +1529,8 @@ chrome.webRequest.onResponseStarted.addListener(wrap(async (details) => {
 
   // Domain flags
   const dflags =
-      httpFlags(parsed.tls, details.statusLine) |
-      (parsed.ws ? DFLAG_WEBSOCKET : 0);
+    httpFlags(parsed.tls, details.statusLine) |
+    (parsed.ws ? DFLAG_WEBSOCKET : 0);
 
   if (dflags & (DFLAG_H2 | DFLAG_H3)) {
     sawHttpGt1();
@@ -1697,9 +1538,9 @@ chrome.webRequest.onResponseStarted.addListener(wrap(async (details) => {
 
   // Address flags
   const aflags =
-      (requestInfo.prefetch ? AFLAG_PREFETCH : 0) |
-      (details.tabId <= 0 ? AFLAG_WORKER : 0) |
-      (fromCache ? AFLAG_CACHE : 0);
+    (requestInfo.prefetch ? AFLAG_PREFETCH : 0) |
+    (details.tabId <= 0 ? AFLAG_WORKER : 0) |
+    (fromCache ? AFLAG_CACHE : 0);
 
   requestInfo.domain = parsed.domain;
   requestInfo.addr = addr;
@@ -1771,7 +1612,7 @@ chrome.contextMenus?.onClicked.addListener((info, tab) => {
   const text = info.selectionText;
   const url = selectionToLookupUrl(text)?.href;
   if (url) {
-    chrome.tabs.create({url});
+    chrome.tabs.create({ url });
   } else {
     // Malformed selection; shake the popup content.
     const tabId = /#(\d+)$/.exec(info.pageUrl);
@@ -1801,9 +1642,9 @@ watchOptions(async (optionsChanged) => {
     }
   }
 
-    if (optionsChanged.has(LOOKUP_PROVIDER) ||
-      optionsChanged.has(CUSTOM_PROVIDER_DOMAIN) ||
-      optionsChanged.has(CUSTOM_PROVIDER_IP)) {
+  if (optionsChanged.has(LOOKUP_PROVIDER) ||
+    optionsChanged.has(CUSTOM_PROVIDER_DOMAIN) ||
+    optionsChanged.has(CUSTOM_PROVIDER_IP)) {
     chrome.contextMenus?.removeAll(() => {
       // Show something sensible, even when domain/ip use different providers.
       const title = lookupMenuTitle("example.com", "0.0.0.0");

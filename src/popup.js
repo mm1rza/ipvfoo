@@ -221,11 +221,6 @@ function compareTuples(a, b) {
     if (cmp !== 0) {
       return currentSort.order === 'asc' ? cmp : -cmp;
     }
-  } else if (currentSort.column === 'upstream') {
-    const cmp = (a[9] || '').localeCompare(b[9] || '');
-    if (cmp !== 0) {
-      return currentSort.order === 'asc' ? cmp : -cmp;
-    }
   } else if (currentSort.column === 'domain') {
     const cmp = a[0].localeCompare(b[0]);
     return currentSort.order === 'asc' ? cmp : -cmp;
@@ -543,33 +538,33 @@ function makeImg(src, title) {
 function makeHttpImg(flags) {
   if (flags & DFLAG_NO_TLS) {
     return makeImg(
-        "gray_unlock.png",
-        "Some connections do not use TLS.");
+      "gray_unlock.png",
+      "Some connections do not use TLS.");
   }
   if (gSawHttpGt1) {
     if (flags & DFLAG_H3) {
       return makeImg(
-          "gray_h3.png",
-          "HTTP/3 (with TLS) is the max version seen.");
+        "gray_h3.png",
+        "HTTP/3 (with TLS) is the max version seen.");
     }
     if (flags & DFLAG_H2) {
       return makeImg(
-          "gray_h2.png",
-          "HTTP/2 (with TLS) is the max version seen.");
+        "gray_h2.png",
+        "HTTP/2 (with TLS) is the max version seen.");
     }
     if (flags & DFLAG_H1) {
       return makeImg(
-          "gray_h1.png",
-          "HTTP/1.x (with TLS) is the max version seen.");
+        "gray_h1.png",
+        "HTTP/1.x (with TLS) is the max version seen.");
     }
   } else if (flags & (DFLAG_H1 | DFLAG_H2 | DFLAG_H3 | DFLAG_SSL)) {
     return makeImg(
-        "gray_lock.png",
-        "All connections use TLS.");
+      "gray_lock.png",
+      "All connections use TLS.");
   }
   return makeImg(
-      "gray_question.png",
-      "Failed to parse HTTP status.");
+    "gray_question.png",
+    "Failed to parse HTTP status.");
 }
 
 function makeSelectMe(...children) {
@@ -602,7 +597,7 @@ function makeRow(isFirst, tuple) {
   const domainTd = document.createElement("td");
   domainTd.appendChild(httpImg);
   domainTd.appendChild(makeSelectMe(
-      domain.length > LONG_DOMAIN ? makeSnippedText(domain, Math.floor(LONG_DOMAIN / 2)) : domain));
+    domain.length > LONG_DOMAIN ? makeSnippedText(domain, Math.floor(LONG_DOMAIN / 2)) : domain));
   domainTd.className = "domainTd";
   domainTd.onclick = handleClick;
   domainTd.oncontextmenu = handleContextMenu;
@@ -712,25 +707,6 @@ function makeRow(isFirst, tuple) {
     cacheTd.style.paddingLeft = '0';
   }
 
-  const upstream = tuple && tuple[9] ? tuple[9] : "-";
-  const upstreamTd = document.createElement("td");
-  upstreamTd.className = `upstreamTd${connectedClass}`;
-  upstreamTd.style.textAlign = "center";
-  upstreamTd.style.fontFamily = "monospace";
-  upstreamTd.style.fontSize = "10px";
-  upstreamTd.style.fontWeight = "bold";
-  if (upstream === "...") {
-    upstreamTd.innerHTML = `<span style="color:#8fa0b5; font-size:10px;" title="Mencari Upstream HalloNet...">⏳</span>`;
-  } else if (upstream !== "-") {
-    const span = document.createElement("span");
-    span.textContent = upstream;
-    span.style.cssText = "color:#48ff00; background:rgba(72,255,0,0.15); border:1px solid rgba(72,255,0,0.4); padding:1px 5px; border-radius:3px;";
-    upstreamTd.appendChild(span);
-  } else {
-    upstreamTd.textContent = "-";
-    upstreamTd.style.color = "#777";
-  }
-
   tr._domain = domain;
   tr.appendChild(domainTd);
   tr.appendChild(addrTd);
@@ -738,7 +714,6 @@ function makeRow(isFirst, tuple) {
   tr.appendChild(latTd);
   tr.appendChild(hitsTd);
   tr.appendChild(sizeTd);
-  tr.appendChild(upstreamTd);
   tr.appendChild(bgpTd);
   tr.appendChild(cacheTd);
   return tr;
@@ -823,7 +798,7 @@ function handleContextMenu(e) {
 function findSelectMe(node, target) {
   const range = document.createRange();
   range.selectNodeContents(
-      target?.closest(".selectMe") || node.querySelector(".selectMe"));
+    target?.closest(".selectMe") || node.querySelector(".selectMe"));
   return range;
 }
 
