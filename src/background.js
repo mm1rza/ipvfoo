@@ -270,27 +270,55 @@ function saveUpstreamCache() {
   chrome.storage.local.set({ upstreamCache, asnCache });
 }
 
+function isPrivateOrLocalIp(ip) {
+  if (!ip || ip === "*" || ip === "-") return true;
+  if (ip.startsWith("10.") || ip.startsWith("192.168.") || ip.startsWith("127.") || ip.startsWith("169.254.")) return true;
+  if (ip.startsWith("103.216.106.")) return true; // HalloNet Gateway
+  if (/^172\.(1[6-9]|2[0-9]|3[0-1])\./.test(ip)) return true;
+  if (/^100\.(6[4-9]|[7-9][0-9]|1[0-1][0-9]|12[0-7])\./.test(ip)) return true; // CGNAT (100.64.0.0/10)
+  return false;
+}
+
 function detectUpstreamFromHops(hops) {
   if (!hops || !Array.isArray(hops)) return "-";
-  for (let i = 1; i < hops.length; i++) {
+  
+  // 1. Check for specific known provider keywords across hops
+  for (let i = 0; i < hops.length; i++) {
     const h = hops[i];
-    if (!h) continue;
+    if (!h || !h.ip) continue;
     const str = `${h.asn || ''} ${h.host || ''} ${h.ip || ''}`;
     if (/iforte/i.test(str)) return "iForte";
     if (/fiberstar|cbn/i.test(str)) return "FiberStar";
     if (/rapid/i.test(str)) return "RapidNet";
     if (/telin/i.test(str)) return "Telin";
-    if (/telkom/i.test(str)) return "Telkom";
-    if (/indosat/i.test(str)) return "Indosat";
-    if (/openixp|iix|jkt-ix/i.test(str)) return "OpenIXP";
+    if (/telkom|indihome|astinet/i.test(str)) return "Telkom";
+    if (/indosat|lintasarta/i.test(str)) return "Indosat";
+    if (/openixp|iix|jkt-ix|cdix/i.test(str)) return "OpenIXP";
     if (/google/i.test(str)) return "Google";
     if (/cloudflare/i.test(str)) return "Cloudflare";
     if (/akamai/i.test(str)) return "Akamai";
   }
-  if (hops[1] && hops[1].asn) {
-    const nameParts = hops[1].asn.split(" - ");
-    return nameParts[0].replace(/^AS\d+\s+/, "") || hops[1].asn.split(" ")[0];
+
+  // 2. If no specific keyword, find the FIRST PUBLIC (non-local) hop after HalloNet gateway
+  for (let i = 0; i < hops.length; i++) {
+    const h = hops[i];
+    if (!h || !h.ip) continue;
+    if (isPrivateOrLocalIp(h.ip)) continue;
+    if (h.host && /hallonet/i.test(h.host)) continue;
+    if (h.asn && /hallonet/i.test(h.asn)) continue;
+
+    // Found the first public upstream/peering hop!
+    if (h.asn) {
+      const nameParts = h.asn.split(" - ");
+      const shortName = nameParts.length > 1 ? nameParts[1] : nameParts[0];
+      return shortName.replace(/^AS\d+\s+/, "").slice(0, 16) || h.asn.split(" ")[0];
+    }
+    if (h.host && h.host !== h.ip) {
+      return h.host.split(".")[0];
+    }
+    return h.ip;
   }
+
   return "-";
 }
 
