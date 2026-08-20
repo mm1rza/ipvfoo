@@ -603,15 +603,83 @@
       : `<span style="color:#666;">-</span>`;
 
     tr.innerHTML = `
-      <td class="domain-cell" title="${domain}">${lockIcon}${domain}</td>
-      <td class="ip-cell ${ipClass}">${addr || "(x)"}</td>
+      <td class="domain-cell" title="Klik untuk copy: ${domain}">${lockIcon}${domain}</td>
+      <td class="ip-cell ${ipClass}" title="Klik untuk copy: ${addr || '(x)'}">${addr || "(x)"}</td>
       <td style="text-align:center;"><span class="status-badge ${statusClass}">${status}</span></td>
       <td class="lat-cell ${latClass}">${latText}</td>
       <td class="hits-cell ${hits > 0 ? '' : 'hits-zero'}">${hits}</td>
       <td class="size-cell ${bytes > 0 ? '' : 'size-zero'}">${formatBytes(bytes)}</td>
       <td style="text-align:center;">${bgpHtml}</td>
     `;
+
+    const domainTd = tr.querySelector(".domain-cell");
+    if (domainTd) {
+      domainTd.style.cursor = "pointer";
+      domainTd.onclick = (e) => {
+        e.stopPropagation();
+        copyToClipboard(domain, "Domain");
+      };
+    }
+
+    const ipTd = tr.querySelector(".ip-cell");
+    if (ipTd && addr && addr !== "(x)" && !addr.startsWith("(")) {
+      ipTd.style.cursor = "pointer";
+      ipTd.onclick = (e) => {
+        e.stopPropagation();
+        copyToClipboard(addr, "IP");
+      };
+    }
+
     return tr;
+  }
+
+  function copyToClipboard(text, label) {
+    if (!text || text === "(x)" || text === "-") return;
+    navigator.clipboard.writeText(text).then(() => {
+      showCopyToast(`Copied ${label}: ${text}`);
+    }).catch(() => {
+      const textarea = document.createElement("textarea");
+      textarea.value = text;
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand("copy");
+      document.body.removeChild(textarea);
+      showCopyToast(`Copied ${label}: ${text}`);
+    });
+  }
+
+  function showCopyToast(msg) {
+    let toast = shadow.getElementById("copy-toast");
+    if (!toast) {
+      toast = document.createElement("div");
+      toast.id = "copy-toast";
+      toast.style.cssText = `
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background: #00d9ff;
+        color: #000;
+        padding: 6px 14px;
+        border-radius: 6px;
+        font-weight: 700;
+        font-size: 11.5px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        z-index: 2147483647;
+        opacity: 0;
+        transform: translateY(10px);
+        transition: opacity 0.2s, transform 0.2s;
+        pointer-events: none;
+      `;
+      shadow.appendChild(toast);
+    }
+    toast.textContent = msg;
+    toast.style.opacity = "1";
+    toast.style.transform = "translateY(0)";
+    clearTimeout(toast._timeout);
+    toast._timeout = setTimeout(() => {
+      toast.style.opacity = "0";
+      toast.style.transform = "translateY(10px)";
+    }, 1800);
   }
 
   function updateMiniBadge(tuples) {

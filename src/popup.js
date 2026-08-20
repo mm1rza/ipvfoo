@@ -665,7 +665,52 @@ function nodeToRange(node) {
   return range;
 }
 
+function showPopupToast(msg) {
+  let toast = document.getElementById("popup-toast");
+  if (!toast) {
+    toast = document.createElement("div");
+    toast.id = "popup-toast";
+    toast.style.cssText = `
+      position: fixed;
+      bottom: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #00d9ff;
+      color: #111;
+      padding: 3px 10px;
+      border-radius: 4px;
+      font-weight: bold;
+      font-size: 11px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+      z-index: 99999;
+      pointer-events: none;
+      transition: opacity 0.2s;
+    `;
+    document.body.appendChild(toast);
+  }
+  toast.textContent = msg;
+  toast.style.opacity = "1";
+  clearTimeout(toast._timeout);
+  toast._timeout = setTimeout(() => {
+    toast.style.opacity = "0";
+  }, 1500);
+}
+
 function handleClick(e) {
+  const text = (this.querySelector('.selectMe') || this).textContent.trim();
+  if (text && text !== "(x)" && text !== "-") {
+    navigator.clipboard.writeText(text).then(() => {
+      showPopupToast(`Copied: ${text}`);
+    }).catch(() => {
+      const textarea = document.createElement("textarea");
+      textarea.value = text;
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand("copy");
+      document.body.removeChild(textarea);
+      showPopupToast(`Copied: ${text}`);
+    });
+  }
   const sel = window.getSelection();
   if (e.detail == 1 && oldRanges.length == 1) {
     if (sameRange(nodeToRange(this), oldRanges[0])) {
