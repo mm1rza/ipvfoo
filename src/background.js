@@ -251,6 +251,78 @@ class SaveableMap {
   }
 }
 
+// -- Upstream & BGP Auto Detection --
+const asnCache = {};
+const upstreamCache = {};
+
+function detectUpstreamFromHops(hops) {
+  if (!hops || !Array.isArray(hops)) return "-";
+  for (let i = 1; i < hops.length; i++) {
+    const h = hops[i];
+    if (!h) continue;
+    const str = `${h.asn || ''} ${h.host || ''} ${h.ip || ''}`;
+    if (/iforte/i.test(str)) return "iForte";
+    if (/fiberstar|cbn/i.test(str)) return "FiberStar";
+    if (/rapid/i.test(str)) return "RapidNet";
+    if (/telin/i.test(str)) return "Telin";
+    if (/telkom/i.test(str)) return "Telkom";
+    if (/indosat/i.test(str)) return "Indosat";
+    if (/openixp|iix|jkt-ix/i.test(str)) return "OpenIXP";
+    if (/google/i.test(str)) return "Google";
+    if (/cloudflare/i.test(str)) return "Cloudflare";
+    if (/akamai/i.test(str)) return "Akamai";
+  }
+  if (hops[1] && hops[1].asn) {
+    const nameParts = hops[1].asn.split(" - ");
+    return nameParts[0].replace(/^AS\d+\s+/, "") || hops[1].asn.split(" ")[0];
+  }
+  return "-";
+}
+
+async function fetchHalloNetTraceroute(ip) {
+  if (!ip || ip === "(x)" || ip.startsWith("(")) {
+    return { error: "Invalid IP address" };
+  }
+  try {
+    const res = await fetch(`https://lg.hallonet.id/api/traceroute.php?target=${encodeURIComponent(ip)}`);
+    const data = await res.json();
+    return data;
+  } catch (err) {
+    console.error("fetchHalloNetTraceroute error:", err);
+    return { error: err.message || "Gagal menghubungi Looking Glass HalloNet" };
+  }
+}
+
+function getUpstreamInfo(addr) {
+  if (!addr || addr === "(x)" || addr.startsWith("(")) return "-";
+  if (upstreamCache[addr]) return upstreamCache[addr];
+
+  fetchHalloNetTraceroute(addr).then((data) => {
+    if (data && data.status === "success" && data.hops && data.hops.length > 0) {
+      const detected = detectUpstreamFromHops(data.hops);
+      upstreamCache[addr] = detected;
+      const lastHop = data.hops[data.hops.length - 1];
+      if (lastHop && lastHop.asn) {
+        asnCache[addr] = lastHop.asn;
+      }
+      for (const tabInfo of Object.values(tabMap)) {
+        for (const [domain, di] of Object.entries(tabInfo.domains)) {
+          if (di.addr === addr) {
+            tabInfo.pushOne(domain);
+          }
+        }
+      }
+    }
+  }).catch(() => {});
+
+  return "-";
+}
+
+function getAsnInfo(addr) {
+  if (!addr || addr === "(x)" || addr.startsWith("(")) return "";
+  return asnCache[addr] || "";
+}
+
 // -- TabInfo --
 
 class TabInfo extends SaveableEntry {
@@ -484,66 +556,6 @@ class TabInfo extends SaveableEntry {
   pushOne(domain) {
     popups.pushOne(this.id(), this.getTuple(domain));
   }
-
-const asnCache = {};
-const upstreamCache = {};
-
-function detectUpstreamFromHops(hops) {
-  if (!hops || !Array.isArray(hops)) return "-";
-  // Look at hop 2 or any non-HalloNet hop
-  for (let i = 1; i < hops.length; i++) {
-    const h = hops[i];
-    if (!h) continue;
-    const str = `${h.asn || ''} ${h.host || ''} ${h.ip || ''}`;
-    if (/iforte/i.test(str)) return "iForte";
-    if (/fiberstar|cbn/i.test(str)) return "FiberStar";
-    if (/rapid/i.test(str)) return "RapidNet";
-    if (/telin/i.test(str)) return "Telin";
-    if (/telkom/i.test(str)) return "Telkom";
-    if (/indosat/i.test(str)) return "Indosat";
-    if (/openixp|iix|jkt-ix/i.test(str)) return "OpenIXP";
-    if (/google/i.test(str)) return "Google";
-    if (/cloudflare/i.test(str)) return "Cloudflare";
-    if (/akamai/i.test(str)) return "Akamai";
-  }
-  if (hops[1] && hops[1].asn) {
-    const nameParts = hops[1].asn.split(" - ");
-    return nameParts[0].replace(/^AS\d+\s+/, "") || hops[1].asn.split(" ")[0];
-  }
-  return "-";
-}
-
-function getUpstreamInfo(addr) {
-  if (!addr || addr === "(x)" || addr.startsWith("(")) return "-";
-  if (upstreamCache[addr]) return upstreamCache[addr];
-
-  // Asynchronously fetch upstream from HalloNet Looking Glass API
-  fetchHalloNetTraceroute(addr).then((data) => {
-    if (data && data.status === "success" && data.hops && data.hops.length > 0) {
-      const detected = detectUpstreamFromHops(data.hops);
-      upstreamCache[addr] = detected;
-      const lastHop = data.hops[data.hops.length - 1];
-      if (lastHop && lastHop.asn) {
-        asnCache[addr] = lastHop.asn;
-      }
-      // Trigger update to active tabs
-      for (const tabInfo of Object.values(tabMap)) {
-        for (const [domain, di] of Object.entries(tabInfo.domains)) {
-          if (di.addr === addr) {
-            tabInfo.pushOne(domain);
-          }
-        }
-      }
-    }
-  }).catch(() => {});
-
-  return "-";
-}
-
-function getAsnInfo(addr) {
-  if (!addr || addr === "(x)" || addr.startsWith("(")) return "";
-  return asnCache[addr] || "";
-}
 
   // Build [domain, addr, version, flags, hits, bytes, statusCode, latencyMs, asn, upstream] tuples
   getTuples() {
@@ -1800,21 +1812,6 @@ async function fetchBgpPath(ip) {
       totalPaths: 0,
       error: err.message
     };
-  }
-}
-
-async function fetchHalloNetTraceroute(ip) {
-  if (!ip || ip === "(x)" || ip.startsWith("(")) {
-    return { error: "Invalid IP address" };
-  }
-
-  try {
-    const res = await fetch(`https://lg.hallonet.id/api/traceroute.php?target=${encodeURIComponent(ip)}`);
-    const data = await res.json();
-    return data;
-  } catch (err) {
-    console.error("fetchHalloNetTraceroute error:", err);
-    return { error: err.message || "Gagal menghubungi Looking Glass HalloNet" };
   }
 }
 
