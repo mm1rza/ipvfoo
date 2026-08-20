@@ -252,8 +252,23 @@ class SaveableMap {
 }
 
 // -- Upstream & BGP Auto Detection --
-const asnCache = {};
-const upstreamCache = {};
+let asnCache = {};
+let upstreamCache = {};
+const pendingUpstreamRequests = {};
+
+// Load persistent cache from chrome.storage.local on startup
+chrome.storage.local.get(['upstreamCache', 'asnCache'], (result) => {
+  if (result.upstreamCache) {
+    upstreamCache = Object.assign({}, result.upstreamCache, upstreamCache);
+  }
+  if (result.asnCache) {
+    asnCache = Object.assign({}, result.asnCache, asnCache);
+  }
+});
+
+function saveUpstreamCache() {
+  chrome.storage.local.set({ upstreamCache, asnCache });
+}
 
 function detectUpstreamFromHops(hops) {
   if (!hops || !Array.isArray(hops)) return "-";
@@ -295,9 +310,20 @@ async function fetchHalloNetTraceroute(ip) {
 
 function getUpstreamInfo(addr) {
   if (!addr || addr === "(x)" || addr.startsWith("(")) return "-";
-  if (upstreamCache[addr]) return upstreamCache[addr];
+  
+  // 1. Instant Cache Check (0ms response)
+  if (upstreamCache[addr]) {
+    return upstreamCache[addr];
+  }
+
+  // 2. Prevent duplicate requests (1 IP only requested 1 time EVER)
+  if (pendingUpstreamRequests[addr]) {
+    return "-";
+  }
+  pendingUpstreamRequests[addr] = true;
 
   fetchHalloNetTraceroute(addr).then((data) => {
+    delete pendingUpstreamRequests[addr];
     if (data && data.status === "success" && data.hops && data.hops.length > 0) {
       const detected = detectUpstreamFromHops(data.hops);
       upstreamCache[addr] = detected;
@@ -305,6 +331,9 @@ function getUpstreamInfo(addr) {
       if (lastHop && lastHop.asn) {
         asnCache[addr] = lastHop.asn;
       }
+      saveUpstreamCache();
+
+      // Trigger instant update to all active tabs
       for (const tabInfo of Object.values(tabMap)) {
         for (const [domain, di] of Object.entries(tabInfo.domains)) {
           if (di.addr === addr) {
@@ -313,7 +342,9 @@ function getUpstreamInfo(addr) {
         }
       }
     }
-  }).catch(() => {});
+  }).catch(() => {
+    delete pendingUpstreamRequests[addr];
+  });
 
   return "-";
 }

@@ -190,7 +190,8 @@
       position: fixed;
       top: 12px;
       right: 12px;
-      width: 580px;
+      width: 720px;
+      min-width: 680px;
       max-width: calc(100vw - 24px);
       max-height: 85vh;
       background: rgba(18, 20, 26, 0.96);
@@ -200,7 +201,7 @@
       border: 1px solid rgba(255, 255, 255, 0.18);
       border-radius: 10px;
       box-shadow: 0 12px 40px rgba(0, 0, 0, 0.7), 0 0 2px rgba(0, 217, 255, 0.3);
-      font-size: 11.5px;
+      font-size: 11px;
       z-index: 2147483647 !important;
       display: none;
       flex-direction: column;
@@ -266,8 +267,9 @@
 
     #table-wrap {
       overflow-y: auto;
+      overflow-x: hidden;
       max-height: calc(85vh - 44px);
-      padding: 4px;
+      padding: 4px 6px;
     }
 
     table {
