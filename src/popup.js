@@ -719,7 +719,9 @@ function makeRow(isFirst, tuple) {
   upstreamTd.style.fontFamily = "monospace";
   upstreamTd.style.fontSize = "10px";
   upstreamTd.style.fontWeight = "bold";
-  if (upstream !== "-") {
+  if (upstream === "...") {
+    upstreamTd.innerHTML = `<span style="color:#8fa0b5; font-size:10px;" title="Mencari Upstream HalloNet...">⏳</span>`;
+  } else if (upstream !== "-") {
     const span = document.createElement("span");
     span.textContent = upstream;
     span.style.cssText = "color:#48ff00; background:rgba(72,255,0,0.15); border:1px solid rgba(72,255,0,0.4); padding:1px 5px; border-radius:3px;";

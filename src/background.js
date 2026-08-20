@@ -360,7 +360,7 @@ function getUpstreamInfo(addr) {
 
   // 2. Prevent duplicate requests (1 IP only requested 1 time EVER)
   if (pendingUpstreamRequests[addr]) {
-    return "-";
+    return "...";
   }
   pendingUpstreamRequests[addr] = true;
 
@@ -391,7 +391,7 @@ function getUpstreamInfo(addr) {
     delete pendingUpstreamRequests[addr];
   });
 
-  return "-";
+  return "...";
 }
 
 function getAsnInfo(addr) {
@@ -448,6 +448,10 @@ class TabInfo extends SaveableEntry {
     this.updateIcon();
   }
 
+  dead() {
+    return this.#state == TAB_DEAD;
+  }
+
   remove() {
     super.remove();  // no await
     this.#state = TAB_DEAD;
@@ -456,38 +460,22 @@ class TabInfo extends SaveableEntry {
   }
 
   setInitialDomain(requestId, domain, origin) {
-    if (this.mainRequestId == null) {
-      this.mainRequestId = requestId;
-    } else if (this.mainRequestId != requestId) {
-      console.error("mainRequestId changed!");
-    }
+    this.mainRequestId = requestId;
     this.mainDomain = domain;
-    updateOriginMap(this.id(), this.mainOrigin, origin);
     this.mainOrigin = origin;
-
-    // If anyone's watching, show some preliminary state.
-    this.pushAll();
     this.save();
   }
 
   setCommitted(domain, origin) {
-    let changed = false;
-
-    if (this.mainDomain != domain) {
-      this.mainDomain = domain;
-      changed = true;
+    if (this.committed) {
+      return;
     }
     this.committed = true;
-
-    // This is usually redundant, but lastPattern takes care of it.
-    this.updateIcon();
-
-    // If the table contents changed, then redraw it.
-    if (changed) {
-      this.pushAll();
-    }
-
+    updateOriginMap(this.id(), this.mainOrigin, origin);
+    this.mainDomain = domain;
+    this.mainOrigin = origin;
     this.save();
+    this.updateIcon();
   }
 
   // If the pageAction is supposed to be visible now, then draw it again.
@@ -542,6 +530,7 @@ class TabInfo extends SaveableEntry {
     if (effectiveAddr && effectiveAddr !== "(x)" && effectiveAddr !== "(lost)" && !effectiveAddr.startsWith("(")) {
       recordIpHit(effectiveAddr, bytes);
       getAsnInfo(effectiveAddr);
+      getUpstreamInfo(effectiveAddr);
     }
 
     if (addressOrFlagsChanged) {
@@ -560,6 +549,7 @@ class TabInfo extends SaveableEntry {
     const effectiveAddr = (d && d.addr) || addr;
     if (effectiveAddr && effectiveAddr !== "(x)" && effectiveAddr !== "(lost)" && !effectiveAddr.startsWith("(")) {
       recordIpHit(effectiveAddr, bytes, false);
+      getUpstreamInfo(effectiveAddr);
     }
     this.pushOne(domain);
     this.save();

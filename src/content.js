@@ -923,11 +923,12 @@
       ? `<a href="${bgpHref}" target="_blank" class="bgp-link" title="Lookup ${bgpText} di HE BGP">${bgpText}</a>`
       : `<span style="color:#666;">-</span>`;
 
-    const dSpeed = domainSpeedMap[domain] || 0;
-    const speedHtml = dSpeed >= 200 ? `<span class="speed-tag">⚡${formatSpeed(dSpeed)}</span> ` : "";
-    const upstreamHtml = (addr && addr !== "(x)" && !addr.startsWith("(") && upstream !== "-")
-      ? `<span class="upstream-badge upstream-active" title="Klik untuk lihat Full Traceroute (HalloNet LG)">${upstream}</span>`
-      : `<span style="color:#666;">${upstream}</span>`;
+    let upstreamHtml = `<span style="color:#666;">-</span>`;
+    if (upstream === "...") {
+      upstreamHtml = `<span style="color:#8fa0b5; font-size:10px;" title="Mencari Upstream HalloNet...">⏳</span>`;
+    } else if (addr && addr !== "(x)" && !addr.startsWith("(") && upstream !== "-") {
+      upstreamHtml = `<span class="upstream-badge upstream-active" title="Klik untuk lihat Full Traceroute (HalloNet LG)">${upstream}</span>`;
+    }
 
     tr.innerHTML = `
       <td class="domain-cell" title="Klik untuk copy: ${domain}">${lockIcon}${domain}</td>
