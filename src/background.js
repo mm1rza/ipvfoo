@@ -1642,7 +1642,7 @@ watchOptions(async (optionsChanged) => {
     }
   }
 
-  if (optionsChanged.has(LOOKUP_PROVIDER) ||
+    if (optionsChanged.has(LOOKUP_PROVIDER) ||
       optionsChanged.has(CUSTOM_PROVIDER_DOMAIN) ||
       optionsChanged.has(CUSTOM_PROVIDER_IP)) {
     chrome.contextMenus?.removeAll(() => {
@@ -1658,5 +1658,101 @@ watchOptions(async (optionsChanged) => {
         });
       }
     });
+  }
+});
+
+// -- BGP AS-Path & Peering Route API --
+const bgpPathCache = {};
+
+async function fetchBgpPath(ip) {
+  if (!ip || ip === "(x)" || ip.startsWith("(")) {
+    return { error: "Invalid IP address" };
+  }
+  if (bgpPathCache[ip]) {
+    return bgpPathCache[ip];
+  }
+
+  try {
+    const res = await fetch(`https://stat.ripe.net/data/looking-glass/data.json?resource=${encodeURIComponent(ip)}`);
+    const data = await res.json();
+    const rrcs = data?.data?.rrcs || [];
+
+    const paths = [];
+    const asnSet = new Set();
+    let prefix = ip;
+    let originAsn = "";
+
+    for (const rrc of rrcs) {
+      const entries = rrc.entries || [];
+      for (const entry of entries) {
+        if (entry.prefix) prefix = entry.prefix;
+        if (entry.asn_origin) originAsn = entry.asn_origin;
+        if (entry.as_path) {
+          const hops = entry.as_path.trim().split(/\s+/).filter(Boolean);
+          hops.forEach(h => asnSet.add(h));
+          const pathStr = hops.join(" -> ");
+          if (!paths.some(p => p.join(" -> ") === pathStr)) {
+            paths.push(hops);
+          }
+        }
+      }
+    }
+
+    let asNames = {};
+    if (asnSet.size > 0) {
+      try {
+        const asnList = Array.from(asnSet).slice(0, 30).join(",");
+        const namesRes = await fetch(`https://stat.ripe.net/data/as-names/data.json?resource=${encodeURIComponent(asnList)}`);
+        const namesData = await namesRes.json();
+        asNames = namesData?.data?.names || {};
+      } catch (e) {
+        console.log("Error fetching AS names:", e);
+      }
+    }
+
+    const cleanOrigin = originAsn ? (originAsn.startsWith("AS") ? originAsn : `AS${originAsn}`) : "";
+    const originHolder = asNames[originAsn] || asNames[originAsn.replace("AS", "")] || "Origin AS";
+
+    const result = {
+      ip,
+      prefix,
+      originAsn: cleanOrigin,
+      originHolder,
+      paths: paths.slice(0, 8),
+      asNames,
+      totalPaths: paths.length
+    };
+
+    bgpPathCache[ip] = result;
+    return result;
+  } catch (err) {
+    console.error("fetchBgpPath error:", err);
+    return {
+      ip,
+      prefix: ip,
+      originAsn: "",
+      originHolder: "Unknown",
+      paths: [],
+      asNames: {},
+      totalPaths: 0,
+      error: err.message
+    };
+  }
+}
+
+chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+  if (msg.cmd === "resetHitCounter") {
+    ipHitCounter = {};
+    ipByteCounter = {};
+    chrome.storage.local.set({ ipHitCounter: {}, ipByteCounter: {}, lastResetDate: new Date().toDateString() });
+    sendResponse({ status: "ok" });
+    return true;
+  } else if (msg.cmd === "lookupBgpPath") {
+    fetchBgpPath(msg.ip).then((data) => {
+      sendResponse(data);
+    }).catch((err) => {
+      sendResponse({ error: err.message });
+    });
+    return true;
   }
 });

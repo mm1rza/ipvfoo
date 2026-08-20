@@ -453,6 +453,221 @@
       display: inline-block;
     }
 
+    /* BGP AS-Path Visualizer Modal */
+    #bgp-modal-backdrop {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(4px);
+      z-index: 2147483647 !important;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      user-select: none;
+    }
+
+    #bgp-modal {
+      width: 580px;
+      max-width: 90vw;
+      background: #141722;
+      border: 1px solid #00d9ff;
+      border-radius: 12px;
+      box-shadow: 0 10px 35px rgba(0, 0, 0, 0.8), 0 0 20px rgba(0, 217, 255, 0.25);
+      color: #eee;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      animation: modalPop 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    @keyframes modalPop {
+      from { transform: scale(0.88); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    #bgp-modal-header {
+      background: #1b202e;
+      padding: 12px 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #283046;
+    }
+
+    #bgp-modal-header .title {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: #00d9ff;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    #bgp-modal-close {
+      background: none;
+      border: none;
+      color: #aaa;
+      font-size: 18px;
+      font-weight: 700;
+      cursor: pointer;
+      line-height: 1;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+    #bgp-modal-close:hover {
+      color: #ff5252;
+      background: rgba(255, 82, 82, 0.15);
+    }
+
+    #bgp-modal-body {
+      padding: 16px 18px;
+      max-height: 70vh;
+      overflow-y: auto;
+      font-size: 12px;
+    }
+
+    .bgp-summary-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .bgp-card {
+      background: #1c2130;
+      border: 1px solid #2d364f;
+      border-radius: 8px;
+      padding: 10px 12px;
+    }
+
+    .bgp-card-label {
+      font-size: 10.5px;
+      color: #8fa0b5;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+      font-weight: 600;
+    }
+
+    .bgp-card-val {
+      font-size: 13px;
+      font-weight: 700;
+      color: #fff;
+      font-family: Consolas, Monaco, monospace;
+    }
+
+    .bgp-card-sub {
+      font-size: 11px;
+      color: #00d9ff;
+      margin-top: 2px;
+    }
+
+    .bgp-path-container {
+      background: #11141c;
+      border: 1px solid #252b3d;
+      border-radius: 8px;
+      padding: 14px;
+      margin-bottom: 14px;
+    }
+
+    .bgp-path-title {
+      font-size: 11.5px;
+      font-weight: 700;
+      color: #ffd700;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .bgp-flow-wrapper {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .bgp-node {
+      background: #1a2233;
+      border: 1px solid #334466;
+      border-radius: 6px;
+      padding: 6px 10px;
+      text-align: center;
+      min-width: 100px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    }
+    .bgp-node-origin {
+      border-color: #00d9ff;
+      background: #002c38;
+    }
+    .bgp-node-client {
+      border-color: #48ff00;
+      background: #0d2e14;
+    }
+    .bgp-node-asn {
+      font-size: 12px;
+      font-weight: 700;
+      color: #fff;
+      font-family: Consolas, Monaco, monospace;
+    }
+    .bgp-node-name {
+      font-size: 9.5px;
+      color: #b0c4de;
+      max-width: 120px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-top: 2px;
+    }
+    .bgp-arrow {
+      color: #ff2a85;
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+    .bgp-actions {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+      margin-top: 10px;
+    }
+
+    .bgp-btn {
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s;
+    }
+    .bgp-btn-mkt {
+      background: #ff5722;
+      color: #fff;
+    }
+    .bgp-btn-mkt:hover {
+      background: #f4511e;
+    }
+    .bgp-btn-he {
+      background: #00d9ff;
+      color: #000;
+    }
+    .bgp-btn-he:hover {
+      background: #33e1ff;
+    }
+
+    .bgp-loading {
+      text-align: center;
+      padding: 30px 20px;
+      color: #00d9ff;
+      font-weight: 600;
+      font-size: 13px;
+    }
+
   `;
   shadow.appendChild(style);
 
@@ -683,6 +898,15 @@
       };
     }
 
+    const bgpLink = tr.querySelector(".bgp-link");
+    if (bgpLink && addr && addr !== "(x)" && !addr.startsWith("(")) {
+      bgpLink.onclick = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        openBgpVisualizer(addr, domain, asn);
+      };
+    }
+
     return tr;
   }
 
@@ -864,6 +1088,165 @@
       if (tr._tuple) allTuples.push(tr._tuple);
     }
     updateMiniBadge(allTuples);
+  }
+
+  // BGP Modal DOM
+  const modalBackdrop = document.createElement("div");
+  modalBackdrop.id = "bgp-modal-backdrop";
+  modalBackdrop.innerHTML = `
+    <div id="bgp-modal">
+      <div id="bgp-modal-header">
+        <div class="title">
+          <span>🌐 BGP AS-Path & Peering Visualizer</span>
+        </div>
+        <button id="bgp-modal-close" title="Tutup Modal">✕</button>
+      </div>
+      <div id="bgp-modal-body">
+        <div class="bgp-loading">⏳ Memuat data routing BGP real-time...</div>
+      </div>
+    </div>
+  `;
+  shadow.appendChild(modalBackdrop);
+
+  const modalCloseBtn = modalBackdrop.querySelector("#bgp-modal-close");
+  modalCloseBtn.onclick = () => {
+    modalBackdrop.style.display = "none";
+  };
+  modalBackdrop.onclick = (e) => {
+    if (e.target === modalBackdrop) {
+      modalBackdrop.style.display = "none";
+    }
+  };
+
+  async function openBgpVisualizer(addr, domain, asn) {
+    if (!addr || addr === "(x)" || addr.startsWith("(")) {
+      showCopyToast("IP tidak valid untuk BGP lookup");
+      return;
+    }
+
+    modalBackdrop.style.display = "flex";
+    const body = modalBackdrop.querySelector("#bgp-modal-body");
+    body.innerHTML = `
+      <div class="bgp-loading">
+        <div style="font-size: 20px; margin-bottom: 8px;">🌐</div>
+        Memuat data BGP AS-Path untuk <strong>${addr}</strong>...
+      </div>
+    `;
+
+    try {
+      chrome.runtime.sendMessage({ cmd: "lookupBgpPath", ip: addr }, (res) => {
+        if (!res || res.error) {
+          body.innerHTML = `
+            <div style="color:#ff5252; padding: 25px; text-align:center;">
+              ⚠️ Gagal memuat data BGP: ${res?.error || "Koneksi timeout"}
+            </div>
+          `;
+          return;
+        }
+
+        renderBgpModalContent(res, domain, addr, asn);
+      });
+    } catch (e) {
+      body.innerHTML = `<div style="color:#ff5252; padding:25px; text-align:center;">Error: ${e.message}</div>`;
+    }
+  }
+
+  function renderBgpModalContent(data, domain, addr, asn) {
+    const body = modalBackdrop.querySelector("#bgp-modal-body");
+    const prefix = data.prefix || addr;
+    const originAsn = data.originAsn || asn || "Unknown";
+    const originHolder = data.originHolder || "Origin Autonomous System";
+    const asNames = data.asNames || {};
+    const paths = data.paths || [];
+
+    // Construct primary path flow
+    let pathHtml = "";
+    if (paths.length > 0) {
+      const primaryPath = paths[0];
+      const flowNodes = [];
+
+      primaryPath.forEach((as, idx) => {
+        const isOrigin = idx === primaryPath.length - 1;
+        const isClient = idx === 0;
+        const asNum = as.startsWith("AS") ? as : `AS${as}`;
+        const name = asNames[as] || (isOrigin ? originHolder : `Transit Provider`);
+        const cleanName = name.split(" - ")[0] || name;
+
+        flowNodes.push(`
+          <div class="bgp-node ${isOrigin ? 'bgp-node-origin' : (isClient ? 'bgp-node-client' : '')}">
+            <div class="bgp-node-asn">${asNum}</div>
+            <div class="bgp-node-name" title="${name}">${cleanName}</div>
+          </div>
+        `);
+      });
+
+      pathHtml = `
+        <div class="bgp-path-container">
+          <div class="bgp-path-title">
+            <span>🛣️ AS-Path Route (Global Ingress ➔ Origin)</span>
+          </div>
+          <div class="bgp-flow-wrapper">
+            ${flowNodes.join('<span class="bgp-arrow">──▶</span>')}
+          </div>
+          <div style="font-size:11px; color:#8fa0b5; margin-top:8px;">
+            • Total Hop AS: <strong>${primaryPath.length} AS</strong> &nbsp;|&nbsp; 
+            • Total Jalur BGP Terdeteksi: <strong>${data.totalPaths || paths.length} rute global</strong>
+          </div>
+        </div>
+      `;
+    } else {
+      pathHtml = `
+        <div class="bgp-path-container" style="text-align:center; color:#999; padding: 15px;">
+          Tidak ada data AS-Path aktif dari Looking Glass
+        </div>
+      `;
+    }
+
+    const cleanAsn = originAsn.split(" ")[0];
+    const heUrl = cleanAsn.startsWith("AS") ? `https://bgp.he.net/${cleanAsn}` : `https://bgp.he.net/ip/${addr}`;
+
+    body.innerHTML = `
+      <div class="bgp-summary-grid">
+        <div class="bgp-card">
+          <div class="bgp-card-label">🎯 Target Host & IP</div>
+          <div class="bgp-card-val">${addr}</div>
+          <div class="bgp-card-sub">${domain}</div>
+        </div>
+        <div class="bgp-card">
+          <div class="bgp-card-label">📡 BGP Announced Prefix</div>
+          <div class="bgp-card-val" style="color:#00d9ff;">${prefix}</div>
+          <div class="bgp-card-sub">Route Advertisement</div>
+        </div>
+        <div class="bgp-card" style="grid-column: span 2;">
+          <div class="bgp-card-label">🏢 Origin Autonomous System</div>
+          <div class="bgp-card-val" style="color:#48ff00;">${originAsn}</div>
+          <div class="bgp-card-sub" style="color:#ccc;">${originHolder}</div>
+        </div>
+      </div>
+
+      ${pathHtml}
+
+      <div class="bgp-actions">
+        <button id="btn-copy-mkt-rule" class="bgp-btn bgp-btn-mkt">📋 Copy MikroTik Address-List</button>
+        <button id="btn-open-he-bgp" class="bgp-btn bgp-btn-he">🌐 Buka BGP.HE.NET ↗</button>
+      </div>
+    `;
+
+    const mktBtn = body.querySelector("#btn-copy-mkt-rule");
+    if (mktBtn) {
+      mktBtn.onclick = () => {
+        const listName = "LIST_" + domain.toUpperCase().replace(/[^A-Z0-9]/g, "_").slice(0, 20);
+        const script = `/ip firewall address-list add list="${listName}" address=${prefix} comment="${cleanAsn} ${originHolder.slice(0, 30)}"`;
+        copyToClipboard(script, "MikroTik Script");
+      };
+    }
+
+    const heBtn = body.querySelector("#btn-open-he-bgp");
+    if (heBtn) {
+      heBtn.onclick = () => {
+        window.open(heUrl, "_blank");
+      };
+    }
   }
 
   // Connect to Extension Background
