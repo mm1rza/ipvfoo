@@ -414,7 +414,7 @@
   widget.innerHTML = `
     <div id="header">
       <div class="title">
-        <span>🌐 IPvFoo NOC Live Diagnostic</span>
+        <span>IPvFoo</span>
       </div>
       <div class="controls">
         <button id="btn-rst" class="btn btn-rst" title="Reset Hit & Size Counter">RESET HITS</button>

@@ -351,6 +351,8 @@ class TabInfo extends SaveableEntry {
           new DomainInfo(this, domain, addr || "(lost)", dflags | aflags);
       if (statusCode) d.statusCode = statusCode;
       if (latencyMs) d.latencyMs = latencyMs;
+      d.hits = 1;
+      d.bytes = bytes || 0;
       d.countUp();
     } else {
       const oldAddr = d.addr;
@@ -361,6 +363,8 @@ class TabInfo extends SaveableEntry {
 
       if (statusCode) d.statusCode = statusCode;
       if (latencyMs) d.latencyMs = latencyMs;
+      d.hits = (d.hits || 0) + 1;
+      if (bytes > 0) d.bytes = (d.bytes || 0) + bytes;
 
       // The numerical value of aflags determines which address to keep
       // (uncached replaces cached, etc.)
@@ -461,8 +465,8 @@ class TabInfo extends SaveableEntry {
     const tuples = [mainTuple];
     for (const domain of domains) {
       const d = this.domains[domain];
-      const hits = (d.addr && ipHitCounter[d.addr]) || 0;
-      const bytes = (d.addr && ipByteCounter[d.addr]) || 0;
+      const hits = d.hits || 0;
+      const bytes = d.bytes || 0;
       const asn = (d.addr && getAsnInfo(d.addr)) || "";
       const status = d.statusCode || 200;
       const latency = d.latencyMs || 0;
@@ -487,8 +491,8 @@ class TabInfo extends SaveableEntry {
     if (!d) {
       return null;
     }
-    const hits = (d.addr && ipHitCounter[d.addr]) || 0;
-    const bytes = (d.addr && ipByteCounter[d.addr]) || 0;
+    const hits = d.hits || 0;
+    const bytes = d.bytes || 0;
     const asn = (d.addr && getAsnInfo(d.addr)) || "";
     const status = d.statusCode || 200;
     const latency = d.latencyMs || 0;
@@ -503,6 +507,8 @@ class DomainInfo {
   flags;
   statusCode = 200;
   latencyMs = 0;
+  hits = 0;
+  bytes = 0;
 
   count = 0;  // count of active requests
   inhibitZero = false;
@@ -515,14 +521,16 @@ class DomainInfo {
   }
 
   toJSON() {
-    return [this.addr, this.flags & ~DFLAG_CONNECTED, this.statusCode || 200, this.latencyMs || 0];
+    return [this.addr, this.flags & ~DFLAG_CONNECTED, this.statusCode || 200, this.latencyMs || 0, this.hits || 0, this.bytes || 0];
   }
 
   static fromJSON(tabInfo, domain, json) {
-    const [addr, flags, statusCode, latencyMs] = json;
+    const [addr, flags, statusCode, latencyMs, hits, bytes] = json;
     const di = new DomainInfo(tabInfo, domain, addr, flags);
     if (statusCode) di.statusCode = statusCode;
     if (latencyMs) di.latencyMs = latencyMs;
+    if (hits) di.hits = hits;
+    if (bytes) di.bytes = bytes;
     return di;
   }
 
@@ -844,6 +852,13 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message?.cmd === "resetHitCounter") {
     ipHitCounter = {};
     ipByteCounter = {};
+    for (const tabInfo of Object.values(tabMap)) {
+      for (const d of Object.values(tabInfo.domains)) {
+        d.hits = 0;
+        d.bytes = 0;
+      }
+      tabInfo.pushAll();
+    }
     lastResetDate = new Date().toDateString();
     chrome.storage.local.set({ ipHitCounter: {}, ipByteCounter: {}, lastResetDate: lastResetDate });
     if (hitCounterSaveTimeout) clearTimeout(hitCounterSaveTimeout);
