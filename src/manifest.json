@@ -31,6 +31,11 @@
       "matches": ["<all_urls>"],
       "js": ["content.js"],
       "run_at": "document_idle"
+    },
+    {
+      "matches": ["https://bgp.he.net/*"],
+      "js": ["bgp_he.js"],
+      "run_at": "document_idle"
     }
   ],
   "host_permissions": [
