@@ -460,22 +460,40 @@ class TabInfo extends SaveableEntry {
   }
 
   setInitialDomain(requestId, domain, origin) {
-    this.mainRequestId = requestId;
+    if (this.mainRequestId == null) {
+      this.mainRequestId = requestId;
+    } else if (this.mainRequestId != requestId) {
+      console.error("mainRequestId changed!");
+    }
     this.mainDomain = domain;
+    updateOriginMap(this.id(), this.mainOrigin, origin);
     this.mainOrigin = origin;
+
+    // If anyone's watching, show some preliminary state.
+    this.pushAll();
     this.save();
   }
 
   setCommitted(domain, origin) {
-    if (this.committed) {
-      return;
+    let changed = false;
+
+    if (this.mainDomain != domain) {
+      this.mainDomain = domain;
+      changed = true;
     }
     this.committed = true;
     updateOriginMap(this.id(), this.mainOrigin, origin);
-    this.mainDomain = domain;
     this.mainOrigin = origin;
-    this.save();
+
+    // This is usually redundant, but lastPattern takes care of it.
     this.updateIcon();
+
+    // If the table contents changed, then redraw it.
+    if (changed) {
+      this.pushAll();
+    }
+
+    this.save();
   }
 
   // If the pageAction is supposed to be visible now, then draw it again.
