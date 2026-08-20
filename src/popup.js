@@ -17,7 +17,17 @@ const ALL_URLS = "<all_urls>";
 const LONG_DOMAIN = 50;
 const tabId = window.location.hash.substr(1);
 let table = null;
-let hitCounter = {}; 
+let hitCounter = {};
+let byteCounter = {};
+
+function formatBytes(bytes) {
+  if (!bytes || bytes <= 0) return "0 B";
+  const k = 1024;
+  const sizes = ["B", "KB", "MB", "GB", "TB"];
+  const i = Math.min(Math.floor(Math.log(bytes) / Math.log(k)), sizes.length - 1);
+  const val = bytes / Math.pow(k, i);
+  return `${val < 10 ? val.toFixed(1) : Math.round(val)} ${sizes[i]}`;
+}
 
 // --- DAFTAR DOMAIN YANG DISEMBUNYIKAN ---
 const HIDDEN_DOMAINS = [
@@ -85,27 +95,30 @@ const HIDDEN_DOMAINS = [
   "static.cdninstagram.com"
 ];
 
-// Load hit counter dari chrome.storage
+// Load hit & byte counter dari chrome.storage
 async function loadHitCounter() {
   try {
-    const result = await chrome.storage.local.get(['ipHitCounter', 'lastResetDate']);
+    const result = await chrome.storage.local.get(['ipHitCounter', 'ipByteCounter', 'lastResetDate']);
     const today = new Date().toDateString();
     if (result.lastResetDate !== today) {
       hitCounter = {};
+      byteCounter = {};
     } else {
       hitCounter = result.ipHitCounter || {};
+      byteCounter = result.ipByteCounter || {};
     }
   } catch (e) {
-    console.log('Could not load hit counter:', e);
+    console.log('Could not load hit/byte counter:', e);
   }
 }
 
 async function resetAllCounters() {
   hitCounter = {};
+  byteCounter = {};
   try {
     await chrome.runtime.sendMessage({ cmd: "resetHitCounter" });
   } catch (e) {
-    await chrome.storage.local.set({ ipHitCounter: {}, lastResetDate: new Date().toDateString() });
+    await chrome.storage.local.set({ ipHitCounter: {}, ipByteCounter: {}, lastResetDate: new Date().toDateString() });
   }
   if (table && table.firstChild) {
     for (let tr = table.firstChild; tr; tr = tr.nextSibling) {
@@ -115,13 +128,23 @@ async function resetAllCounters() {
         hitsTd.style.color = "#999";
         hitsTd.style.fontWeight = "normal";
       }
+      const sizeTd = tr.querySelector('.sizeTd');
+      if (sizeTd) {
+        sizeTd.textContent = "0 B";
+        sizeTd.style.color = "#999";
+      }
     }
   }
 }
 
 chrome.storage.onChanged.addListener((changes, areaName) => {
-  if (areaName === 'local' && changes.ipHitCounter) {
-    hitCounter = changes.ipHitCounter.newValue || {};
+  if (areaName === 'local') {
+    if (changes.ipHitCounter) {
+      hitCounter = changes.ipHitCounter.newValue || {};
+    }
+    if (changes.ipByteCounter) {
+      byteCounter = changes.ipByteCounter.newValue || {};
+    }
     if (table) {
       for (let tr = table.firstChild; tr; tr = tr.nextSibling) {
         if (tr._tuple) {
@@ -132,6 +155,12 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
             hitsTd.textContent = hits;
             hitsTd.style.color = hits > 0 ? "#48ff00" : "#999";
             hitsTd.style.fontWeight = hits > 0 ? "bold" : "normal";
+          }
+          const sizeTd = tr.querySelector('.sizeTd');
+          if (sizeTd) {
+            const bytes = byteCounter[addr] || 0;
+            sizeTd.textContent = formatBytes(bytes);
+            sizeTd.style.color = bytes > 0 ? "#ffd700" : "#999";
           }
         }
       }
@@ -157,21 +186,27 @@ function compareTuples(a, b) {
   return a[0].localeCompare(b[0]);
 }
 
-window.onload = async function() {
+window.onload = async function () {
   await loadHitCounter();
   table = document.getElementById("addr_table");
   table.onmousedown = handleMouseDown;
-  
-  const resetBtn = document.createElement("button");
-  resetBtn.textContent = "x";
-  resetBtn.style.cssText = "position: fixed; top: 5px; right: 5px; padding: 5px 10px; background: #ff4444; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; z-index: 1000;";
-  resetBtn.onclick = async () => {
-    if (confirm("Reset all IP hit counters?")) {
-      await resetAllCounters();
-    }
-  };
-  document.body.appendChild(resetBtn);
-  
+
+  const rstBtn = document.getElementById("rst_btn");
+  if (rstBtn) {
+    rstBtn.onclick = async () => {
+      if (confirm("Reset all IP hit counters?")) {
+        await resetAllCounters();
+      }
+    };
+  }
+
+  const closeBtn = document.getElementById("close_btn");
+  if (closeBtn) {
+    closeBtn.onclick = () => {
+      window.close();
+    };
+  }
+
   if (IS_MOBILE) {
     document.getElementById("mobile_footer").style.display = "flex";
     document.addEventListener("selectionchange", redrawLookupBubble);
@@ -204,7 +239,7 @@ async function beg() {
   const button = document.getElementById("beg");
   button.style.display = "block";
   button.addEventListener("click", async () => {
-    const promise = chrome.permissions.request({origins: [ALL_URLS]});
+    const promise = chrome.permissions.request({ origins: [ALL_URLS] });
     window.close();
     await promise;
   });
@@ -235,7 +270,7 @@ function redrawLookupBubble() {
 }
 
 function connectToExtension() {
-  const port = chrome.runtime.connect(null, {name: tabId});
+  const port = chrome.runtime.connect(null, { name: tabId });
   port.onMessage.addListener((msg) => {
     document.bgColor = "";
     switch (msg.cmd) {
@@ -340,7 +375,7 @@ function pushSpillCount(count) {
 
 function shake() {
   document.body.className = "shake";
-  setTimeout(function() { document.body.className = ""; }, 600);
+  setTimeout(function () { document.body.className = ""; }, 600);
 }
 
 function zoomHack() {
@@ -400,7 +435,7 @@ function makeRow(isFirst, tuple) {
   const tr = document.createElement("tr");
   if (isFirst) tr.className = "mainRow";
   tr._tuple = tuple;
-  
+
   const sslImg = makeSslImg(flags);
   sslImg.className = "sslImg";
   const domainTd = document.createElement("td");
@@ -428,7 +463,7 @@ function makeRow(isFirst, tuple) {
   addrTd.appendChild(document.createTextNode(addr));
   addrTd.onclick = handleClick;
   addrTd.oncontextmenu = handleContextMenu;
-  
+
   const bgpTd = document.createElement("td");
   bgpTd.className = `bgpTd${connectedClass}`;
   if (addr && addr !== "(x)" && !addr.startsWith("(")) {
@@ -443,15 +478,26 @@ function makeRow(isFirst, tuple) {
     bgpTd.appendChild(document.createTextNode("(x)"));
     bgpTd.style.color = "#999";
   }
-  
+
   const hitsTd = document.createElement("td");
   hitsTd.className = `hitsTd${connectedClass}`;
-  const hits = hitCounter[addr] || 0;
+  const hits = (tuple && tuple[4] !== undefined) ? tuple[4] : (hitCounter[addr] || 0);
   hitsTd.appendChild(document.createTextNode(hits));
   hitsTd.style.textAlign = "center";
   hitsTd.style.color = hits > 0 ? "#48ff00" : "#999";
   hitsTd.style.fontWeight = hits > 0 ? "bold" : "normal";
-  
+
+  const sizeTd = document.createElement("td");
+  sizeTd.className = `sizeTd${connectedClass}`;
+  const bytes = (tuple && tuple[5] !== undefined) ? tuple[5] : (byteCounter[addr] || 0);
+  sizeTd.appendChild(document.createTextNode(formatBytes(bytes)));
+  sizeTd.style.textAlign = "right";
+  sizeTd.style.color = bytes > 0 ? "#ffd700" : "#999";
+  sizeTd.style.fontSize = "11px";
+  sizeTd.style.fontFamily = "monospace";
+  sizeTd.style.paddingLeft = "4pt";
+  sizeTd.style.paddingRight = "4pt";
+
   const cacheTd = document.createElement("td");
   cacheTd.className = `cacheTd${connectedClass}`;
   if (flags & DFLAG_WEBSOCKET) {
@@ -463,12 +509,13 @@ function makeRow(isFirst, tuple) {
   } else {
     cacheTd.style.paddingLeft = '0';
   }
-  
+
   tr._domain = domain;
   tr.appendChild(domainTd);
   tr.appendChild(addrTd);
   tr.appendChild(bgpTd);
   tr.appendChild(hitsTd);
+  tr.appendChild(sizeTd);
   tr.appendChild(cacheTd);
   return tr;
 }
@@ -525,7 +572,7 @@ function handleMouseDown(e) {
 
 function sameRange(r1, r2) {
   return (r1.compareBoundaryPoints(Range.START_TO_START, r2) == 0 &&
-          r1.compareBoundaryPoints(Range.END_TO_END, r2) == 0);
+    r1.compareBoundaryPoints(Range.END_TO_END, r2) == 0);
 }
 
 function isSpuriousSelection(sel, newTimeStamp) {

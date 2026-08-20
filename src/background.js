@@ -338,8 +338,9 @@ class TabInfo extends SaveableEntry {
     this.save();
   }
 
-  addDomain(domain, dflags, addr, aflags) {
+  addDomain(domain, dflags, addr, aflags, bytes = 0) {
     let d = this.domains[domain];
+    let addressOrFlagsChanged = true;
     if (!d) {
       // Limit the number of domains per page, to avoid wasting RAM.
       if (Object.keys(this.domains).length >= 256) {
@@ -363,15 +364,21 @@ class TabInfo extends SaveableEntry {
         d.flags = (d.flags & DFLAG_MASK) | aflags;
       }
       d.countUp();
-      // Don't update if nothing has changed.
       if (d.addr == oldAddr && d.flags == oldFlags) {
-        return;
+        addressOrFlagsChanged = false;
       }
     }
 
-    this.updateIcon();
+    const effectiveAddr = d.addr || addr;
+    if (effectiveAddr && effectiveAddr !== "(x)" && effectiveAddr !== "(lost)" && !effectiveAddr.startsWith("(")) {
+      recordIpHit(effectiveAddr, bytes);
+    }
+
+    if (addressOrFlagsChanged) {
+      this.updateIcon();
+      this.save();
+    }
     this.pushOne(domain);
-    this.save();
   }
 
   updateIcon() {
@@ -427,10 +434,6 @@ class TabInfo extends SaveableEntry {
       });
       // Send icon to the popup window.
       popups.pushPattern(this.id(), pattern, this.color);
-      action.setPopup({
-        "tabId": this.id(),
-        "popup": `popup.html#${this.id()}`,
-      });
       if (action.show) {
         action.show(this.id());  // Firefox only
       }
@@ -447,33 +450,39 @@ class TabInfo extends SaveableEntry {
     popups.pushOne(this.id(), this.getTuple(domain));
   }
 
-  // Build some [domain, addr, version, flags] tuples, for a popup.
+  // Build some [domain, addr, version, flags, hits, bytes] tuples, for a popup.
   getTuples() {
     const mainDomain = this.mainDomain || "(no domain)";
     const domains = Object.keys(this.domains).sort();
-    const mainTuple = [mainDomain, "(x)", "?", 0];
+    const mainTuple = [mainDomain, "(x)", "?", 0, 0, 0];
     const tuples = [mainTuple];
     for (const domain of domains) {
       const d = this.domains[domain];
+      const hits = (d.addr && ipHitCounter[d.addr]) || 0;
+      const bytes = (d.addr && ipByteCounter[d.addr]) || 0;
       if (domain == mainTuple[0]) {
         mainTuple[1] = d.addr;
         mainTuple[2] = d.addrVersion();
         mainTuple[3] = d.flags;
+        mainTuple[4] = hits;
+        mainTuple[5] = bytes;
       } else {
-        tuples.push([domain, d.addr, d.addrVersion(), d.flags]);
+        tuples.push([domain, d.addr, d.addrVersion(), d.flags, hits, bytes]);
       }
     }
     return tuples;
   }
 
-  // Build [domain, addr, version, flags] tuple, for a popup.
+  // Build [domain, addr, version, flags, hits, bytes] tuple, for a popup.
   getTuple(domain) {
     const d = this.domains[domain];
     if (!d) {
       // Perhaps this.domains was cleared during the request's lifetime.
       return null;
     }
-    return [domain, d.addr, d.addrVersion(), d.flags];
+    const hits = (d.addr && ipHitCounter[d.addr]) || 0;
+    const bytes = (d.addr && ipByteCounter[d.addr]) || 0;
+    return [domain, d.addr, d.addrVersion(), d.flags, hits, bytes];
   }
 }
 
@@ -543,6 +552,7 @@ class RequestInfo extends SaveableEntry {
   tabIdToBorn = newMap();
   domain = null;
   prefetch = false;
+  bytes = 0;
 
   afterLoad() {
     for (const [tabId, tabBorn] of Object.entries(this.tabIdToBorn)) {
@@ -660,25 +670,31 @@ function lookupOriginMap(origin) {
   }
 })();
 
-// -- IP Hit Counter (Background Persistent Tracking) --
+// -- IP Hit & Byte Counter (Background Persistent Tracking) --
 let ipHitCounter = {};
-let lastResetDate = "";
+let ipByteCounter = {};
+let lastResetDate = null;
+let hitCounterLoaded = false;
 let hitCounterSaveTimeout = null;
 
 async function loadHitCounterBackground() {
   try {
-    const result = await chrome.storage.local.get(['ipHitCounter', 'lastResetDate']);
+    const result = await chrome.storage.local.get(['ipHitCounter', 'ipByteCounter', 'lastResetDate']);
     const today = new Date().toDateString();
-    if (result.lastResetDate !== today) {
+    if (result.lastResetDate && result.lastResetDate !== today) {
       ipHitCounter = {};
+      ipByteCounter = {};
       lastResetDate = today;
-      await chrome.storage.local.set({ ipHitCounter: {}, lastResetDate: today });
+      await chrome.storage.local.set({ ipHitCounter: {}, ipByteCounter: {}, lastResetDate: today });
     } else {
       ipHitCounter = result.ipHitCounter || {};
+      ipByteCounter = result.ipByteCounter || {};
       lastResetDate = result.lastResetDate || today;
     }
+    hitCounterLoaded = true;
   } catch (e) {
     console.error("Could not load hit counter in background:", e);
+    hitCounterLoaded = true;
   }
 }
 
@@ -686,27 +702,33 @@ function saveHitCounterBackgroundDebounced() {
   if (hitCounterSaveTimeout) clearTimeout(hitCounterSaveTimeout);
   hitCounterSaveTimeout = setTimeout(async () => {
     try {
-      await chrome.storage.local.set({ ipHitCounter: ipHitCounter, lastResetDate: lastResetDate });
+      await chrome.storage.local.set({
+        ipHitCounter: ipHitCounter,
+        ipByteCounter: ipByteCounter,
+        lastResetDate: lastResetDate
+      });
     } catch (e) {
-      console.error("Could not save hit counter in background:", e);
+      console.error("Could not save hit/byte counter in background:", e);
     }
   }, 1000);
 }
 
-function recordIpHit(addr) {
+function recordIpHit(addr, bytes = 0) {
   if (!addr || addr === "(x)" || addr === "(lost)" || addr.startsWith("(")) {
     return;
   }
   const today = new Date().toDateString();
-  if (lastResetDate !== today) {
+  if (hitCounterLoaded && lastResetDate && lastResetDate !== today) {
     ipHitCounter = {};
+    ipByteCounter = {};
     lastResetDate = today;
   }
   ipHitCounter[addr] = (ipHitCounter[addr] || 0) + 1;
+  if (bytes > 0) {
+    ipByteCounter[addr] = (ipByteCounter[addr] || 0) + bytes;
+  }
   saveHitCounterBackgroundDebounced();
 }
-
-loadHitCounterBackground();
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.hasOwnProperty("darkModeOffscreen")) {
@@ -717,8 +739,9 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   }
   if (message?.cmd === "resetHitCounter") {
     ipHitCounter = {};
+    ipByteCounter = {};
     lastResetDate = new Date().toDateString();
-    chrome.storage.local.set({ ipHitCounter: {}, lastResetDate: lastResetDate });
+    chrome.storage.local.set({ ipHitCounter: {}, ipByteCounter: {}, lastResetDate: lastResetDate });
     if (hitCounterSaveTimeout) clearTimeout(hitCounterSaveTimeout);
     sendResponse?.({ status: "ok" });
   }
@@ -762,6 +785,7 @@ const storageSyncDebouncer = new StorageSyncDebouncer();
 // You can force initStorage() from the console for debugging purposes.
 const initStorage = async () => {
   await optionsReady;
+  await loadHitCounterBackground();
 
   // These are be no-ops unless initStorage() is called manually.
   clearMap(tabMap);
@@ -791,64 +815,108 @@ const initStorage = async () => {
 };
 const storageReady = initStorage();
 
-// -- Popups --
-
-// This class keeps track of the visible popup windows,
-// and streams changes to them as they occur.
+// -- Popups & In-Page Overlays --
 class Popups {
-  ports = newMap();  // tabId -> Port
+  ports = newMap();  // tabId -> Set of ports
 
-  // Attach a new popup window, and start sending it updates.
   attachPort(port) {
-    const tabId = port.name;
-    this.ports[tabId] = port;
+    const tabId = port.sender?.tab?.id || port.name;
+    if (!this.ports[tabId]) {
+      this.ports[tabId] = new Set();
+    }
+    this.ports[tabId].add(port);
     tabMap[tabId]?.pushAll();
-  };
+  }
 
   detachPort(port) {
-    const tabId = port.name;
-    delete this.ports[tabId];
-  };
+    const tabId = port.sender?.tab?.id || port.name;
+    if (this.ports[tabId]) {
+      this.ports[tabId].delete(port);
+      if (this.ports[tabId].size === 0) {
+        delete this.ports[tabId];
+      }
+    }
+  }
 
   pushAll(tabId, tuples, pattern, color, spillCount) {
-    this.ports[tabId]?.postMessage({
-      cmd: "pushAll",
-      tuples: tuples,
-      pattern: pattern,
-      color: color,
-      spillCount: spillCount,
-    });
-  };
+    if (this.ports[tabId]) {
+      for (const port of this.ports[tabId]) {
+        try {
+          port.postMessage({
+            cmd: "pushAll",
+            tuples: tuples,
+            pattern: pattern,
+            color: color,
+            spillCount: spillCount,
+          });
+        } catch (e) {}
+      }
+    }
+  }
 
   pushOne(tabId, tuple) {
-    if (!tuple) {
-      return;
+    if (!tuple) return;
+    if (this.ports[tabId]) {
+      for (const port of this.ports[tabId]) {
+        try {
+          port.postMessage({
+            cmd: "pushOne",
+            tuple: tuple,
+          });
+        } catch (e) {}
+      }
     }
-    this.ports[tabId]?.postMessage({
-      cmd: "pushOne",
-      tuple: tuple,
-    });
-  };
+  }
 
   pushPattern(tabId, pattern, color) {
-    this.ports[tabId]?.postMessage({
-      cmd: "pushPattern",
-      pattern: pattern,
-      color: color,
-    });
-  };
+    if (this.ports[tabId]) {
+      for (const port of this.ports[tabId]) {
+        try {
+          port.postMessage({
+            cmd: "pushPattern",
+            pattern: pattern,
+            color: color,
+          });
+        } catch (e) {}
+      }
+    }
+  }
 
   pushSpillCount(tabId, count) {
-    this.ports[tabId]?.postMessage({
-      cmd: "pushSpillCount",
-      spillCount: count,
-    });
-  };
+    if (this.ports[tabId]) {
+      for (const port of this.ports[tabId]) {
+        try {
+          port.postMessage({
+            cmd: "pushSpillCount",
+            spillCount: count,
+          });
+        } catch (e) {}
+      }
+    }
+  }
+
+  toggleOverlay(tabId) {
+    if (this.ports[tabId]) {
+      for (const port of this.ports[tabId]) {
+        try {
+          port.postMessage({
+            cmd: "toggleOverlay",
+          });
+        } catch (e) {}
+      }
+    }
+  }
 
   shake(tabId) {
-    this.ports[tabId]?.postMessage({
-      cmd: "shake",
-    });
+    if (this.ports[tabId]) {
+      for (const port of this.ports[tabId]) {
+        try {
+          port.postMessage({
+            cmd: "shake",
+          });
+        } catch (e) {}
+      }
+    }
   }
 }
 
@@ -860,6 +928,14 @@ chrome.runtime.onConnect.addListener(wrap(async (port) => {
   port.onDisconnect.addListener(() => {
     popups.detachPort(port);
   });
+}));
+
+const actionApi = chrome.action || chrome.pageAction;
+actionApi?.onClicked?.addListener(wrap(async (tab) => {
+  await storageReady;
+  if (tab?.id) {
+    popups.toggleOverlay(tab.id);
+  }
 }));
 
 // Refresh icons after chrome.runtime.reload()
@@ -1086,6 +1162,20 @@ chrome.webRequest.onBeforeRedirect.addListener(wrap(async (details) => {
 
 }), FILTER_ALL_URLS);
 
+chrome.webRequest.onHeadersReceived.addListener(wrap(async (details) => {
+  await storageReady;
+  const requestInfo = requestMap[details.requestId];
+  if (!requestInfo) return;
+  const clHeader = details.responseHeaders?.find(h => h.name.toLowerCase() === "content-length");
+  if (clHeader) {
+    const bytes = parseInt(clHeader.value, 10);
+    if (!isNaN(bytes) && bytes > 0) {
+      requestInfo.bytes = bytes;
+      requestInfo.save();
+    }
+  }
+}), FILTER_ALL_URLS, ["responseHeaders"]);
+
 chrome.webRequest.onResponseStarted.addListener(wrap(async (details) => {
   //debugLog("wR.oRS", details?.tabId, details?.url, details);
   await storageReady;
@@ -1136,9 +1226,6 @@ chrome.webRequest.onResponseStarted.addListener(wrap(async (details) => {
     }
   }
   addr = reformatForNAT64(addr) || "(x)";
-  if (addr && addr !== "(x)") {
-    recordIpHit(addr);
-  }
 
   // Domain flags
   const dflags =
@@ -1154,8 +1241,9 @@ chrome.webRequest.onResponseStarted.addListener(wrap(async (details) => {
   if (requestInfo.domain) throw `Duplicate onResponseStarted: ${parsed.domain}`;
   requestInfo.domain = parsed.domain;
   requestInfo.save();
+  const bytes = requestInfo.bytes || 0;
   for (const tabInfo of tabInfos) {
-    tabInfo.addDomain(parsed.domain, dflags, addr, aflags);
+    tabInfo.addDomain(parsed.domain, dflags, addr, aflags, bytes);
   }
 }), FILTER_ALL_URLS);
 
