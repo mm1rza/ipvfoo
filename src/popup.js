@@ -221,6 +221,11 @@ function compareTuples(a, b) {
     if (cmp !== 0) {
       return currentSort.order === 'asc' ? cmp : -cmp;
     }
+  } else if (currentSort.column === 'upstream') {
+    const cmp = (a[9] || '').localeCompare(b[9] || '');
+    if (cmp !== 0) {
+      return currentSort.order === 'asc' ? cmp : -cmp;
+    }
   } else if (currentSort.column === 'domain') {
     const cmp = a[0].localeCompare(b[0]);
     return currentSort.order === 'asc' ? cmp : -cmp;
@@ -707,6 +712,23 @@ function makeRow(isFirst, tuple) {
     cacheTd.style.paddingLeft = '0';
   }
 
+  const upstream = tuple && tuple[9] ? tuple[9] : "-";
+  const upstreamTd = document.createElement("td");
+  upstreamTd.className = `upstreamTd${connectedClass}`;
+  upstreamTd.style.textAlign = "center";
+  upstreamTd.style.fontFamily = "monospace";
+  upstreamTd.style.fontSize = "10px";
+  upstreamTd.style.fontWeight = "bold";
+  if (upstream !== "-") {
+    const span = document.createElement("span");
+    span.textContent = upstream;
+    span.style.cssText = "color:#48ff00; background:rgba(72,255,0,0.15); border:1px solid rgba(72,255,0,0.4); padding:1px 5px; border-radius:3px;";
+    upstreamTd.appendChild(span);
+  } else {
+    upstreamTd.textContent = "-";
+    upstreamTd.style.color = "#777";
+  }
+
   tr._domain = domain;
   tr.appendChild(domainTd);
   tr.appendChild(addrTd);
@@ -714,6 +736,7 @@ function makeRow(isFirst, tuple) {
   tr.appendChild(latTd);
   tr.appendChild(hitsTd);
   tr.appendChild(sizeTd);
+  tr.appendChild(upstreamTd);
   tr.appendChild(bgpTd);
   tr.appendChild(cacheTd);
   return tr;

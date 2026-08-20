@@ -485,17 +485,78 @@ class TabInfo extends SaveableEntry {
     popups.pushOne(this.id(), this.getTuple(domain));
   }
 
-  // Build [domain, addr, version, flags, hits, bytes, statusCode, latencyMs, asn] tuples
+const asnCache = {};
+const upstreamCache = {};
+
+function detectUpstreamFromHops(hops) {
+  if (!hops || !Array.isArray(hops)) return "-";
+  // Look at hop 2 or any non-HalloNet hop
+  for (let i = 1; i < hops.length; i++) {
+    const h = hops[i];
+    if (!h) continue;
+    const str = `${h.asn || ''} ${h.host || ''} ${h.ip || ''}`;
+    if (/iforte/i.test(str)) return "iForte";
+    if (/fiberstar|cbn/i.test(str)) return "FiberStar";
+    if (/rapid/i.test(str)) return "RapidNet";
+    if (/telin/i.test(str)) return "Telin";
+    if (/telkom/i.test(str)) return "Telkom";
+    if (/indosat/i.test(str)) return "Indosat";
+    if (/openixp|iix|jkt-ix/i.test(str)) return "OpenIXP";
+    if (/google/i.test(str)) return "Google";
+    if (/cloudflare/i.test(str)) return "Cloudflare";
+    if (/akamai/i.test(str)) return "Akamai";
+  }
+  if (hops[1] && hops[1].asn) {
+    const nameParts = hops[1].asn.split(" - ");
+    return nameParts[0].replace(/^AS\d+\s+/, "") || hops[1].asn.split(" ")[0];
+  }
+  return "-";
+}
+
+function getUpstreamInfo(addr) {
+  if (!addr || addr === "(x)" || addr.startsWith("(")) return "-";
+  if (upstreamCache[addr]) return upstreamCache[addr];
+
+  // Asynchronously fetch upstream from HalloNet Looking Glass API
+  fetchHalloNetTraceroute(addr).then((data) => {
+    if (data && data.status === "success" && data.hops && data.hops.length > 0) {
+      const detected = detectUpstreamFromHops(data.hops);
+      upstreamCache[addr] = detected;
+      const lastHop = data.hops[data.hops.length - 1];
+      if (lastHop && lastHop.asn) {
+        asnCache[addr] = lastHop.asn;
+      }
+      // Trigger update to active tabs
+      for (const tabInfo of Object.values(tabMap)) {
+        for (const [domain, di] of Object.entries(tabInfo.domains)) {
+          if (di.addr === addr) {
+            tabInfo.pushOne(domain);
+          }
+        }
+      }
+    }
+  }).catch(() => {});
+
+  return "-";
+}
+
+function getAsnInfo(addr) {
+  if (!addr || addr === "(x)" || addr.startsWith("(")) return "";
+  return asnCache[addr] || "";
+}
+
+  // Build [domain, addr, version, flags, hits, bytes, statusCode, latencyMs, asn, upstream] tuples
   getTuples() {
     const mainDomain = this.mainDomain || "(no domain)";
     const domains = Object.keys(this.domains).sort();
-    const mainTuple = [mainDomain, "(x)", "?", 0, 0, 0, 200, 0, ""];
+    const mainTuple = [mainDomain, "(x)", "?", 0, 0, 0, 200, 0, "", "-"];
     const tuples = [mainTuple];
     for (const domain of domains) {
       const d = this.domains[domain];
       const hits = d.hits || 0;
       const bytes = d.bytes || 0;
       const asn = (d.addr && getAsnInfo(d.addr)) || "";
+      const upstream = (d.addr && getUpstreamInfo(d.addr)) || "-";
       const status = d.statusCode || 200;
       const latency = d.latencyMs || 0;
       if (domain == mainTuple[0]) {
@@ -507,8 +568,9 @@ class TabInfo extends SaveableEntry {
         mainTuple[6] = status;
         mainTuple[7] = latency;
         mainTuple[8] = asn;
+        mainTuple[9] = upstream;
       } else {
-        tuples.push([domain, d.addr, d.addrVersion(), d.flags, hits, bytes, status, latency, asn]);
+        tuples.push([domain, d.addr, d.addrVersion(), d.flags, hits, bytes, status, latency, asn, upstream]);
       }
     }
     return tuples;
@@ -522,9 +584,10 @@ class TabInfo extends SaveableEntry {
     const hits = d.hits || 0;
     const bytes = d.bytes || 0;
     const asn = (d.addr && getAsnInfo(d.addr)) || "";
+    const upstream = (d.addr && getUpstreamInfo(d.addr)) || "-";
     const status = d.statusCode || 200;
     const latency = d.latencyMs || 0;
-    return [domain, d.addr, d.addrVersion(), d.flags, hits, bytes, status, latency, asn];
+    return [domain, d.addr, d.addrVersion(), d.flags, hits, bytes, status, latency, asn, upstream];
   }
 }
 
