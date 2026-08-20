@@ -322,6 +322,20 @@ function detectUpstreamFromHops(hops) {
   return "-";
 }
 
+async function fetchHalloNetUpstream(ip) {
+  if (!ip || ip === "(x)" || ip.startsWith("(")) {
+    return { error: "Invalid IP address" };
+  }
+  try {
+    const res = await fetch(`https://lg.hallonet.id/api/traceroute-upstream.php?target=${encodeURIComponent(ip)}`);
+    const data = await res.json();
+    return data;
+  } catch (err) {
+    console.error("fetchHalloNetUpstream error:", err);
+    return { error: err.message || "Gagal menghubungi Looking Glass HalloNet (Upstream)" };
+  }
+}
+
 async function fetchHalloNetTraceroute(ip) {
   if (!ip || ip === "(x)" || ip.startsWith("(")) {
     return { error: "Invalid IP address" };
@@ -350,12 +364,15 @@ function getUpstreamInfo(addr) {
   }
   pendingUpstreamRequests[addr] = true;
 
-  fetchHalloNetTraceroute(addr).then((data) => {
+  fetchHalloNetUpstream(addr).then((data) => {
     delete pendingUpstreamRequests[addr];
-    if (data && data.status === "success" && data.hops && data.hops.length > 0) {
-      const detected = detectUpstreamFromHops(data.hops);
+    if (data && data.status === "success") {
+      let detected = data.upstream || data.detected_upstream || (data.hops ? detectUpstreamFromHops(data.hops) : "-");
+      if (!detected || detected === "-") {
+        detected = detectUpstreamFromHops(data.hops || []);
+      }
       upstreamCache[addr] = detected;
-      const lastHop = data.hops[data.hops.length - 1];
+      const lastHop = data.hops && data.hops.length > 0 ? data.hops[data.hops.length - 1] : null;
       if (lastHop && lastHop.asn) {
         asnCache[addr] = lastHop.asn;
       }
