@@ -402,7 +402,7 @@
 
     .speed-tag {
       display: inline-block;
-      margin-left: 4px;
+      margin-right: 5px;
       padding: 1px 5px;
       font-size: 9px;
       font-weight: 700;
@@ -653,7 +653,7 @@
       : `<span style="color:#666;">-</span>`;
 
     const dSpeed = domainSpeedMap[domain] || 0;
-    const speedHtml = dSpeed >= 200 ? ` <span class="speed-tag">⚡${formatSpeed(dSpeed)}</span>` : "";
+    const speedHtml = dSpeed >= 200 ? `<span class="speed-tag">⚡${formatSpeed(dSpeed)}</span> ` : "";
 
     tr.innerHTML = `
       <td class="domain-cell" title="Klik untuk copy: ${domain}">${lockIcon}${domain}</td>
@@ -661,7 +661,7 @@
       <td style="text-align:center;"><span class="status-badge ${statusClass}">${status}</span></td>
       <td class="lat-cell ${latClass}">${latText}</td>
       <td class="hits-cell ${hits > 0 ? '' : 'hits-zero'}">${hits}</td>
-      <td class="size-cell ${bytes > 0 ? '' : 'size-zero'}">${formatBytes(bytes)}${speedHtml}</td>
+      <td class="size-cell ${bytes > 0 ? '' : 'size-zero'}">${speedHtml}${formatBytes(bytes)}</td>
       <td style="text-align:center;">${bgpHtml}</td>
     `;
 
@@ -817,8 +817,8 @@
           const sizeTd = tr.querySelector(".size-cell");
           if (sizeTd) {
             const bytes = tr._tuple[5] || 0;
-            const speedHtml = dSpeed >= 200 ? ` <span class="speed-tag">⚡${formatSpeed(dSpeed)}</span>` : "";
-            sizeTd.innerHTML = `${formatBytes(bytes)}${speedHtml}`;
+            const speedHtml = dSpeed >= 200 ? `<span class="speed-tag">⚡${formatSpeed(dSpeed)}</span> ` : "";
+            sizeTd.innerHTML = `${speedHtml}${formatBytes(bytes)}`;
           }
         }
       }

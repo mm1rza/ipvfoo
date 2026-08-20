@@ -418,8 +418,8 @@ function calculatePopupSpeed() {
       const sizeTd = tr.querySelector(".sizeTd");
       if (sizeTd) {
         const bytes = (tr._tuple[5] !== undefined) ? tr._tuple[5] : (byteCounter[tr._tuple[1]] || 0);
-        const speedHtml = dSpeed >= 200 ? ` <span class="speed-tag">⚡${formatSpeed(dSpeed)}</span>` : "";
-        sizeTd.innerHTML = `${formatBytes(bytes)}${speedHtml}`;
+        const speedHtml = dSpeed >= 200 ? `<span class="speed-tag">⚡${formatSpeed(dSpeed)}</span> ` : "";
+        sizeTd.innerHTML = `${speedHtml}${formatBytes(bytes)}`;
       }
     }
   }
@@ -661,8 +661,8 @@ function makeRow(isFirst, tuple) {
   sizeTd.className = `sizeTd${connectedClass}`;
   const bytes = (tuple && tuple[5] !== undefined) ? tuple[5] : (byteCounter[addr] || 0);
   const dSpeed = domainSpeedMap[domain] || 0;
-  const speedHtml = dSpeed >= 200 ? ` <span class="speed-tag">⚡${formatSpeed(dSpeed)}</span>` : "";
-  sizeTd.innerHTML = `${formatBytes(bytes)}${speedHtml}`;
+  const speedHtml = dSpeed >= 200 ? `<span class="speed-tag">⚡${formatSpeed(dSpeed)}</span> ` : "";
+  sizeTd.innerHTML = `${speedHtml}${formatBytes(bytes)}`;
   sizeTd.style.textAlign = "right";
   sizeTd.style.color = bytes > 0 ? "#ffd700" : "#999";
   sizeTd.style.fontSize = "11px";
