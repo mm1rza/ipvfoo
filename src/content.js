@@ -388,9 +388,9 @@
     .widget-speed {
       font-size: 10px;
       font-weight: 700;
-      color: #00d9ff;
-      background: rgba(0, 217, 255, 0.15);
-      border: 1px solid rgba(0, 217, 255, 0.35);
+      color: #ff2a85;
+      background: rgba(255, 42, 133, 0.15);
+      border: 1px solid rgba(255, 42, 133, 0.4);
       padding: 1px 6px;
       border-radius: 4px;
       margin-left: 8px;
@@ -403,13 +403,14 @@
     .speed-tag {
       display: inline-block;
       margin-left: 4px;
-      padding: 1px 4px;
+      padding: 1px 5px;
       font-size: 9px;
       font-weight: 700;
-      color: #000;
-      background: #00d9ff;
+      color: #fff;
+      background: #ff2a85;
       border-radius: 3px;
       line-height: 1.1;
+      box-shadow: 0 1px 4px rgba(255, 42, 133, 0.4);
     }
 
     .row-error td {
