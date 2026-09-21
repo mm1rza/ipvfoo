@@ -449,26 +449,41 @@ class TabInfo extends SaveableEntry {
     const tooltip = this.mainDomain ? `IPvFoo: ${this.mainDomain}` : "IPvFoo";
 
     if (this.lastTooltip != tooltip) {
-      action.setTitle({
-        "tabId": this.id(),
-        "title": tooltip,
-      });
+      try {
+        const p = action.setTitle({
+          "tabId": this.id(),
+          "title": tooltip,
+        });
+        if (p && typeof p.catch === "function") {
+          p.catch(() => {});
+        }
+      } catch (e) { }
       this.lastTooltip = tooltip;
       this.save();
     }
 
     if (this.lastPattern != pattern) {
       const color = options[this.color] || "darkfg";
-      action.setIcon({
-        "tabId": this.id(),
-        "path": {
-          "16": iconPath(pattern, 16, color),
-          "32": iconPath(pattern, 32, color),
-        },
-      });
+      try {
+        const p = action.setIcon({
+          "tabId": this.id(),
+          "path": {
+            "16": iconPath(pattern, 16, color),
+            "32": iconPath(pattern, 32, color),
+          },
+        });
+        if (p && typeof p.catch === "function") {
+          p.catch(() => {});
+        }
+      } catch (e) { }
       popups.pushPattern(this.id(), pattern, this.color);
       if (action.show) {
-        action.show(this.id());
+        try {
+          const p = action.show(this.id());
+          if (p && typeof p.catch === "function") {
+            p.catch(() => {});
+          }
+        } catch (e) { }
       }
       this.lastPattern = pattern;
       this.save();
@@ -1075,14 +1090,17 @@ class Popups {
 
 const popups = new Popups();
 
-chrome.runtime.onConnect.addListener(wrap(async (port) => {
-  await storageReady;
-  popups.attachPort(port);
-  port.onDisconnect.addListener(() => {
-    const _err = chrome.runtime?.lastError || port.error;
-    popups.detachPort(port);
-  });
-}));
+chrome.runtime.onConnect.addListener((port) => {
+  try {
+    popups.attachPort(port);
+    port.onDisconnect.addListener(() => {
+      try {
+        const _err = chrome.runtime?.lastError || port.error;
+      } catch (e) { }
+      popups.detachPort(port);
+    });
+  } catch (e) { }
+});
 
 const actionApi = chrome.action || chrome.pageAction;
 actionApi?.onClicked?.addListener(wrap(async (tab) => {
