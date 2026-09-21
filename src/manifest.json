@@ -24,7 +24,6 @@
     "storage",
     "webNavigation",
     "webRequest",
-    "webRequestExtraHeaders",
     "offscreen"
   ],
   "content_scripts": [

@@ -1079,6 +1079,7 @@ chrome.runtime.onConnect.addListener(wrap(async (port) => {
   await storageReady;
   popups.attachPort(port);
   port.onDisconnect.addListener(() => {
+    const _err = chrome.runtime?.lastError || port.error;
     popups.detachPort(port);
   });
 }));

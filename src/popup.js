@@ -338,6 +338,7 @@ function connectToExtension() {
     }
   });
   port.onDisconnect.addListener(() => {
+    const _err = chrome.runtime?.lastError || port.error;
     document.bgColor = "lightpink";
     setTimeout(connectToExtension, 1);
   });

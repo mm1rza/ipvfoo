@@ -1424,10 +1424,21 @@
     }
   }
 
+  let activePort = null;
+  let isPageHidden = false;
+
   // Connect to Extension Background
   function connect() {
+    if (isPageHidden) return;
+    if (activePort) {
+      try {
+        activePort.disconnect();
+      } catch (e) { }
+      activePort = null;
+    }
     try {
       const port = chrome.runtime.connect({ name: "content-overlay" });
+      activePort = port;
       port.onMessage.addListener((msg) => {
         if (msg.cmd === "toggleOverlay") {
           if (widget.style.display === "flex" || miniBadge.style.display === "flex") {
@@ -1444,12 +1455,36 @@
         }
       });
       port.onDisconnect.addListener(() => {
-        setTimeout(connect, 2000);
+        // Access lastError / error to suppress 'Unchecked runtime.lastError' warning
+        const _err = chrome.runtime?.lastError || port.error;
+        if (activePort === port) {
+          activePort = null;
+        }
+        if (!isPageHidden) {
+          setTimeout(connect, 2000);
+        }
       });
     } catch (e) {
-      setTimeout(connect, 2000);
+      if (!isPageHidden) {
+        setTimeout(connect, 2000);
+      }
     }
   }
+
+  window.addEventListener("pagehide", () => {
+    isPageHidden = true;
+    if (activePort) {
+      try {
+        activePort.disconnect();
+      } catch (e) { }
+      activePort = null;
+    }
+  });
+
+  window.addEventListener("pageshow", () => {
+    isPageHidden = false;
+    connect();
+  });
 
   connect();
 })();
