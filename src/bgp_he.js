@@ -298,9 +298,102 @@
     showToast(`Ditemukan ${ipArr.length} IPv4 Prefix!`);
   }
 
+  function transformCertLinks(root = document) {
+    if (!root || !root.querySelectorAll) return;
+    const links = root.querySelectorAll("a[href*='certs'], a[href*='_SearchTab'], a[href*='q=']");
+    const domainRegex = /^(\*\.)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(:\d+)?$/;
+    const ipRegex = /^((25[0-5]|2[0-4]\d|1?\d?\d)\.){3}(25[0-5]|2[0-4]\d|1?\d?\d)(:\d+)?$/;
+
+    links.forEach((link) => {
+      const href = link.getAttribute("href") || "";
+      let targetDomain = "";
+
+      const qMatch = href.match(/[?&]q=([^&#]+)/i);
+      if (qMatch && (href.includes("certs") || href.includes("_SearchTab") || href.includes("/dns/"))) {
+        targetDomain = decodeURIComponent(qMatch[1]).trim();
+      } else if (href.includes("/certs/") && !href.includes("?")) {
+        const parts = href.split("/certs/");
+        if (parts[1]) {
+          targetDomain = decodeURIComponent(parts[1].split(/[#?]/)[0]).trim();
+        }
+      }
+
+      if (!targetDomain && (href.includes("certs") || href.includes("_SearchTab"))) {
+        const text = link.textContent.trim();
+        if (domainRegex.test(text) || ipRegex.test(text)) {
+          targetDomain = text;
+        }
+      }
+
+      if (targetDomain) {
+        targetDomain = targetDomain.replace(/^\*\./, "").replace(/^\/+|\/+$/g, "");
+        if (domainRegex.test(targetDomain) || ipRegex.test(targetDomain)) {
+          link.href = `http://${targetDomain}/`;
+          link.target = "_blank";
+          link.rel = "noopener noreferrer";
+        }
+      }
+    });
+  }
+
+  function setupLinkInterceptor() {
+    const domainRegex = /^(\*\.)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(:\d+)?$/;
+    const ipRegex = /^((25[0-5]|2[0-4]\d|1?\d?\d)\.){3}(25[0-5]|2[0-4]\d|1?\d?\d)(:\d+)?$/;
+
+    // Capture click in case of dynamically injected links or un-transformed clicks
+    document.addEventListener(
+      "click",
+      (e) => {
+        const link = e.target.closest("a");
+        if (!link) return;
+        const href = link.getAttribute("href") || "";
+        const qMatch = href.match(/[?&]q=([^&#]+)/i);
+        if (qMatch && (href.includes("certs") || href.includes("_SearchTab"))) {
+          let domain = decodeURIComponent(qMatch[1]).trim().replace(/^\*\./, "").replace(/^\/+|\/+$/g, "");
+          if (domainRegex.test(domain) || ipRegex.test(domain)) {
+            e.preventDefault();
+            e.stopPropagation();
+            window.open(`http://${domain}/`, "_blank", "noopener,noreferrer");
+          }
+        }
+      },
+      true
+    );
+
+    // Run initial transformation
+    transformCertLinks(document);
+
+    // Watch for dynamic DOM changes (e.g. AJAX tab switches on bgp.he.net)
+    const observer = new MutationObserver((mutations) => {
+      for (const mutation of mutations) {
+        if (mutation.addedNodes.length > 0) {
+          mutation.addedNodes.forEach((node) => {
+            if (node.nodeType === Node.ELEMENT_NODE) {
+              transformCertLinks(node);
+            }
+          });
+        }
+      }
+    });
+
+    observer.observe(document.body || document.documentElement, {
+      childList: true,
+      subtree: true
+    });
+
+    window.addEventListener("hashchange", () => {
+      setTimeout(() => transformCertLinks(document), 100);
+    });
+  }
+
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", init);
+    document.addEventListener("DOMContentLoaded", () => {
+      init();
+      setupLinkInterceptor();
+    });
   } else {
     init();
+    setupLinkInterceptor();
   }
 })();
+
