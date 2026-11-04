@@ -263,7 +263,7 @@
       `/ip firewall address-list`
     ];
     ipArr.forEach((ip) => {
-      addrListLines.push(`add list="ip-list-${listName}" address=${ip} comment="${asNumber} ${orgName}"`);
+      addrListLines.push(`add list="z-ip-list-${listName}" address=${ip} comment="${asNumber} ${orgName}"`);
     });
     addrListLines.push(`# Total IPv4 Prefix: ${ipArr.length}`);
     generatedData.addressList = addrListLines.join("\n");
