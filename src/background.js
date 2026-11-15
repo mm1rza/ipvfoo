@@ -851,8 +851,8 @@ function getAsnInfo(addr) {
   }
 
   if (ipAsnCache[addr]) {
-    // If it was wrongly cached as LAN before or is old format without org, re-fetch
-    if (ipAsnCache[addr] === "LAN" || /^AS\d+\s+[A-Z]{2}$/.test(ipAsnCache[addr])) {
+    // If it was wrongly cached as LAN before, or old format without org, re-fetch
+    if (ipAsnCache[addr] === "LAN" || /^AS\d+\s+[A-Z]{2}$/.test(ipAsnCache[addr]) || ipAsnCache[addr] === "bgp") {
       delete ipAsnCache[addr];
     } else {
       return ipAsnCache[addr];
@@ -862,28 +862,113 @@ function getAsnInfo(addr) {
   // Fetch ASN asynchronously in background if not pending
   if (!asnPending.has(addr)) {
     asnPending.add(addr);
-    fetchAsnInfo(addr);
+    fetchAsnInfo(addr).finally(() => {
+      // Remove from pending after 5s to allow retry if needed
+      setTimeout(() => asnPending.delete(addr), 5000);
+    });
   }
 
   return "";
 }
 
-async function fetchAsnInfo(addr) {
+const asnOrgCache = {}; // Cache ASN number -> Org name in RAM
+
+async function fetchAsnFromCymruDoH(addr) {
+  // Support IPv4 reverse lookup via Team Cymru DNS-over-HTTPS (Cloudflare DoH)
+  if (/^(\d{1,3}\.){3}\d{1,3}$/.test(addr)) {
+    try {
+      const rev = addr.split(".").reverse().join(".") + ".origin.asn.cymru.com";
+      const res = await fetch(`https://cloudflare-dns.com/dns-query?name=${rev}&type=TXT`, {
+        headers: { "accept": "application/dns-json" }
+      });
+      if (!res.ok) return null;
+      const json = await res.json();
+      if (!json.Answer || !json.Answer.length) return null;
+
+      // Format: "\"20940 | 23.221.50.0/24 | US | arin | 2013-07-12\""
+      const txt = json.Answer[0].data || "";
+      const match = txt.match(/(\d+)/);
+      if (!match) return null;
+
+      const asnNum = match[1];
+      let orgName = asnOrgCache[asnNum] || "";
+
+      if (!orgName) {
+        try {
+          const asnRes = await fetch(`https://cloudflare-dns.com/dns-query?name=AS${asnNum}.asn.cymru.com&type=TXT`, {
+            headers: { "accept": "application/dns-json" }
+          });
+          if (asnRes.ok) {
+            const asnJson = await asnRes.json();
+            if (asnJson.Answer && asnJson.Answer.length) {
+              // Format: "\"20940 | NL | ripencc | 2001-07-10 | AKAMAI-ASN1 - Akamai International B.V., NL\""
+              const asnTxt = (asnJson.Answer[0].data || "").replace(/"/g, "");
+              const parts = asnTxt.split("|");
+              if (parts.length >= 5) {
+                let rawOrg = parts[4].trim();
+                rawOrg = rawOrg.replace(/,\s*[A-Z]{2}$/i, "");
+                const dashParts = rawOrg.split(/\s+-\s+/);
+                orgName = dashParts.length > 1 ? dashParts[1].trim() : rawOrg;
+              }
+            }
+          }
+        } catch (e) { }
+
+        if (orgName) {
+          asnOrgCache[asnNum] = orgName;
+        }
+      }
+
+      return orgName ? `AS${asnNum} ${orgName}` : `AS${asnNum}`;
+    } catch (e) { }
+  }
+  return null;
+}
+
+async function fetchAsnFromIpApi(addr) {
   try {
-    const res = await fetch(`https://ipwhois.app/json/${addr}?objects=asn,org,country_code`);
+    const res = await fetch(`http://ip-api.com/json/${addr}?fields=status,as,org`);
     if (res.ok) {
       const data = await res.json();
-      if (data.asn || data.org || data.country_code) {
-        const asn = data.asn || "";
-        const org = data.org || "";
-        const asnStr = asn ? (org ? `${asn} ${org}` : asn) : (org || data.country_code || "");
-        ipAsnCache[addr] = asnStr.trim();
-        chrome.storage.local.set({ ipAsnCache });
-        for (const tabInfo of Object.values(tabMap)) {
-          for (const [domain, di] of Object.entries(tabInfo.domains)) {
-            if (di.addr === addr) {
-              tabInfo.pushOne(domain);
-            }
+      if (data.status === "success") {
+        if (data.as) return data.as;
+        if (data.org) return data.org;
+      }
+    }
+  } catch (e) { }
+  return null;
+}
+
+async function fetchAsnInfo(addr) {
+  try {
+    // Tier 1: Cloudflare DoH (Team Cymru) - Unlimited, 0 rate limit, HTTPS
+    let asnStr = await fetchAsnFromCymruDoH(addr);
+
+    // Tier 2: Fallback to ip-api.com
+    if (!asnStr) {
+      asnStr = await fetchAsnFromIpApi(addr);
+    }
+
+    // Tier 3: Fallback to ipwhois.app
+    if (!asnStr) {
+      const res = await fetch(`https://ipwhois.app/json/${addr}?objects=asn,org,country_code`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.asn || data.org || data.country_code) {
+          const asn = data.asn || "";
+          const org = data.org || "";
+          asnStr = asn ? (org ? `${asn} ${org}` : asn) : (org || data.country_code || "");
+        }
+      }
+    }
+
+    if (asnStr) {
+      ipAsnCache[addr] = asnStr.trim();
+      chrome.storage.local.set({ ipAsnCache });
+      for (const tabInfo of Object.values(tabMap)) {
+        for (const [domain, di] of Object.entries(tabInfo.domains)) {
+          if (di.addr === addr) {
+            tabInfo.pushOne(domain);
           }
         }
       }
