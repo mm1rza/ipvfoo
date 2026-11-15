@@ -104,14 +104,18 @@ function parseUrl(url) {
 
 function httpFlags(tls, statusLine) {
   if (!tls) return DFLAG_NO_TLS;
-  const m = statusLine.match(/^HTTP\/(\d+)/);
+  if (!statusLine) return DFLAG_H1;
+  const s = statusLine.toLowerCase();
+  if (s.includes("http/3") || s.startsWith("h3") || s.includes("quic")) return DFLAG_H3;
+  if (s.includes("http/2") || s.startsWith("h2")) return DFLAG_H2;
+  const m = statusLine.match(/^HTTP\/(\d+)/i);
   if (m) {
     const v = parseInt(m[1], 10);
     if (v == 1) return DFLAG_H1;
     if (v == 2) return DFLAG_H2;
     if (v == 3) return DFLAG_H3;
   }
-  return 0;  // show "?" if unknown.
+  return DFLAG_H1;
 }
 
 function updateNAT64(domain, addr) {

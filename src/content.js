@@ -74,10 +74,72 @@
     "static.cdninstagram.com"
   ];
 
-  const DFLAG_SSL = 0x100;
-  const DFLAG_NOSSL = 0x200;
-  const DFLAG_CONNECTED = 0x400;
-  const DFLAG_WEBSOCKET = 0x800;
+  const DFLAG_NO_TLS = 0x100;  // Unencrypted HTTP
+  const DFLAG_H1 = 0x200;      // HTTP/1.x with TLS
+  const DFLAG_H2 = 0x400;      // HTTP/2.x with TLS
+  const DFLAG_H3 = 0x800;      // HTTP/3.x with TLS
+  const DFLAG_CONNECTED = 0x1000;
+  const DFLAG_WEBSOCKET = 0x2000;
+
+  const domainProtoCache = new Map();
+  function getDomainProtocol(domain, flags) {
+    if (domainProtoCache.has(domain)) {
+      return domainProtoCache.get(domain);
+    }
+    let res = "";
+    if (flags & DFLAG_WEBSOCKET) {
+      res = "WS";
+    } else if (flags & DFLAG_H3) {
+      res = "H3";
+    } else if (flags & DFLAG_H2) {
+      res = "H2";
+    } else if (flags & DFLAG_H1) {
+      res = "H1";
+    }
+
+    if (!res && typeof performance !== "undefined" && typeof performance.getEntriesByType === "function") {
+      try {
+        const entries = performance.getEntriesByType("resource");
+        for (let i = entries.length - 1; i >= 0; i--) {
+          const entry = entries[i];
+          if (entry.name && entry.name.includes(domain) && entry.nextHopProtocol) {
+            const p = entry.nextHopProtocol.toLowerCase();
+            if (p === "h3" || p.includes("quic")) {
+              res = "H3";
+              break;
+            } else if (p === "h2") {
+              res = "H2";
+              break;
+            } else if (p.includes("http/1")) {
+              res = "H1";
+              break;
+            }
+          }
+        }
+        if (!res) {
+          const navEntries = performance.getEntriesByType("navigation");
+          if (navEntries && navEntries.length > 0) {
+            const nav = navEntries[0];
+            if (nav.name && nav.name.includes(domain) && nav.nextHopProtocol) {
+              const p = nav.nextHopProtocol.toLowerCase();
+              if (p === "h3" || p.includes("quic")) res = "H3";
+              else if (p === "h2") res = "H2";
+              else if (p.includes("http/1")) res = "H1";
+            }
+          }
+        }
+      } catch (e) {}
+    }
+
+    if (!res && (flags & DFLAG_NO_TLS)) {
+      res = "HTTP";
+    }
+
+    if (res) {
+      domainProtoCache.set(domain, res);
+    }
+    return res;
+  }
 
   let currentSort = { column: 'default', order: 'asc' };
   let allTuplesCache = [];
@@ -508,11 +570,48 @@
       font-family: Consolas, Monaco, monospace;
       font-size: 10.5px;
       text-align: right;
+      white-space: nowrap;
     }
-    .lat-fast { color: #48ff00; }
-    .lat-med { color: #ffd700; }
+    .lat-fastest { color: #00ff88; font-weight: bold; }
+    .lat-regional { color: #00d9ff; }
+    .lat-medium { color: #fbbf24; }
     .lat-slow { color: #ff5252; font-weight: bold; }
     .lat-na { color: #777; }
+
+    .proto-badge {
+      display: inline-block;
+      font-size: 9px;
+      font-family: Consolas, Monaco, monospace;
+      font-weight: 700;
+      padding: 1px 3.5px;
+      border-radius: 3px;
+      margin-right: 4px;
+      line-height: 1.1;
+      vertical-align: middle;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+    .proto-h3 {
+      background: #7c3aed;
+      color: #ffffff;
+      box-shadow: 0 0 5px rgba(124, 58, 237, 0.4);
+    }
+    .proto-h2 {
+      background: #0284c7;
+      color: #ffffff;
+    }
+    .proto-h1 {
+      background: #475569;
+      color: #e2e8f0;
+    }
+    .proto-ws {
+      background: #d97706;
+      color: #ffffff;
+    }
+    .proto-http {
+      background: #dc2626;
+      color: #ffffff;
+    }
 
     .bgp-link {
       color: #00d9ff;
@@ -993,12 +1092,17 @@
     return `ipvfoo_${host}_${dateStr}.${ext}`;
   }
 
-  function getExportProtocol(flags) {
+  function getExportProtocol(flags, domain) {
+    if (domain) {
+      const p = getDomainProtocol(domain, flags);
+      if (p) return p;
+    }
     if (flags & DFLAG_WEBSOCKET) return "WS";
-    if (flags & 0x800) return "H3";
-    if (flags & 0x400) return "H2";
-    if (flags & DFLAG_SSL || flags & 0x200) return "HTTPS";
-    return "HTTP";
+    if (flags & DFLAG_H3) return "H3";
+    if (flags & DFLAG_H2) return "H2";
+    if (flags & DFLAG_H1) return "H1";
+    if (flags & DFLAG_NO_TLS) return "HTTP";
+    return "HTTPS";
   }
 
   function exportCsvSession(tuples, mainDomain) {
@@ -1019,7 +1123,7 @@
       const status = t[6] !== undefined ? t[6] : 200;
       const latency = t[7] !== undefined ? t[7] : 0;
       const asn = t[8] || "";
-      const proto = getExportProtocol(flags);
+      const proto = getExportProtocol(flags, domain);
 
       const row = [
         domain,
@@ -1101,7 +1205,7 @@
       const rawLat = t[7] !== undefined ? t[7] : 0;
       const latency = rawLat > 0 ? `${rawLat} ms` : "-";
       const asn = t[8] || "-";
-      const proto = getExportProtocol(flags);
+      const proto = getExportProtocol(flags, domain);
 
       lines.push(
         pad(domain, 30) + " " +
@@ -1175,7 +1279,7 @@
     tr._tuple = tuple;
     tr._domain = domain;
 
-    const lockIcon = (flags & DFLAG_SSL) ? "🔒 " : "";
+    const lockIcon = (flags & (DFLAG_H1 | DFLAG_H2 | DFLAG_H3) || !(flags & DFLAG_NO_TLS)) ? "🔒 " : "";
     const ipClass = version === "6" ? "ip6" : "ip4";
 
     let statusClass = "status-2xx";
@@ -1190,15 +1294,39 @@
     const isErr = (typeof status === "number" && status >= 400) || typeof status === "string";
     if (isErr) tr.classList.add("row-error");
 
-    let latClass = "lat-fast";
+    const proto = getDomainProtocol(domain, flags);
+    let protoBadge = "";
+    if (proto === "H3") {
+      protoBadge = `<span class="proto-badge proto-h3" title="HTTP/3 (QUIC / UDP)">H3</span>`;
+    } else if (proto === "H2") {
+      protoBadge = `<span class="proto-badge proto-h2" title="HTTP/2 (Multiplexed TCP)">H2</span>`;
+    } else if (proto === "H1") {
+      protoBadge = `<span class="proto-badge proto-h1" title="HTTP/1.1 (TLS)">H1</span>`;
+    } else if (proto === "WS") {
+      protoBadge = `<span class="proto-badge proto-ws" title="WebSocket">WS</span>`;
+    } else if (proto === "HTTP") {
+      protoBadge = `<span class="proto-badge proto-http" title="HTTP (No TLS / Plaintext)">HTTP</span>`;
+    }
+
+    let latClass = "lat-fastest";
     let latText = `${latency} ms`;
+    let latTitle = `${latency} ms - Local / IIX / Cache Sangat Cepat (< 30ms)`;
     if (latency <= 0) {
       latClass = "lat-na";
       latText = "-";
-    } else if (latency > 500) {
+      latTitle = "Latency tidak tersedia";
+    } else if (latency <= 30) {
+      latClass = "lat-fastest";
+      latTitle = `${latency} ms - Local / IIX / Cache Sangat Cepat (< 30ms)`;
+    } else if (latency <= 80) {
+      latClass = "lat-regional";
+      latTitle = `${latency} ms - Regional Asia Tenggara / SG (30 - 80ms)`;
+    } else if (latency <= 180) {
+      latClass = "lat-medium";
+      latTitle = `${latency} ms - Asia Timur / US West (80 - 180ms)`;
+    } else {
       latClass = "lat-slow";
-    } else if (latency > 150) {
-      latClass = "lat-med";
+      latTitle = `${latency} ms - High Latency / Rute Jauh (> 180ms)`;
     }
 
     let bgpDisplay = "bgp";
@@ -1219,8 +1347,8 @@
     tr.innerHTML = `
       <td class="domain-cell" title="Klik untuk copy: ${domain}">${lockIcon}${domain}</td>
       <td class="ip-cell ${ipClass}" title="Klik untuk copy: ${addr || '(x)'}">${addr || "(x)"}</td>
-      <td class="lat-cell ${latClass}">${latText}</td>
-      <td style="text-align:center;"><span class="status-badge ${statusClass}">${status}</span></td>
+      <td class="lat-cell ${latClass}" title="${latTitle}">${latText}</td>
+      <td style="text-align:center; white-space:nowrap;">${protoBadge}<span class="status-badge ${statusClass}">${status}</span></td>
       <td class="hits-cell ${hits > 0 ? '' : 'hits-zero'}">${hits}</td>
       <td class="size-cell ${bytes > 0 ? '' : 'size-zero'}">${speedHtml}${formatBytes(bytes)}</td>
       <td class="bgp-cell" style="text-align:left;">${bgpHtml}</td>
@@ -1238,14 +1366,10 @@
     const ipTd = tr.querySelector(".ip-cell");
     if (ipTd && addr && addr !== "(x)" && !addr.startsWith("(")) {
       ipTd.style.cursor = "pointer";
-      ipTd.title = `Klik untuk lookup BGP IP: https://bgp.he.net/ip/${addr}\n(Ctrl+Click untuk copy IP)`;
+      ipTd.title = `Klik untuk copy IP: ${addr}`;
       ipTd.onclick = (e) => {
         e.stopPropagation();
-        if (e.ctrlKey || e.altKey) {
-          copyToClipboard(addr, "IP");
-        } else {
-          window.open(`https://bgp.he.net/ip/${addr}`, "_blank");
-        }
+        copyToClipboard(addr, "IP");
       };
     }
 

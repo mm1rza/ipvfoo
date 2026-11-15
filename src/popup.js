@@ -927,22 +927,59 @@ function makeRow(isFirst, tuple) {
   addrTd.onclick = handleClick;
   addrTd.oncontextmenu = handleContextMenu;
 
+  let proto = "";
+  let protoCls = "";
+  let protoTitle = "";
+  if (flags & DFLAG_WEBSOCKET) {
+    proto = "WS";
+    protoTitle = "WebSocket";
+    protoCls = "proto-ws";
+  } else if (flags & DFLAG_H3) {
+    proto = "H3";
+    protoTitle = "HTTP/3 (QUIC / UDP)";
+    protoCls = "proto-h3";
+  } else if (flags & DFLAG_H2) {
+    proto = "H2";
+    protoTitle = "HTTP/2 (Multiplexed TCP)";
+    protoCls = "proto-h2";
+  } else if (flags & DFLAG_H1) {
+    proto = "H1";
+    protoTitle = "HTTP/1.1 (TLS)";
+    protoCls = "proto-h1";
+  } else if (flags & DFLAG_NO_TLS) {
+    proto = "HTTP";
+    protoTitle = "HTTP (Plaintext)";
+    protoCls = "proto-http";
+  }
+
   const statusTd = document.createElement("td");
   statusTd.className = `statusTd${connectedClass}`;
-  const status = (tuple && tuple[6] !== undefined) ? tuple[6] : 200;
-  statusTd.textContent = status;
   statusTd.style.textAlign = "center";
   statusTd.style.fontFamily = "monospace";
   statusTd.style.fontSize = "10.5px";
-  statusTd.style.fontWeight = "bold";
-  if (typeof status === "number") {
-    if (status >= 500) statusTd.style.color = "#ff5252";
-    else if (status >= 400) statusTd.style.color = "#ffa726";
-    else if (status >= 300) statusTd.style.color = "#64b5f6";
-    else statusTd.style.color = "#48ff00";
-  } else {
-    statusTd.style.color = "#ff5252";
+  statusTd.style.whiteSpace = "nowrap";
+
+  if (proto) {
+    const protoSpan = document.createElement("span");
+    protoSpan.className = `proto-badge ${protoCls}`;
+    protoSpan.textContent = proto;
+    protoSpan.title = protoTitle;
+    statusTd.appendChild(protoSpan);
   }
+
+  const status = (tuple && tuple[6] !== undefined) ? tuple[6] : 200;
+  const statusSpan = document.createElement("span");
+  statusSpan.textContent = status;
+  statusSpan.style.fontWeight = "bold";
+  if (typeof status === "number") {
+    if (status >= 500) statusSpan.style.color = "#ff5252";
+    else if (status >= 400) statusSpan.style.color = "#ffa726";
+    else if (status >= 300) statusSpan.style.color = "#64b5f6";
+    else statusSpan.style.color = "#48ff00";
+  } else {
+    statusSpan.style.color = "#ff5252";
+  }
+  statusTd.appendChild(statusSpan);
 
   const latTd = document.createElement("td");
   latTd.className = `latTd${connectedClass}`;
@@ -951,10 +988,26 @@ function makeRow(isFirst, tuple) {
   latTd.style.textAlign = "right";
   latTd.style.fontFamily = "monospace";
   latTd.style.fontSize = "10.5px";
-  if (latency > 500) latTd.style.color = "#ff5252";
-  else if (latency > 150) latTd.style.color = "#ffd700";
-  else if (latency > 0) latTd.style.color = "#48ff00";
-  else latTd.style.color = "#777";
+  latTd.style.whiteSpace = "nowrap";
+
+  if (latency <= 0) {
+    latTd.style.color = "#777";
+    latTd.title = "Latency tidak tersedia";
+  } else if (latency <= 30) {
+    latTd.style.color = "#00ff88";
+    latTd.style.fontWeight = "bold";
+    latTd.title = `${latency}ms - Local / IIX / Cache Sangat Cepat (< 30ms)`;
+  } else if (latency <= 80) {
+    latTd.style.color = "#00d9ff";
+    latTd.title = `${latency}ms - Regional Asia Tenggara (30-80ms)`;
+  } else if (latency <= 180) {
+    latTd.style.color = "#fbbf24";
+    latTd.title = `${latency}ms - Asia Timur / US West (80-180ms)`;
+  } else {
+    latTd.style.color = "#ff5252";
+    latTd.style.fontWeight = "bold";
+    latTd.title = `${latency}ms - High Latency (> 180ms)`;
+  }
 
   const hitsTd = document.createElement("td");
   hitsTd.className = `hitsTd${connectedClass}`;
