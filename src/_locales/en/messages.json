@@ -70,11 +70,11 @@
    },
    "extDescription": {
       "description": "Chrome extension description.",
-      "message": "Easily inspect the meta data found inside web pages, find issues and get advices to fix them."
+      "message": "Realtime server IP (IPv4/IPv6, HTTP/3, TLS), BGP AS-Path traceroute, Link & Asset Grabber, and In-Page META SEO Diagnostics."
    },
    "extName": {
       "description": "Chrome extension name.",
-      "message": "META SEO inspector"
+      "message": "IPvFooKan"
    },
    "external": {
       "message": "external"

@@ -380,7 +380,7 @@ function getExportFilename(mainDomain, ext) {
   const d = new Date();
   const pad2 = (n) => String(n).padStart(2, "0");
   const dateStr = `${d.getFullYear()}${pad2(d.getMonth() + 1)}${pad2(d.getDate())}_${pad2(d.getHours())}${pad2(d.getMinutes())}${pad2(d.getSeconds())}`;
-  return `ipvfoo_${host}_${dateStr}.${ext}`;
+  return `ipvfookan_${host}_${dateStr}.${ext}`;
 }
 
 function getExportProtocol(flags) {

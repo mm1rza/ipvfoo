@@ -1,4 +1,4 @@
-// META SEO Inspector Pro - Modern Interactive Report Renderer
+// IPvFooKan - Modern Interactive SEO Report Renderer
 (function () {
   "use strict";
 
@@ -128,7 +128,7 @@
     const sourceUrl = (page && page.url) || data.url || window.location.href;
     const sourceHost = (page && (page.hostname || (new URL(sourceUrl)).hostname)) || data.hostname || "Page";
 
-    document.title = "META SEO Inspector — " + sourceHost;
+    document.title = "IPvFooKan SEO Audit — " + sourceHost;
 
     // Header URL Box
     const targetLink = document.getElementById("target-url-link");
@@ -563,7 +563,7 @@
         const d = CURRENT_SEO || {};
         const diag = d.diagnostics || [];
         const hCounts = d.headingCounts || {};
-        let md = "# META SEO Audit Report — " + (d.hostname || location.hostname) + "\r\n";
+        let md = "# IPvFooKan SEO Audit Report — " + (d.hostname || location.hostname) + "\r\n";
         md += "URL: " + (d.url || location.href) + "\r\n";
         md += "Generated: " + (d.generatedAt || new Date().toLocaleString()) + "\r\n\r\n";
         md += "## Ringkasan KPI\r\n";
