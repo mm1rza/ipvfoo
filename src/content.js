@@ -134,12 +134,112 @@
       if (cmp !== 0) {
         return currentSort.order === 'asc' ? cmp : -cmp;
       }
+    } else if (currentSort.column === 'route') {
+      const rA = classifyTraffic(a[1], a[0], a[8], a[7]).code;
+      const rB = classifyTraffic(b[1], b[0], b[8], b[7]).code;
+      const cmp = rA.localeCompare(rB);
+      if (cmp !== 0) {
+        return currentSort.order === 'asc' ? cmp : -cmp;
+      }
     } else if (currentSort.column === 'domain') {
       const cmp = a[0].localeCompare(b[0]);
       return currentSort.order === 'asc' ? cmp : -cmp;
     }
 
     return a[0].localeCompare(b[0]);
+  }
+
+  // Klasifikasi Jalur Trafik: IIX / OIXP, Direct CDN, Transit Intl
+  function classifyTraffic(addr, domain, asn, latency) {
+    if (!addr || addr === "(x)" || addr === "(lost)" || addr.startsWith("(")) {
+      return { code: "UNKNOWN", label: "-", class: "badge-unknown", desc: "No IP address" };
+    }
+
+    // Check Private / LAN
+    if (addr.startsWith("10.") || addr.startsWith("192.168.") || addr.startsWith("127.") ||
+        addr.startsWith("169.254.") || addr === "::1" || addr.startsWith("fc00:") || addr.startsWith("fe80:") ||
+        /^172\.(1[6-9]|2[0-9]|3[0-1])\./.test(addr) ||
+        /^100\.(6[4-9]|[7-9][0-9]|1[0-1][0-9]|12[0-7])\./.test(addr)) {
+      return { code: "LAN", label: "[LAN / Local]", class: "badge-lan", desc: "Local / Private Network IP" };
+    }
+
+    const d = (domain || "").toLowerCase();
+    const a = (asn || "").toUpperCase();
+    const lat = typeof latency === "number" ? latency : parseFloat(latency) || 0;
+
+    // Check 2-letter ISO country code from ASN string (e.g. "AS15169 ID" or "AS7713 ID")
+    const ccMatch = a.match(/\b([A-Z]{2})\b/);
+    const country = ccMatch ? ccMatch[1] : "";
+    const isIdCountry = country === "ID";
+
+    // Known Global CDNs / Hyperscalers
+    const cdnAsnRegex = /\b(AS15169|AS13335|AS20940|AS16625|AS32787|AS54113|AS32934|AS2906|AS16509|AS8075|AS7195|AS209242)\b/;
+    const cdnDomainRegex = /(googlevideo|googleusercontent|gvt1|fbcdn|cdninstagram|tiktokcdn|byteoversea|ibytedtos|fastly|cloudflare|cloudfront|akamaized|akamaihd|edgesuite|edgekey|nflxvideo|nflxso|nflxext|azureedge|msedge)\./;
+    const isCdnAsn = cdnAsnRegex.test(a) || /GOOGLE|CLOUDFLARE|AKAMAI|FASTLY|FACEBOOK|META|NETFLIX|AMAZON|CLOUDFRONT|MICROSOFT/i.test(a);
+    const isCdnDomain = cdnDomainRegex.test(d);
+
+    // 1. [Direct CDN]
+    // Trafik yang ditarik dari Google/Meta/Akamai/Cloudflare Edge server yang ada di dalam ISP / lokal
+    if (isCdnAsn || isCdnDomain) {
+      if (isIdCountry || (lat > 0 && lat <= 32) || /googlevideo|fbcdn|tiktokcdn/i.test(d)) {
+        return {
+          code: "CDN",
+          label: "[Direct CDN]",
+          class: "badge-cdn",
+          desc: "Trafik ditarik dari Google/Meta/Akamai/Cloudflare Edge server di ISP / lokal"
+        };
+      }
+    }
+
+    // 2. [IIX / OIXP]
+    // Trafik domestik Indonesia via OpenIXP/IIX/CDIX
+    const isIdDomain = /\.(id|co\.id|go\.id|ac\.id|my\.id|web\.id|biz\.id|sch\.id|net\.id|or\.id)$/i.test(d);
+    const isIdAsn = /INDONESIA|TELKOM|BIZNET|MORATEL|APJII|IDNIC|CBN|FIRSTMEDIA|LINKNET|INDOSAT|XL|SMARTFREN|HALLONET|IFORTE|FIBERSTAR/i.test(a);
+
+    if (isIdCountry || isIdDomain || isIdAsn) {
+      return {
+        code: "IIX",
+        label: "[IIX / OIXP]",
+        class: "badge-iix",
+        desc: "Trafik domestik Indonesia via OpenIXP/IIX/CDIX"
+      };
+    }
+
+    // 3. [Transit Intl]
+    // Trafik yang keluar lewat kabel laut ke Singapura / Hong Kong / AS
+    if (country && country !== "ID") {
+      return {
+        code: "INTL",
+        label: "[Transit Intl]",
+        class: "badge-intl",
+        desc: `Trafik keluar lewat kabel laut ke luar negeri (${country})`
+      };
+    }
+
+    if (lat > 40) {
+      return {
+        code: "INTL",
+        label: "[Transit Intl]",
+        class: "badge-intl",
+        desc: "Trafik keluar lewat kabel laut ke Singapura / Hong Kong / AS"
+      };
+    }
+
+    if (lat > 0 && lat <= 32) {
+      return {
+        code: "IIX",
+        label: "[IIX / OIXP]",
+        class: "badge-iix",
+        desc: "Trafik domestik Indonesia via OpenIXP/IIX/CDIX"
+      };
+    }
+
+    return {
+      code: "INTL",
+      label: "[Transit Intl]",
+      class: "badge-intl",
+      desc: "Trafik keluar lewat kabel laut ke Singapura / Hong Kong / AS"
+    };
   }
 
   function formatBytes(bytes) {
@@ -185,8 +285,8 @@
       position: fixed;
       top: 12px;
       right: 12px;
-      width: 720px;
-      min-width: 680px;
+      width: 790px;
+      min-width: 740px;
       max-width: calc(100vw - 24px);
       max-height: 85vh;
       background: rgba(18, 20, 26, 0.96);
@@ -351,6 +451,41 @@
       font-weight: 700;
       font-family: Consolas, Monaco, monospace;
       text-align: center;
+    }
+
+    .route-badge {
+      display: inline-block;
+      padding: 1.5px 5.5px;
+      border-radius: 4px;
+      font-size: 9.5px;
+      font-weight: 700;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      white-space: nowrap;
+      cursor: help;
+      line-height: 1.2;
+    }
+    .badge-iix {
+      background: rgba(0, 230, 118, 0.16);
+      color: #00e676;
+      border: 1px solid rgba(0, 230, 118, 0.45);
+    }
+    .badge-cdn {
+      background: rgba(0, 217, 255, 0.16);
+      color: #00d9ff;
+      border: 1px solid rgba(0, 217, 255, 0.45);
+    }
+    .badge-intl {
+      background: rgba(255, 145, 0, 0.18);
+      color: #ff9100;
+      border: 1px solid rgba(255, 145, 0, 0.45);
+    }
+    .badge-lan {
+      background: rgba(255, 255, 255, 0.08);
+      color: #bbb;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    .badge-unknown {
+      color: #666;
     }
     .status-2xx { background: rgba(76, 175, 80, 0.2); color: #48ff00; }
     .status-3xx { background: rgba(33, 150, 243, 0.2); color: #64b5f6; }
@@ -725,6 +860,7 @@
           <tr>
             <th id="th-domain" style="cursor:pointer;" title="Sort Domain">Domain <span class="sort-icon"></span></th>
             <th id="th-ip" style="cursor:pointer;" title="Sort IP">IP Address <span class="sort-icon"></span></th>
+            <th id="th-route" style="text-align:center; cursor:pointer;" title="Sort Jalur Trafik (IIX / CDN / Intl)">Jalur <span class="sort-icon"></span></th>
             <th id="th-status" style="text-align:center; cursor:pointer;" title="Sort HTTP Status Code">Status <span class="sort-icon"></span></th>
             <th id="th-latency" style="text-align:right; cursor:pointer;" title="Sort Response Latency">Latency <span class="sort-icon"></span></th>
             <th id="th-hits" style="text-align:center; cursor:pointer;" title="Sort Hits">Hits <span class="sort-icon"></span></th>
@@ -765,7 +901,7 @@
   }
 
   function updateHeaderSortIndicators() {
-    const cols = ["domain", "ip", "status", "latency", "hits", "size", "bgp"];
+    const cols = ["domain", "ip", "route", "status", "latency", "hits", "size", "bgp"];
     cols.forEach((c) => {
       const el = shadow.getElementById(`th-${c}`);
       if (el) {
@@ -785,6 +921,7 @@
 
   shadow.getElementById("th-domain").onclick = () => setSort("domain");
   shadow.getElementById("th-ip").onclick = () => setSort("ip");
+  shadow.getElementById("th-route").onclick = () => setSort("route");
   shadow.getElementById("th-status").onclick = () => setSort("status");
   shadow.getElementById("th-latency").onclick = () => setSort("latency");
   shadow.getElementById("th-hits").onclick = () => setSort("hits");
@@ -859,7 +996,7 @@
       showCopyToast("Tidak ada data session untuk di-export");
       return;
     }
-    const header = ["Domain", "IP Address", "IP Version", "Protocol", "Status Code", "Latency (ms)", "Hits", "Bytes", "Size Formatted", "ASN"];
+    const header = ["Domain", "IP Address", "Jalur Trafik", "IP Version", "Protocol", "Status Code", "Latency (ms)", "Hits", "Bytes", "Size Formatted", "ASN"];
     const rows = [header.map(c => `"${c}"`).join(",")];
 
     tuples.forEach(t => {
@@ -873,10 +1010,12 @@
       const latency = t[7] !== undefined ? t[7] : 0;
       const asn = t[8] || "";
       const proto = getExportProtocol(flags);
+      const routeInfo = classifyTraffic(addr, domain, asn, latency);
 
       const row = [
         domain,
         addr,
+        routeInfo.label,
         ver,
         proto,
         status,
@@ -911,15 +1050,15 @@
     });
 
     const lines = [];
-    lines.push("=".repeat(110));
+    lines.push("=".repeat(128));
     lines.push("IPvFoo Session Report");
-    lines.push("=".repeat(110));
+    lines.push("=".repeat(128));
     lines.push(`Target / Main Host : ${mainDomain || (tuples[0] ? tuples[0][0] : "-")}`);
     lines.push(`Export Time        : ${dateStr}`);
     lines.push(`Total Domains      : ${tuples.length}`);
     lines.push(`Total Requests     : ${totalHits} reqs`);
     lines.push(`Total Bandwidth    : ${formatBytes(totalBytes)}`);
-    lines.push("=".repeat(110));
+    lines.push("=".repeat(128));
     lines.push("");
 
     const pad = (str, len, align = "left") => {
@@ -931,17 +1070,18 @@
     };
 
     lines.push(
-      pad("Domain", 32) + " " +
-      pad("IP Address", 22) + " " +
+      pad("Domain", 30) + " " +
+      pad("IP Address", 20) + " " +
+      pad("Jalur", 16) + " " +
       pad("Ver", 4) + " " +
-      pad("Proto", 7) + " " +
+      pad("Proto", 6) + " " +
       pad("Status", 7) + " " +
       pad("Latency", 9, "right") + " " +
       pad("Hits", 6, "right") + " " +
       pad("Size", 10, "right") + "  " +
       "ASN / Organization"
     );
-    lines.push("-".repeat(110));
+    lines.push("-".repeat(128));
 
     tuples.forEach(t => {
       const domain = t[0] || "";
@@ -954,12 +1094,14 @@
       const latency = t[7] !== undefined && t[7] > 0 ? `${t[7]} ms` : "-";
       const asn = t[8] || "-";
       const proto = getExportProtocol(flags);
+      const routeInfo = classifyTraffic(addr, domain, asn, latency);
 
       lines.push(
-        pad(domain, 32) + " " +
-        pad(addr, 22) + " " +
+        pad(domain, 30) + " " +
+        pad(addr, 20) + " " +
+        pad(routeInfo.label, 16) + " " +
         pad(ver, 4) + " " +
-        pad(proto, 7) + " " +
+        pad(proto, 6) + " " +
         pad(status, 7) + " " +
         pad(latency, 9, "right") + " " +
         pad(hits, 6, "right") + " " +
@@ -968,9 +1110,9 @@
       );
     });
 
-    lines.push("-".repeat(110));
+    lines.push("-".repeat(128));
     lines.push("Generated by IPvFoo Extension");
-    lines.push("=".repeat(110));
+    lines.push("=".repeat(128));
 
     const txtContent = lines.join("\r\n");
     const filename = getExportFilename(mainDomain, "txt");
@@ -1069,10 +1211,13 @@
 
     const dSpeed = domainSpeedMap[domain] || 0;
     const speedHtml = dSpeed >= 200 ? `<span class="speed-tag">⚡${formatSpeed(dSpeed)}</span> ` : "";
+    const routeInfo = classifyTraffic(addr, domain, asn, latency);
+    const routeHtml = `<span class="route-badge ${routeInfo.class}" title="${routeInfo.desc}">${routeInfo.label}</span>`;
 
     tr.innerHTML = `
       <td class="domain-cell" title="Klik untuk copy: ${domain}">${lockIcon}${domain}</td>
       <td class="ip-cell ${ipClass}" title="Klik untuk copy: ${addr || '(x)'}">${addr || "(x)"}</td>
+      <td style="text-align:center;">${routeHtml}</td>
       <td style="text-align:center;"><span class="status-badge ${statusClass}">${status}</span></td>
       <td class="lat-cell ${latClass}">${latText}</td>
       <td class="hits-cell ${hits > 0 ? '' : 'hits-zero'}">${hits}</td>
@@ -1161,9 +1306,9 @@
     if (!tuples || tuples.length === 0) return;
     const main = tuples[0];
     const mainAddr = main[1] || "(x)";
-    const mainAsn = main[8] ? ` [${main[8]}]` : "";
     const mainStatus = main[6] || 200;
     const mainLat = main[7] ? ` (${main[7]}ms)` : "";
+    const mainRoute = classifyTraffic(main[1], main[0], main[8], main[7]).label;
     let totalHits = 0;
     let totalBytes = 0;
     tuples.forEach((t) => {
@@ -1173,7 +1318,7 @@
     const speedStr = currentSpeedBps >= 200 ? ` | ⚡ ${formatSpeed(currentSpeedBps)}` : "";
     const miniText = shadow.getElementById("mini-text");
     if (miniText) {
-      miniText.textContent = `${mainAddr}${mainAsn} | ${mainStatus}${mainLat} | ${totalHits} req | ${formatBytes(totalBytes)}${speedStr}`;
+      miniText.textContent = `${mainAddr} ${mainRoute} | ${mainStatus}${mainLat} | ${totalHits} req | ${formatBytes(totalBytes)}${speedStr}`;
     }
   }
 
@@ -1428,6 +1573,7 @@
     const cleanAsn = (targetAsn.split(" ")[0] || "").replace(/[^A-Z0-9]/g, "");
     const heUrl = cleanAsn.startsWith("AS") ? `https://bgp.he.net/${cleanAsn}` : `https://bgp.he.net/ip/${addr}`;
     const lgUrl = `https://lg.hallonet.id/?cmd=traceroute&target=${encodeURIComponent(addr)}`;
+    const routeInfo = classifyTraffic(addr, domain, asn, lastHop.rtt || 0);
 
     body.innerHTML = `
       <div class="bgp-summary-grid">
@@ -1441,7 +1587,12 @@
           <div class="bgp-card-val" style="color:#48ff00;">${targetRtt}</div>
           <div class="bgp-card-sub">${data.hops_count || hops.length} Hops Total (${data.timestamp || 'Real-time'})</div>
         </div>
-        <div class="bgp-card" style="grid-column: span 2;">
+        <div class="bgp-card">
+          <div class="bgp-card-label">🛣️ Jalur Routing Klasifikasi</div>
+          <div class="bgp-card-val"><span class="route-badge ${routeInfo.class}">${routeInfo.label}</span></div>
+          <div class="bgp-card-sub">${routeInfo.desc}</div>
+        </div>
+        <div class="bgp-card">
           <div class="bgp-card-label">🏢 Destination AS & ISP</div>
           <div class="bgp-card-val" style="color:#00d9ff;">${targetAsn}</div>
           <div class="bgp-card-sub" style="color:#ccc;">Source: gw-ixp.106-1.hallonet.id (AS151584 HalloNet)</div>

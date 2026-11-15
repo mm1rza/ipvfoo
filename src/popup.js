@@ -224,9 +224,109 @@ function compareTuples(a, b) {
   } else if (currentSort.column === 'domain') {
     const cmp = a[0].localeCompare(b[0]);
     return currentSort.order === 'asc' ? cmp : -cmp;
+  } else if (currentSort.column === 'route') {
+    const rA = classifyTraffic(a[1], a[0], a[8], a[7]).code;
+    const rB = classifyTraffic(b[1], b[0], b[8], b[7]).code;
+    const cmp = rA.localeCompare(rB);
+    if (cmp !== 0) {
+      return currentSort.order === 'asc' ? cmp : -cmp;
+    }
   }
 
   return a[0].localeCompare(b[0]);
+}
+
+// Klasifikasi Jalur Trafik: IIX / OIXP, Direct CDN, Transit Intl
+function classifyTraffic(addr, domain, asn, latency) {
+  if (!addr || addr === "(x)" || addr === "(lost)" || addr.startsWith("(")) {
+    return { code: "UNKNOWN", label: "-", class: "badge-unknown", desc: "No IP address" };
+  }
+
+  // Check Private / LAN
+  if (addr.startsWith("10.") || addr.startsWith("192.168.") || addr.startsWith("127.") ||
+      addr.startsWith("169.254.") || addr === "::1" || addr.startsWith("fc00:") || addr.startsWith("fe80:") ||
+      /^172\.(1[6-9]|2[0-9]|3[0-1])\./.test(addr) ||
+      /^100\.(6[4-9]|[7-9][0-9]|1[0-1][0-9]|12[0-7])\./.test(addr)) {
+    return { code: "LAN", label: "[LAN / Local]", class: "badge-lan", desc: "Local / Private Network IP" };
+  }
+
+  const d = (domain || "").toLowerCase();
+  const a = (asn || "").toUpperCase();
+  const lat = typeof latency === "number" ? latency : parseFloat(latency) || 0;
+
+  // Check 2-letter ISO country code from ASN string (e.g. "AS15169 ID" or "AS7713 ID")
+  const ccMatch = a.match(/\b([A-Z]{2})\b/);
+  const country = ccMatch ? ccMatch[1] : "";
+  const isIdCountry = country === "ID";
+
+  // Known Global CDNs / Hyperscalers
+  const cdnAsnRegex = /\b(AS15169|AS13335|AS20940|AS16625|AS32787|AS54113|AS32934|AS2906|AS16509|AS8075|AS7195|AS209242)\b/;
+  const cdnDomainRegex = /(googlevideo|googleusercontent|gvt1|fbcdn|cdninstagram|tiktokcdn|byteoversea|ibytedtos|fastly|cloudflare|cloudfront|akamaized|akamaihd|edgesuite|edgekey|nflxvideo|nflxso|nflxext|azureedge|msedge)\./;
+  const isCdnAsn = cdnAsnRegex.test(a) || /GOOGLE|CLOUDFLARE|AKAMAI|FASTLY|FACEBOOK|META|NETFLIX|AMAZON|CLOUDFRONT|MICROSOFT/i.test(a);
+  const isCdnDomain = cdnDomainRegex.test(d);
+
+  // 1. [Direct CDN]
+  // Trafik yang ditarik dari Google/Meta/Akamai/Cloudflare Edge server yang ada di dalam ISP / lokal
+  if (isCdnAsn || isCdnDomain) {
+    if (isIdCountry || (lat > 0 && lat <= 32) || /googlevideo|fbcdn|tiktokcdn/i.test(d)) {
+      return {
+        code: "CDN",
+        label: "[Direct CDN]",
+        class: "badge-cdn",
+        desc: "Trafik ditarik dari Google/Meta/Akamai/Cloudflare Edge server di ISP / lokal"
+      };
+    }
+  }
+
+  // 2. [IIX / OIXP]
+  // Trafik domestik Indonesia via OpenIXP/IIX/CDIX
+  const isIdDomain = /\.(id|co\.id|go\.id|ac\.id|my\.id|web\.id|biz\.id|sch\.id|net\.id|or\.id)$/i.test(d);
+  const isIdAsn = /INDONESIA|TELKOM|BIZNET|MORATEL|APJII|IDNIC|CBN|FIRSTMEDIA|LINKNET|INDOSAT|XL|SMARTFREN|HALLONET|IFORTE|FIBERSTAR/i.test(a);
+
+  if (isIdCountry || isIdDomain || isIdAsn) {
+    return {
+      code: "IIX",
+      label: "[IIX / OIXP]",
+      class: "badge-iix",
+      desc: "Trafik domestik Indonesia via OpenIXP/IIX/CDIX"
+    };
+  }
+
+  // 3. [Transit Intl]
+  // Trafik yang keluar lewat kabel laut ke Singapura / Hong Kong / AS
+  if (country && country !== "ID") {
+    return {
+      code: "INTL",
+      label: "[Transit Intl]",
+      class: "badge-intl",
+      desc: `Trafik keluar lewat kabel laut ke luar negeri (${country})`
+    };
+  }
+
+  if (lat > 40) {
+    return {
+      code: "INTL",
+      label: "[Transit Intl]",
+      class: "badge-intl",
+      desc: "Trafik keluar lewat kabel laut ke Singapura / Hong Kong / AS"
+    };
+  }
+
+  if (lat > 0 && lat <= 32) {
+    return {
+      code: "IIX",
+      label: "[IIX / OIXP]",
+      class: "badge-iix",
+      desc: "Trafik domestik Indonesia via OpenIXP/IIX/CDIX"
+    };
+  }
+
+  return {
+    code: "INTL",
+    label: "[Transit Intl]",
+    class: "badge-intl",
+    desc: "Trafik keluar lewat kabel laut ke Singapura / Hong Kong / AS"
+  };
 }
 
 // --- Export Functions ---
@@ -285,7 +385,7 @@ function exportCsvSession(tuples, mainDomain) {
     showPopupToast("Tidak ada data session");
     return;
   }
-  const header = ["Domain", "IP Address", "IP Version", "Protocol", "Status Code", "Latency (ms)", "Hits", "Bytes", "Size Formatted", "ASN"];
+  const header = ["Domain", "IP Address", "Jalur Trafik", "IP Version", "Protocol", "Status Code", "Latency (ms)", "Hits", "Bytes", "Size Formatted", "ASN"];
   const rows = [header.map(c => `"${c}"`).join(",")];
 
   tuples.forEach(t => {
@@ -299,10 +399,12 @@ function exportCsvSession(tuples, mainDomain) {
     const latency = t[7] !== undefined ? t[7] : 0;
     const asn = t[8] || "";
     const proto = getExportProtocol(flags);
+    const routeInfo = classifyTraffic(addr, domain, asn, latency);
 
     const row = [
       domain,
       addr,
+      routeInfo.label,
       ver,
       proto,
       status,
@@ -337,15 +439,15 @@ function exportTxtSession(tuples, mainDomain) {
   });
 
   const lines = [];
-  lines.push("=".repeat(110));
+  lines.push("=".repeat(128));
   lines.push("IPvFoo Session Report");
-  lines.push("=".repeat(110));
+  lines.push("=".repeat(128));
   lines.push(`Target / Main Host : ${mainDomain || (tuples[0] ? tuples[0][0] : "-")}`);
   lines.push(`Export Time        : ${dateStr}`);
   lines.push(`Total Domains      : ${tuples.length}`);
   lines.push(`Total Requests     : ${totalHits} reqs`);
   lines.push(`Total Bandwidth    : ${formatBytes(totalBytes)}`);
-  lines.push("=".repeat(110));
+  lines.push("=".repeat(128));
   lines.push("");
 
   const pad = (str, len, align = "left") => {
@@ -357,17 +459,18 @@ function exportTxtSession(tuples, mainDomain) {
   };
 
   lines.push(
-    pad("Domain", 32) + " " +
-    pad("IP Address", 22) + " " +
+    pad("Domain", 30) + " " +
+    pad("IP Address", 20) + " " +
+    pad("Jalur", 16) + " " +
     pad("Ver", 4) + " " +
-    pad("Proto", 7) + " " +
+    pad("Proto", 6) + " " +
     pad("Status", 7) + " " +
     pad("Latency", 9, "right") + " " +
     pad("Hits", 6, "right") + " " +
     pad("Size", 10, "right") + "  " +
     "ASN / Organization"
   );
-  lines.push("-".repeat(110));
+  lines.push("-".repeat(128));
 
   tuples.forEach(t => {
     const domain = t[0] || "";
@@ -380,12 +483,14 @@ function exportTxtSession(tuples, mainDomain) {
     const latency = t[7] !== undefined && t[7] > 0 ? `${t[7]} ms` : "-";
     const asn = t[8] || "-";
     const proto = getExportProtocol(flags);
+    const routeInfo = classifyTraffic(addr, domain, asn, latency);
 
     lines.push(
-      pad(domain, 32) + " " +
-      pad(addr, 22) + " " +
+      pad(domain, 30) + " " +
+      pad(addr, 20) + " " +
+      pad(routeInfo.label, 16) + " " +
       pad(ver, 4) + " " +
-      pad(proto, 7) + " " +
+      pad(proto, 6) + " " +
       pad(status, 7) + " " +
       pad(latency, 9, "right") + " " +
       pad(hits, 6, "right") + " " +
@@ -394,9 +499,9 @@ function exportTxtSession(tuples, mainDomain) {
     );
   });
 
-  lines.push("-".repeat(110));
+  lines.push("-".repeat(128));
   lines.push("Generated by IPvFoo Extension");
-  lines.push("=".repeat(110));
+  lines.push("=".repeat(128));
 
   const txtContent = lines.join("\r\n");
   const filename = getExportFilename(mainDomain, "txt");
@@ -901,9 +1006,22 @@ function makeRow(isFirst, tuple) {
     cacheTd.style.paddingLeft = '0';
   }
 
+  const routeTd = document.createElement("td");
+  routeTd.className = `routeTd${connectedClass}`;
+  const routeInfo = classifyTraffic(addr, domain, asn, latency);
+  const routeSpan = document.createElement("span");
+  routeSpan.className = `route-badge ${routeInfo.class}`;
+  routeSpan.title = routeInfo.desc;
+  routeSpan.textContent = routeInfo.label;
+  routeTd.appendChild(routeSpan);
+  routeTd.style.textAlign = "center";
+  routeTd.style.paddingLeft = "4px";
+  routeTd.style.paddingRight = "4px";
+
   tr._domain = domain;
   tr.appendChild(domainTd);
   tr.appendChild(addrTd);
+  tr.appendChild(routeTd);
   tr.appendChild(statusTd);
   tr.appendChild(latTd);
   tr.appendChild(hitsTd);
