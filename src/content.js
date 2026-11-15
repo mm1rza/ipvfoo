@@ -1030,7 +1030,6 @@
         <span id="widget-speed" class="widget-speed"></span>
       </div>
       <div class="controls">
-        <button id="btn-export-csv" class="btn btn-export" title="Export Session ke CSV">CSV</button>
         <button id="btn-export-txt" class="btn btn-export" title="Export Session ke TXT">TXT</button>
         <button id="btn-seo" class="btn btn-seo" title="Buka META SEO Inspector (New Tab)">META SEO</button>
         <button id="btn-linkgrabber" class="btn btn-grabber" title="Ekstrak Semua Link di Halaman Ini (Link Grabber)">LINK GRABBER</button>
@@ -1300,10 +1299,6 @@
   }
 
   // Buttons
-  shadow.getElementById("btn-export-csv").onclick = () => {
-    exportCsvSession(allTuplesCache, allTuplesCache[0] ? allTuplesCache[0][0] : location.hostname);
-  };
-
   shadow.getElementById("btn-export-txt").onclick = () => {
     exportTxtSession(allTuplesCache, allTuplesCache[0] ? allTuplesCache[0][0] : location.hostname);
   };
@@ -2717,7 +2712,7 @@
 
         let thumbHtml = "";
         if (isImg) {
-          thumbHtml = '<div class="item-thumb" title="Lihat gambar"><img src="' + escapeHtml(item.url) + '" loading="lazy" onerror="this.style.display=\\'none\\'" /></div>';
+          thumbHtml = '<div class="item-thumb" title="Lihat gambar"><img src="' + escapeHtml(item.url) + '" loading="lazy" /></div>';
         }
 
         let dimHtml = "";
@@ -3288,7 +3283,7 @@
       '<div class="preview-card">' +
       '<div class="preview-card-header">Facebook / Open Graph Preview</div>' +
       '<div class="preview-img-wrap">' +
-      (ogImage ? ('<img src="' + escapeHtml(ogImage) + '" alt="OG Image Preview" onerror="this.onerror=null; this.parentNode.innerHTML=\'<span class=preview-no-img>Gambar Gagal Dimuat</span>\';">') : '<span class="preview-no-img">Tidak ada og:image</span>') +
+      (ogImage ? ('<img src="' + escapeHtml(ogImage) + '" alt="OG Image Preview" class="social-preview-img">') : '<span class="preview-no-img">Tidak ada og:image</span>') +
       '</div>' +
       '<div class="preview-body">' +
       '<div class="preview-domain">' + escapeHtml(ogSite) + '</div>' +
@@ -3299,7 +3294,7 @@
       '<div class="preview-card">' +
       '<div class="preview-card-header">Twitter / X Card Preview</div>' +
       '<div class="preview-img-wrap">' +
-      (twImage ? ('<img src="' + escapeHtml(twImage) + '" alt="Twitter Image Preview" onerror="this.onerror=null; this.parentNode.innerHTML=\'<span class=preview-no-img>Gambar Gagal Dimuat</span>\';">') : '<span class="preview-no-img">Tidak ada twitter:image</span>') +
+      (twImage ? ('<img src="' + escapeHtml(twImage) + '" alt="Twitter Image Preview" class="social-preview-img">') : '<span class="preview-no-img">Tidak ada twitter:image</span>') +
       '</div>' +
       '<div class="preview-body">' +
       '<div class="preview-domain">' + escapeHtml(sourceHost) + '</div>' +

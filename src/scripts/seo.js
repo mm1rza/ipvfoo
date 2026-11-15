@@ -273,7 +273,7 @@
             <span>🌐</span> Facebook / Open Graph Preview
           </div>
           <div class="preview-img-frame">
-            ${ogImage ? `<img src="${escapeHtml(ogImage)}" alt="OG Image" onerror="this.onerror=null; this.parentNode.innerHTML='<span class=preview-no-img-text>Gambar Gagal Dimuat</span>';">` : `<span class="preview-no-img-text">Tidak ada og:image</span>`}
+            ${ogImage ? `<img src="${escapeHtml(ogImage)}" alt="OG Image" class="social-preview-img">` : `<span class="preview-no-img-text">Tidak ada og:image</span>`}
           </div>
           <div class="preview-content-body">
             <div class="preview-domain-name">${escapeHtml(ogSite)}</div>
@@ -287,7 +287,7 @@
             <span>🐦</span> Twitter / X Card Preview
           </div>
           <div class="preview-img-frame">
-            ${twImage ? `<img src="${escapeHtml(twImage)}" alt="Twitter Image" onerror="this.onerror=null; this.parentNode.innerHTML='<span class=preview-no-img-text>Gambar Gagal Dimuat</span>';">` : `<span class="preview-no-img-text">Tidak ada twitter:image</span>`}
+            ${twImage ? `<img src="${escapeHtml(twImage)}" alt="Twitter Image" class="social-preview-img">` : `<span class="preview-no-img-text">Tidak ada twitter:image</span>`}
           </div>
           <div class="preview-content-body">
             <div class="preview-domain-name">${escapeHtml(sourceHost)}</div>
@@ -296,6 +296,15 @@
           </div>
         </div>
       `;
+
+      previewsContainer.querySelectorAll("img.social-preview-img").forEach(img => {
+        img.addEventListener("error", function () {
+          const parent = this.parentNode;
+          if (parent) {
+            parent.innerHTML = '<span class="preview-no-img-text">Gambar Gagal Dimuat</span>';
+          }
+        }, { once: true });
+      });
     }
 
     const socTagsContainer = document.getElementById("social-tags-container");
