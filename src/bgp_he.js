@@ -274,7 +274,7 @@
       `# IP Route`
     ];
     ipArr.forEach((ip) => {
-      ipRouteLines.push(`/ip route add dst-address=${ip} gateway=VPN-XXX comment="${asNumber} ${orgName}"`);
+      ipRouteLines.push(`/ip route add dst-address=${ip} gateway=XXXXXXX comment="${asNumber} ${orgName}"`);
     });
     ipRouteLines.push(`# Total IPv4 Prefix: ${ipArr.length}`);
     generatedData.ipRoute = ipRouteLines.join("\n");
