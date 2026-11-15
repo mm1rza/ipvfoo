@@ -540,21 +540,11 @@ window.onload = async function () {
     seoBtn.onclick = () => {
       chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
         if (!tabs || !tabs[0]) return;
-        chrome.tabs.sendMessage(tabs[0].id, { action: "pageInfo", mode: "full" }, (response) => {
-          if (response && response.sections) {
-            chrome.storage.local.set({
-              page: tabs[0],
-              sections: response.sections
-            }, () => {
-              chrome.tabs.create({ url: chrome.runtime.getURL("seo.html") });
-              window.close();
-            });
-          } else {
-            chrome.tabs.sendMessage(tabs[0].id, { action: "open_seo" }, () => {
-              chrome.tabs.create({ url: chrome.runtime.getURL("seo.html") });
-              window.close();
-            });
+        chrome.tabs.sendMessage(tabs[0].id, { action: "open_seo" }, (response) => {
+          if (chrome.runtime.lastError || !response) {
+            chrome.tabs.create({ url: chrome.runtime.getURL("seo.html") });
           }
+          window.close();
         });
       });
     };

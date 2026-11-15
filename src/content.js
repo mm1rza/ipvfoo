@@ -3925,44 +3925,31 @@
 
     showCopyToast("🚀 Membuka IPvFooKan SEO (" + escapeHtml(sourceHost) + ") di Tab Baru...");
 
-    try {
-      if (typeof getPageData === "function") {
-        const pageData = getPageData({ mode: "full" });
-        if (pageData && pageData.sections) {
-          chrome.storage.local.set({
-            page: { url: sourceUrl, title: document.title },
-            sections: pageData.sections
-          }, () => {
-            chrome.runtime.sendMessage({ cmd: "open_seo_tab" }, (res) => {
-              if (chrome.runtime.lastError || !res || res.status !== "ok") {
-                openPreRenderedSeoBlob(extractPageSeoData());
-              }
-            });
-          });
-          return;
-        }
-      }
-    } catch (e) {
-      console.warn("openSeoInNewTab getPageData error:", e);
-    }
-
     const seoData = extractPageSeoData();
+    const seoPayload = {
+      page: {
+        url: sourceUrl,
+        title: document.title,
+        hostname: sourceHost
+      },
+      last_seo_data: seoData,
+      timestamp: Date.now()
+    };
+
     try {
       if (typeof chrome !== "undefined" && chrome.storage && chrome.storage.local) {
-        chrome.storage.local.set({ last_seo_data: seoData });
-      }
-    } catch (e) { }
-
-    try {
-      if (typeof chrome !== "undefined" && chrome.runtime && chrome.runtime.sendMessage) {
-        chrome.runtime.sendMessage({ cmd: "open_seo_tab" }, (res) => {
-          if (chrome.runtime.lastError || !res || res.status !== "ok") {
-            openPreRenderedSeoBlob(seoData);
-          }
+        chrome.storage.local.set(seoPayload, () => {
+          chrome.runtime.sendMessage({ cmd: "open_seo_tab" }, (res) => {
+            if (chrome.runtime.lastError || !res || res.status !== "ok") {
+              openPreRenderedSeoBlob(seoData);
+            }
+          });
         });
         return;
       }
-    } catch (e) { }
+    } catch (e) {
+      console.warn("openSeoInNewTab storage error:", e);
+    }
 
     openPreRenderedSeoBlob(seoData);
   }

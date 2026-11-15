@@ -125,8 +125,13 @@
     CURRENT_PAGE = page || { url: data.url, hostname: data.hostname };
     CURRENT_SEO = data;
 
-    const sourceUrl = (page && page.url) || data.url || window.location.href;
-    const sourceHost = (page && (page.hostname || (new URL(sourceUrl)).hostname)) || data.hostname || "Page";
+    const sourceUrl = (data && data.url) || (page && page.url) || window.location.href;
+    let sourceHost = "Page";
+    try {
+      sourceHost = (data && data.hostname) || (page && page.hostname) || (new URL(sourceUrl)).hostname || "Page";
+    } catch (e) {
+      sourceHost = (data && data.hostname) || (page && page.hostname) || "Page";
+    }
 
     document.title = "IPvFooKan SEO Audit — " + sourceHost;
 

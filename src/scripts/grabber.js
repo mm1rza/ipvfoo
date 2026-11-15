@@ -409,11 +409,11 @@
           initData(res.grabber_data);
         } else {
           initData({
-            sourceUrl: "https://hallonet.id",
-            sourceHost: "hallonet.id",
+            sourceUrl: "https://github.com/mm1rza/ipvfoo",
+            sourceHost: "github.com",
             assets: [
-              { category: "image", url: "icons/icon128.png", hostname: "extension", title: "IPvFooKan Logo", ext: "png", width: 128, height: 128 },
-              { category: "link", url: "https://hallonet.id/layanan", hostname: "hallonet.id", title: "Layanan Internet", ext: "html" }
+              { category: "image", url: "icons/icon128.png", hostname: "github.com", title: "IPvFooKan Logo", ext: "png", width: 128, height: 128 },
+              { category: "link", url: "https://github.com/mm1rza/ipvfoo", hostname: "github.com", title: "IPvFooKan Repository", ext: "html" }
             ]
           });
         }

@@ -100,6 +100,8 @@ ipvfoo/
 ├── LICENSE                    # Apache License 2.0
 ├── Makefile                   # Multi-browser build script (Chrome / Firefox)
 ├── README.md                  # Dokumentasi & panduan teknis
+├── THEMES.md                  # Master Design System (shadcn/ui Cyber Obsidian)
+├── THEMES-PREVIEW.html        # Interactive UI Showcase & Component Sandbox
 └── src/
     ├── _locales/              # Lokalisasi bahasa (en)
     │   └── en/messages.json
@@ -150,7 +152,7 @@ ipvfoo/
 | `src/id_asn_default.js` | Basis data pemetaan ASN & provider ISP (offline & lokal). |
 | `src/bgp_he.js` | Content script pembantu untuk lookup rute BGP. |
 | `src/popup.html` & `src/popup.js` | Antarmuka popup default saat ikon ekstensi di-klik pada toolbar. |
-| `src/seo.html` & `src/scripts/seo.js` | Antarmuka dan engine visualisasi dashboard SEO audit modern. |
+| `THEMES.md` & `THEMES-PREVIEW.html` | Dokumentasi Master Design System shadcn/ui Cyber Obsidian dan halaman showcase preview interaktif. |
 | `src/scripts/seo-extractor.js` | Injeksi content script untuk ekstraksi tag meta, JSON-LD, dan outline. |
 | `src/icons/` & `src/icons/badges/` | Ikon resolusi tinggi, asset UI, serta badge dinamis status IPv4/IPv6. |
 | `src/options.html` & `src/options.js` | Halaman pengaturan ekstensi (disediakan untuk rilis mendatang). |
