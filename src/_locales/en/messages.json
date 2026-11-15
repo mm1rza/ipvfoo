@@ -70,7 +70,7 @@
    },
    "extDescription": {
       "description": "Chrome extension description.",
-      "message": "Realtime server IP (IPv4/IPv6, HTTP/3, TLS), BGP AS-Path traceroute, Link & Asset Grabber, and In-Page META SEO Diagnostics."
+      "message": "Realtime server IP (IPv4/IPv6, HTTP/3, TLS), BGP AS-Path lookup, Link & Asset Grabber, and In-Page META SEO Diagnostics."
    },
    "extName": {
       "description": "Chrome extension name.",

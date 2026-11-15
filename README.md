@@ -1,19 +1,19 @@
 # IPvFooKan (v0.1)
 
-> **All-in-One In-Page Network Analyzer, BGP Traceroute, Link & Asset Grabber, and Deep META SEO Diagnostics.**  
-> *Self-modified and unified extension for Google Chrome & Firefox.*  
+> **All-in-One In-Page Network Analyzer, BGP AS-Path Lookup & Prefix Extractor, Link & Asset Grabber, and Deep META SEO Diagnostics.**  
+> *Self-modified and unified extension for Google Chrome & Chromium browsers.*  
 > **Repository:** [https://github.com/mm1rza/ipvfoo](https://github.com/mm1rza/ipvfoo)
 
 ---
 
 ## 📌 Sekilas Tentang IPvFooKan
 
-**IPvFooKan** adalah evolusi dan penggabungan mandiri dari beberapa tool analisis web open-source terpopuler yang disatukan ke dalam satu ekstensi browser yang ringan, cepat, dan modular:
+**IPvFooKan** adalah evolusi dan penggabungan mandiri dari serangkaian utilitas analisis web, inspeksi jaringan, dan audit SEO yang disatukan ke dalam satu ekstensi browser yang ringan, responsif, dan modular:
 
-1. **IPvFoo Core Engine** — Memantau alamat IP server asli setiap domain di halaman aktif secara *real-time* (IPv4, IPv6, HTTP/1.1, HTTP/2, HTTP/3 QUIC, TLS), statistik hit & bandwidth, serta latency response.
-2. **BGP AS-Path Visualizer** — Breadcrumb AS-Path transit ISP global, lookup BGP.he.net, dan auto-generator script Address-List MikroTik RouterOS.
-3. **Link & Asset Grabber** — Ekstraktor aset lengkap (Link, Gambar, Dokumen, Video/Audio, Scripts/CSS) dengan filter cerdas, konversi Base64 instan, tampilan Galeri Grid / List, serta ekspor teks.
-4. **Deep META SEO Diagnostics** — Laporan audit SEO halaman mendalam (Common Meta, Social Open Graph & Twitter Card Previews, hierarki heading H1–H6, Schema.org JSON-LD structured data, status canonical & robots, serta ekspor Markdown / Print PDF).
+1. **IPvFoo Core Engine** — Memantau alamat IP server asli setiap domain di halaman aktif secara *real-time* (IPv4, IPv6, HTTP/1.1, HTTP/2, HTTP/3 QUIC, WebSocket, TLS), indikator latency response, status code, hit count, dan akumulasi size data.
+2. **BGP AS-Path Visualizer & Prefix Extractor** — Modal visualisasi rute transit BGP global, announced route prefix, origin ASN, serta integrasi otomatis script generator di `bgp.he.net` untuk MikroTik RouterOS v7 dan Juniper Junos.
+3. **Link & Asset Grabber** — Ekstraktor aset lengkap (Link, Gambar, Dokumen, Media, Scripts & CSS) dengan master tema **shadcn/ui (Cyber Obsidian)**, filter chips instan, search bar, mode List & Gallery Grid View, konversi Base64, serta ekspor teks.
+4. **Deep META SEO Diagnostics** — Laporan audit SEO halaman mendalam (Common Meta, Social Open Graph & Twitter/X Cards Preview, hierarki heading tree H1–H6, Schema.org JSON-LD structured data, status canonical & robots, diagnostic KPI scoring, serta salin ringkasan Markdown).
 
 Semua data jaringan ditangkap secara pasif dan privat menggunakan API `webRequest` browser tanpa membuat trafik DNS/network tambahan yang tidak perlu.
 
@@ -22,115 +22,95 @@ Semua data jaringan ditangkap secara pasif dan privat menggunakan API `webReques
 ## 🚀 Fitur Unggulan
 
 ### 1. In-Page Floating Overlay (Shadow DOM)
-- Widget melayang transparan di pojok kanan atas halaman yang dapat di-*minimize* atau ditutup.
-- Menggunakan **Shadow DOM isolated container** sehingga CSS widget tidak bocor dan tidak merusak tampilan website asli.
-- Dilengkapi **Live Bandwidth Speed Meter** (kecepatan per-domain dan total halaman).
+- Widget melayang semi-transparan di pojok kanan atas halaman yang dapat di-*minimize* atau ditutup.
+- Menggunakan **Shadow DOM isolated container** sehingga CSS widget tidak bocor dan tidak merusak tata letak maupun tampilan website asli.
+- Dilengkapi **Live Bandwidth Speed Meter** untuk memantau kecepatan transfer data (per-domain dan total halaman).
 - Sorting tabel interaktif berdasarkan Domain, IP, Latency, Status Code, Hits, Size, dan BGP/ASN.
+- Tombol akses cepat ke tab **META SEO** dan **LINK GRABBER**.
 
-### 2. Live Traceroute & BGP AS-Path
-- Klik IP mana saja pada tabel untuk membuka modal live traceroute visual.
-- Menampilkan hop router, RTT latency tiap hop, dan diagram alur AS-Path transit ISP (`Client ──► Transit ──► Origin`).
-- Tombol 1-klik untuk generate perintah MikroTik:
+### 2. BGP AS-Path Visualizer & Helper Script (bgp.he.net)
+- **In-Page AS-Path Route Lookup**: Klik IP mana saja pada tabel widget untuk membuka modal diagram visual alur rute BGP transit (`Global Ingress ──► Transit AS ──► Origin AS`).
+- Menampilkan Target Host & IP, BGP Announced Prefix, Origin ASN, nama organisasi/ISP, dan jalur AS global.
+- Tombol 1-klik untuk generate perintah MikroTik Address-List langsung dari modal:
   ```routeros
-  /ip firewall address-list add list="LIST_DOMAIN" address=1.2.3.4 comment="AS13335 CLOUDFLARE"
+  /ip firewall address-list add list="LIST_DOMAIN" address=1.2.3.4/24 comment="AS13335 CLOUDFLARE"
   ```
-- Tautan langsung ke Looking Glass dan BGP Hurricane Electric (`bgp.he.net`).
+- **Integrasi Otomatis BGP Hurricane Electric (`bgp_he.js`)**:  
+  Saat membuka halaman AS di `https://bgp.he.net/*`, helper box otomatis menyediakan tombol generator:
+  - `📋 Copy CIDR` — Salin seluruh daftar IPv4 prefix (CIDR).
+  - `📋 Copy Address List` — Salin script konfigurasi `/ip firewall address-list` MikroTik.
+  - `📋 Copy Ip Route` — Salin script penambahan routing `/ip route` MikroTik.
+  - `📋 Copy BGP LP MikroTik (v7)` — Salin routing filter rule RouterOS v7 untuk Local-Preference / BGP Weight.
+  - `📋 Copy BGP LP Juniper` — Salin policy-options AS-Path dan Local-Preference Junos.
+  - `📋 Copy BGP Block IP Juniper` — Salin policy-statement route-filter exact Junos untuk reject IP prefix ASN target.
+  - Standarisasi otomatis header `# AS Info: ...` dan footer `# Total IPv4 Prefix: ...` pada seluruh format output.
+  - Certs/Search Auto-Rewriter yang otomatis mengarahkan link sertifikat/query langsung ke website target di tab baru.
 
 ### 3. Link & Asset Grabber
-- Buka tab grabber instan dari tombol **LINK GRABBER**.
-- Filter kategori aset: Semua, Gambar, Links, Media, Dokumen, Scripts & CSS.
-- Fitur *Copy All URLs*, *Export TXT*, dan konversi gambar ke format data Base64 PNG.
-- Mode tampilan **List View** dan **Gallery Grid View**.
+- Buka tab grabber instan dari tombol **LINK GRABBER** pada floating widget.
+- Dibangun dengan master tema **shadcn/ui (Cyber Obsidian)** berbasis CSS Variables `:root`.
+- Filter cepat berbasis Chips: Semua, Gambar, Links, Media, Dokumen, Scripts & CSS (lengkap dengan badge counter per kategori).
+- Search input instan untuk memfilter URL, ekstensi file, atau nama berkas secara real-time.
+- Opsi cerdas: *Hapus Duplikat*, *Hanya Domain Pihak Ke-3*, dan *Kelompokkan per Tipe*.
+- Dual Mode Tampilan:
+  - **List View**: Tampilan tabel rinci dengan resolusi dimensi gambar dan tombol konversi Base64.
+  - **Gallery Grid View**: Tampilan galeri kartu visual thumbnail gambar.
+- Aksi praktis: `📋 Copy URLs` (salin semua URL terfilter ke clipboard) dan `📥 Export TXT`.
 
-### 4. In-Page META SEO Diagnostics
-- Buka dashboard SEO berdesain modern (Dark/Light mode) dari tombol **META SEO**.
-- Skor KPI audit instan: *Passed Checks*, *Warnings*, *Errors*.
-- Pratinjau visual media sosial: Kartu Facebook Open Graph dan Twitter/X Card.
-- Struktur Outline Headings Tree (H1 hingga H6) dengan validasi hierarki urutan heading.
-- Validasi status canonical self-referencing, meta robots (index/noindex), viewport mobile WCAG, dan Schema.org JSON-LD.
-- Tombol cetak langsung (*Print to PDF*) dan salin ringkasan ke format Markdown.
+### 4. Deep META SEO Diagnostics
+- Buka dashboard audit SEO komprehensif dari tombol **META SEO** pada widget.
+- Antarmuka modern dan responsif dengan dukungan tema Dark Mode dan Light Mode.
+- Indikator skor KPI audit instan: *Passed Checks*, *Warnings*, dan *Errors*.
+- **Social Media Previews**: Pratinjau visual kartu postingan Facebook Open Graph dan Twitter/X Card.
+- **Headings Outline Tree**: Visualisasi pohon hierarki H1 hingga H6 dengan validasi otomatis terhadap level heading yang terlewat atau tidak teratur.
+- **Inspeksi Lengkap**:
+  - *Common Meta*: Title, meta description, charset, viewport, author, keywords.
+  - *Social Tags*: Open Graph (og:title, og:image, og:description) dan Twitter Cards.
+  - *Structured Data*: Parsing dan validasi sintaks Schema.org JSON-LD.
+  - *Headings & Links*: Statistik tautan internal vs eksternal, nofollow, dan canonical self-referencing.
+  - *Security & Directives*: Status meta robots (index/noindex, follow/nofollow), X-Frame-Options, dan HTTPS/TLS.
+- Tombol `📋 Copy Summary` untuk mengekspor ringkasan audit langsung ke format Markdown.
 
 ---
 
-## 🏗️ Arsitektur & Alur Codingan (Code Flow)
+## 📁 Struktur Direktori & Modul File
 
-Berikut adalah bagan alur kerja sistem di balik **IPvFooKan**:
-
-```
-+-----------------------------------------------------------------------------------+
-|                                  TARGET WEBPAGE                                   |
-|   +---------------------------------------------------------------------------+   |
-|   | Requests: HTML, CSS, JS, Images, APIs, WebSockets...                      |   |
-+---+-------------------------------------+-------------------------------------+---+
-                                          |
-                                          v  (Passive Intercept)
-+-----------------------------------------------------------------------------------+
-|                        background.js (Extension Service Worker)                   |
-| - chrome.webRequest.onResponseStarted / onCompleted                               |
-| - Ekstrak: IP Address, IP Version (4/6), HTTP Protocol (H1/H2/H3), Status, Bytes  |
-| - id_asn_default.js: Resolusi ASN & Nama ISP/Organisasi secara lokal             |
-| - Broadcast data session via chrome.runtime Port                                  |
-+-----------------------------------------+-----------------------------------------+
-                                          |
-                      +-------------------+-------------------+
-                      |                                       |
-                      v                                       v
-+------------------------------------+ +---------------------------------------------+
-|    popup.html / popup.js           | |        content.js (In-Page Content Script)  |
-| - UI Popup Toolbar Browser         | | - Injeksi Shadow DOM Host                   |
-| - Mini table view per tab          | | - Floating Widget & Mini Status Badge       |
-| - Tombol ekspor CSV, TXT, SEO,     | | - Speed Meter & Per-domain Traffic Monitor  |
-|   dan LINK GRABBER                 | | - Modal Live Traceroute & MikroTik Gen      |
-+------------------------------------+ +----------------------+----------------------+
-                                                              |
-                                  +---------------------------+-----------------------+
-                                  |                                                   |
-                                  v                                                   v
-+---------------------------------------------------+ +-----------------------------------------------+
-|             openGrabberInNewTab()                 | |            openSeoInNewTab()                  |
-| - Ekstraksi link & DOM assets (img, a, doc, media)| | - Parsing meta tags, OG, Twitter, Schema      |
-| - Render tab mandiri via Blob URL                 | | - Render dashboard via seo.html / seo.js      |
-| - Galeri Grid & konversi Base64                   | | - Diagnostic Scoring, Social Preview, Outline |
-+---------------------------------------------------+ +-----------------------------------------------+
-```
-
-### Rincian Modul File & Struktur Direktori Bersih
 ```text
 ipvfoo/
 ├── LICENSE                    # Apache License 2.0
 ├── Makefile                   # Multi-browser build script (Chrome / Firefox)
-├── README.md                  # Dokumentasi & panduan teknis
+├── README.md                  # Dokumentasi & panduan teknis terpadu
 ├── THEMES.md                  # Master Design System (shadcn/ui Cyber Obsidian)
 ├── THEMES-PREVIEW.html        # Interactive UI Showcase & Component Sandbox
 └── src/
     ├── _locales/              # Lokalisasi bahasa (en)
     │   └── en/messages.json
-    ├── icons/                 # Direktori terpadu ikon & badge ekstensi
-    │   ├── badges/            # 48 badge angka IP/protokol status bar
+    ├── icons/                 # Direktori ikon & status badge ekstensi
+    │   ├── badges/            # Badge dinamis IPv4/IPv6 untuk status bar
     │   ├── icon16.png
     │   ├── icon16_transparent.png
     │   ├── icon128.png
-    │   └── *.png              # UI icons (arrows, lock, h1-h3, snip, websocket)
-    ├── manifest/              # Manifest alternatif untuk build spesifik browser
+    │   └── *.png              # UI assets & icon set
+    ├── manifest/              # Manifest alternatif spesifik browser
     │   ├── chrome-manifest.json
     │   └── firefox-manifest.json
-    ├── scripts/               # Engine ekstraktor metadata & SEO
-    │   ├── defines.js         # Konstanta & dictionary data SEO
+    ├── scripts/               # Engine ekstraktor metadata & audit SEO
+    │   ├── defines.js         # Dictionary data & konstanta SEO
     │   ├── extractors.js      # Parser metadata & DOM tags
     │   ├── extractors3.js     # Parser visual & outline headings
     │   ├── grabber.js         # Controller visual Link Grabber (grabber.html)
-    │   ├── seo-extractor.js   # Content script extractor SEO
+    │   ├── seo-extractor.js   # Content script parser DOM halaman aktif
     │   ├── seo.js             # Controller visual dashboard SEO (seo.html)
     │   ├── service.js         # Service helper & download generator
     │   └── url2service.js     # URL categorization service
     ├── background.js          # Service Worker: pemantau pasif webRequest
-    ├── bgp_he.js              # Script pembantu rute BGP Hurricane Electric
-    ├── common.js              # Fungsi utilitas bersama & status badge resolver
-    ├── content.js             # In-Page Shadow DOM widget, speed meter, traceroute
+    ├── bgp_he.js              # Content script helper di https://bgp.he.net/*
+    ├── common.js              # Utilitas bersama & badge resolver
+    ├── content.js             # In-Page Shadow DOM widget, live speed counter, & AS-Path modal
     ├── detectdarkmode.html    # Offscreen Dark Mode detector
     ├── detectdarkmode.js
     ├── grabber.html           # Halaman Link & Asset Grabber mandiri
-    ├── id_asn_default.js      # Basis data offline pemetaan ASN & ISP
+    ├── id_asn_default.js      # Basis data offline pemetaan ASN & nama ISP
     ├── iputil.js              # Utilitas parsing & validasi IPv4/IPv6
     ├── manifest.json          # Master Manifest V3
     ├── options.html           # Pengaturan ekstensi
@@ -143,33 +123,31 @@ ipvfoo/
 
 | File / Folder | Deskripsi / Peran |
 | :--- | :--- |
-| `src/manifest.json` | Konfigurasi ekstensi Chrome (Manifest V3), permissions, dan resource mappings. |
-| `src/grabber.html` & `src/scripts/grabber.js` | Halaman tab mandiri Link & Asset Grabber berbasis UI shadcn. |
-| `src/seo.html` & `src/scripts/seo.js` | Antarmuka dan engine visualisasi dashboard SEO audit modern. |
-| `src/theme.css` | Sentralisasi skema warna `:root` & `.dark` berbasis shadcn/ui. |
+| `src/manifest.json` | Konfigurasi utama ekstensi (Manifest V3), permissions, dan resource declaration. |
+| `src/content.js` | Content script utama: merender In-Page Shadow DOM widget, live speed meter, BGP AS-Path lookup modal, serta trigger Link Grabber & SEO. |
+| `src/bgp_he.js` | Helper otomatis di `bgp.he.net` untuk ekstraksi CIDR, script MikroTik (v7), dan Juniper BGP policies. |
+| `src/grabber.html` & `src/scripts/grabber.js` | Halaman tab mandiri Link & Asset Grabber berbasis UI shadcn Cyber Obsidian. |
+| `src/seo.html` & `src/scripts/seo.js` | Antarmuka dan visualisasi dashboard audit META SEO modern. |
+| `src/theme.css` | Sentralisasi variabel skema warna `:root` & `.dark` berbasis shadcn/ui. |
 | `src/background.js` | Service Worker penangkap trafik jaringan pasif via `chrome.webRequest`. |
-| `src/content.js` | Content script utama: merender In-Page Shadow DOM widget, live speed counter, traceroute modal, serta pengendali Link Grabber & SEO. |
-| `src/id_asn_default.js` | Basis data pemetaan ASN & provider ISP (offline & lokal). |
-| `src/bgp_he.js` | Content script pembantu untuk lookup rute BGP. |
-| `src/popup.html` & `src/popup.js` | Antarmuka popup default saat ikon ekstensi di-klik pada toolbar. |
-| `THEMES.md` & `THEMES-PREVIEW.html` | Dokumentasi Master Design System shadcn/ui Cyber Obsidian dan halaman showcase preview interaktif. |
-| `src/scripts/seo-extractor.js` | Injeksi content script untuk ekstraksi tag meta, JSON-LD, dan outline. |
-| `src/icons/` & `src/icons/badges/` | Ikon resolusi tinggi, asset UI, serta badge dinamis status IPv4/IPv6. |
-| `src/options.html` & `src/options.js` | Halaman pengaturan ekstensi (disediakan untuk rilis mendatang). |
+| `src/id_asn_default.js` | Basis data pemetaan ASN & provider ISP secara lokal dan offline. |
+| `src/popup.html` & `src/popup.js` | Antarmuka popup default saat ikon ekstensi diklik pada toolbar browser. |
+| `THEMES.md` & `THEMES-PREVIEW.html` | Dokumentasi Master Design System shadcn/ui Cyber Obsidian dan halaman showcase interaktif. |
+| `src/scripts/seo-extractor.js` | Script injeksi untuk ekstraksi metadata DOM, JSON-LD, headings, dan link. |
+| `src/icons/` & `src/icons/badges/` | Aset ikon resolusi tinggi dan badge status bar dinamis IPv4/IPv6. |
+| `src/options.html` & `src/options.js` | Halaman opsi dan preferensi ekstensi. |
 
 ---
 
 ## ⚙️ Extension Options
 
-Pada rilis versi **v0.1**, halaman **Extension Options** (`options.html`) sengaja dibuat seringan mungkin (menggunakan konfigurasi bawaan otomatis) agar ekstensi dapat langsung digunakan tanpa setup manual.
+Pada rilis versi **v0.1**, halaman **Extension Options** (`options.html`) menggunakan konfigurasi standar bawaan otomatis agar ekstensi dapat langsung digunakan secara instan tanpa konfigurasi manual yang rumit.
 
-Rencana pembaruan untuk menu Options di rilis berikutnya:
-- [ ] Pengaturan Looking Glass / BGP endpoint kustom.
-- [ ] Opsi kustomisasi daftar blacklist / whitelist domain di floating widget.
-- [ ] Pilihan format nama file ekspor otomatis (CSV/TXT).
-- [ ] Konfigurasi filter otomatis tipe file pada Link Grabber.
-
-Segala pembaruan terkait fitur Options akan dicatat langsung pada repository GitHub.
+Rencana fitur untuk pembaruan berikutnya:
+- [ ] Pengaturan endpoint kustom untuk Looking Glass / BGP lookup.
+- [ ] Opsi kustomisasi daftar domain yang diabaikan (*ignored domains*) pada floating widget.
+- [ ] Opsi penyesuaian template skrip ekspor MikroTik & Juniper.
+- [ ] Konfigurasi default filter tipe berkas pada Link Grabber.
 
 ---
 
@@ -179,12 +157,12 @@ Segala pembaruan terkait fitur Options akan dicatat langsung pada repository Git
    ```bash
    git clone https://github.com/mm1rza/ipvfoo.git
    ```
-2. Buka browser **Google Chrome** atau browser berbasis Chromium (Brave, Edge, Opera).
-3. Masuk ke halaman extensions: `chrome://extensions/`.
-4. Aktifkan **Developer mode** di pojok kanan atas.
+2. Buka browser **Google Chrome** atau browser berbasis Chromium lainnya (Edge, Brave, Opera, Vivaldi).
+3. Buka halaman ekstensi: `chrome://extensions/`.
+4. Aktifkan tombol **Developer mode** di pojok kanan atas.
 5. Klik tombol **Load unpacked** (Muat yang belum dibongkar).
-6. Pilih folder `src` dari direktori repository ini.
-7. Ekstensi **IPvFooKan** siap digunakan di semua tab!
+6. Pilih direktori folder `src` dari repositori ini.
+7. Ekstensi **IPvFooKan** langsung aktif dan siap digunakan di seluruh tab website!
 
 ---
 
@@ -200,6 +178,6 @@ Proyek ini merupakan hasil kompilasi, penyempurnaan, dan modifikasi mandiri dari
 - **META SEO Inspector**  
   Terinspirasi dari metadata extraction logic & SEO inspection guidelines.
 - **IPvFooKan Modifications**  
-  Modifikasi, penyatuan fitur, perbaikan encoding UTF-8, tema visual neon glassmorphism, dan integrasi BGP Traceroute oleh [mm1rza](https://github.com/mm1rza/ipvfoo).
+  Modifikasi, penyatuan fitur, standarisasi tema visual shadcn/ui Cyber Obsidian, BGP AS-Path visualizer, dan script generator MikroTik/Juniper oleh [mm1rza](https://github.com/mm1rza/ipvfoo).
 
-Distribusi modifikasi ini mematuhi ketentuan Apache License 2.0 (menyertakan lisensi asli, mencatat modifikasi file, dan atribusi pengembang asli).
+Distribusi modifikasi ini sepenuhnya mematuhi ketentuan Apache License 2.0 (menyertakan lisensi asli, mencatat modifikasi file, dan atribusi pengembang asli).
