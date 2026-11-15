@@ -1917,6 +1917,10 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     chrome.tabs.create({ url: chrome.runtime.getURL("seo.html") });
     sendResponse({ status: "ok" });
     return true;
+  } else if (msg.cmd === "open_grabber_tab") {
+    chrome.tabs.create({ url: chrome.runtime.getURL("grabber.html") });
+    sendResponse({ status: "ok" });
+    return true;
   } else if (msg.cmd === "open_tab" && msg.url) {
     chrome.tabs.create({ url: msg.url });
     sendResponse({ status: "ok" });

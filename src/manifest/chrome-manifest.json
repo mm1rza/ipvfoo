@@ -57,6 +57,8 @@
       "resources": [
         "seo.html",
         "scripts/seo.js",
+        "grabber.html",
+        "scripts/grabber.js",
         "theme.css",
         "icons/icon128.png"
       ],

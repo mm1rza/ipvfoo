@@ -116,6 +116,7 @@ ipvfoo/
     │   ├── defines.js         # Konstanta & dictionary data SEO
     │   ├── extractors.js      # Parser metadata & DOM tags
     │   ├── extractors3.js     # Parser visual & outline headings
+    │   ├── grabber.js         # Controller visual Link Grabber (grabber.html)
     │   ├── seo-extractor.js   # Content script extractor SEO
     │   ├── seo.js             # Controller visual dashboard SEO (seo.html)
     │   ├── service.js         # Service helper & download generator
@@ -126,6 +127,7 @@ ipvfoo/
     ├── content.js             # In-Page Shadow DOM widget, speed meter, traceroute
     ├── detectdarkmode.html    # Offscreen Dark Mode detector
     ├── detectdarkmode.js
+    ├── grabber.html           # Halaman Link & Asset Grabber mandiri
     ├── id_asn_default.js      # Basis data offline pemetaan ASN & ISP
     ├── iputil.js              # Utilitas parsing & validasi IPv4/IPv6
     ├── manifest.json          # Master Manifest V3
@@ -140,6 +142,8 @@ ipvfoo/
 | File / Folder | Deskripsi / Peran |
 | :--- | :--- |
 | `src/manifest.json` | Konfigurasi ekstensi Chrome (Manifest V3), permissions, dan resource mappings. |
+| `src/grabber.html` & `src/scripts/grabber.js` | Halaman tab mandiri Link & Asset Grabber berbasis UI shadcn. |
+| `src/seo.html` & `src/scripts/seo.js` | Antarmuka dan engine visualisasi dashboard SEO audit modern. |
 | `src/theme.css` | Sentralisasi skema warna `:root` & `.dark` berbasis shadcn/ui. |
 | `src/background.js` | Service Worker penangkap trafik jaringan pasif via `chrome.webRequest`. |
 | `src/content.js` | Content script utama: merender In-Page Shadow DOM widget, live speed counter, traceroute modal, serta pengendali Link Grabber & SEO. |

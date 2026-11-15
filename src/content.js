@@ -1949,7 +1949,37 @@
     const sourceUrl = window.location.href;
     const sourceHost = window.location.hostname;
 
+    const grabberPayload = {
+      sourceUrl: sourceUrl,
+      sourceHost: sourceHost,
+      assets: assets,
+      timestamp: Date.now()
+    };
+
     showCopyToast(`🚀 Membuka Grabber (${assets.length} aset) di Tab Baru...`);
+
+    try {
+      if (typeof chrome !== "undefined" && chrome.storage && chrome.storage.local) {
+        chrome.storage.local.set({ grabber_data: grabberPayload }, () => {
+          chrome.runtime.sendMessage({ cmd: "open_grabber_tab" }, (res) => {
+            if (chrome.runtime.lastError || !res || res.status !== "ok") {
+              openPreRenderedGrabberBlob(grabberPayload);
+            }
+          });
+        });
+        return;
+      }
+    } catch (e) {
+      console.warn("openGrabberInNewTab storage error:", e);
+    }
+
+    openPreRenderedGrabberBlob(grabberPayload);
+  }
+
+  function openPreRenderedGrabberBlob(payload) {
+    const assets = payload.assets || [];
+    const sourceUrl = payload.sourceUrl || window.location.href;
+    const sourceHost = payload.sourceHost || window.location.hostname;
 
     const html = `<!DOCTYPE html>
 <html lang="id">
