@@ -2162,10 +2162,21 @@
       box-shadow: 0 0 12px rgba(124, 58, 237, 0.45);
     }
     .tab-badge {
-      background: rgba(0, 0, 0, 0.35);
-      padding: 1px 7px;
-      border-radius: 10px;
+      background: #1e293b;
+      color: #38bdf8;
+      border: 1px solid #334155;
+      padding: 1px 8px;
+      border-radius: 12px;
       font-size: 11px;
+      font-weight: 700;
+      font-family: Consolas, Monaco, monospace;
+      letter-spacing: 0.3px;
+    }
+    .tab-btn.active .tab-badge {
+      background: rgba(255, 255, 255, 0.28);
+      color: #ffffff;
+      border-color: rgba(255, 255, 255, 0.5);
+      box-shadow: 0 0 6px rgba(255, 255, 255, 0.25);
     }
 
     .filter-actions-row {
@@ -2217,12 +2228,6 @@
       border-color: #6d28d9;
     }
     .btn-purple:hover { background: #6d28d9; }
-    .btn-pink {
-      background: #db2777;
-      color: #fff;
-      border-color: #be185d;
-    }
-    .btn-pink:hover { background: #be185d; }
     .btn-outline {
       background: #0d0f17;
       color: #cbd5e1;
@@ -2535,7 +2540,7 @@
         <button class="tab-btn active" data-tab="all">🌟 Semua <span class="tab-badge" id="count-all">0</span></button>
         <button class="tab-btn" data-tab="image">🖼️ Gambar (PNG/B64) <span class="tab-badge" id="count-image">0</span></button>
         <button class="tab-btn" data-tab="link">🔗 Links <span class="tab-badge" id="count-link">0</span></button>
-        <button class="tab-btn" data-tab="media">🎬 Media <span class="tab-badge" id="count-media">0</span></button>
+        <button class="tab-btn" data-tab="media">🎬 Video & Audio <span class="tab-badge" id="count-media">0</span></button>
         <button class="tab-btn" data-tab="doc">📄 Dokumen <span class="tab-badge" id="count-doc">0</span></button>
         <button class="tab-btn" data-tab="code">⚡ Scripts & CSS <span class="tab-badge" id="count-code">0</span></button>
       </div>
@@ -2543,7 +2548,6 @@
       <div class="filter-actions-row">
         <input type="text" id="search-input" class="search-input" placeholder="Ketik untuk filter: nama file, domain, ekstensi .png, base64, dll..." autofocus />
         <button id="btn-copy-urls" class="btn btn-primary" title="Copy semua URL yang tampil">📋 Copy URLs (<span id="copy-count">0</span>)</button>
-        <button id="btn-copy-b64-all" class="btn btn-pink" style="display:none;" title="Convert & Copy semua gambar di daftar sebagai Base64 PNG">🧬 Copy All Base64</button>
         <button id="btn-export-txt" class="btn btn-purple" title="Download daftar URL sebagai file teks">📥 Export TXT</button>
         
         <div class="view-toggle">
@@ -2679,7 +2683,6 @@
       const groupByDomain = document.getElementById("opt-group").checked;
       const contentArea = document.getElementById("content-area");
       const copyCountSpan = document.getElementById("copy-count");
-      const copyB64AllBtn = document.getElementById("btn-copy-b64-all");
 
       let items = RAW_ASSETS.slice(0);
 
@@ -2715,7 +2718,6 @@
       copyCountSpan.textContent = filtered.length;
 
       const hasImages = activeCategory === "image" || filtered.some(f => f.category === "image");
-      copyB64AllBtn.style.display = hasImages ? "inline-flex" : "none";
 
       if (filtered.length === 0) {
         contentArea.innerHTML = '<div class="empty-state">🔍 Tidak ada aset yang cocok dengan filter "' + escapeHtml(searchVal) + '"</div>';
@@ -2880,28 +2882,6 @@
       if (!currentFiltered.length) return showToast("Tidak ada item untuk di-copy");
       const text = currentFiltered.map(i => i.url).join("\\r\\n");
       copyToClipboard(text, currentFiltered.length + " URLs");
-    };
-
-    // Copy All Base64
-    document.getElementById("btn-copy-b64-all").onclick = async function() {
-      const imgItems = currentFiltered.filter(i => i.category === "image");
-      if (!imgItems.length) return showToast("Tidak ada gambar untuk di-convert");
-      this.textContent = "⏳ Converting (" + imgItems.length + ")...";
-      const b64List = [];
-      for (const item of imgItems) {
-        try {
-          const b64 = await convertImgToBase64(item.url);
-          if (b64) b64List.push(b64);
-        } catch (e) {}
-      }
-      if (b64List.length > 0) {
-        copyToClipboard(b64List.join("\\r\\n"), b64List.length + " Base64 Images");
-        this.textContent = "✅ Copied (" + b64List.length + ")!";
-      } else {
-        showToast("Gagal convert Base64 (CORS protection)");
-        this.textContent = "❌ Gagal";
-      }
-      setTimeout(() => { this.textContent = "🧬 Copy All Base64"; }, 2000);
     };
 
     // Export TXT
