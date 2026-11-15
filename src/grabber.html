@@ -26,40 +26,6 @@
       gap: 1.25rem;
     }
 
-    .toolbar-card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 1.25rem 1.5rem;
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-    }
-
-    .tabs-row {
-      display: flex;
-      gap: 0.5rem;
-      overflow-x: auto;
-      padding-bottom: 0.25rem;
-    }
-
-    .filter-actions-row {
-      display: flex;
-      gap: 0.75rem;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-
-    .options-row {
-      display: flex;
-      gap: 1.25rem;
-      font-size: 0.8125rem;
-      color: var(--muted-foreground);
-      align-items: center;
-      flex-wrap: wrap;
-    }
-
     .view-toggle {
       margin-left: auto;
       display: flex;
@@ -467,20 +433,21 @@
       </div>
     </section>
 
-    <!-- TOOLBAR & FILTERS -->
-    <div class="toolbar-card">
-      <div class="tabs-list tabs-row">
-        <button class="tab-btn active" data-tab="all">Semua <span class="tab-badge" id="count-all">0</span></button>
-        <button class="tab-btn" data-tab="image">Gambar <span class="tab-badge" id="count-image">0</span></button>
-        <button class="tab-btn" data-tab="link">Links <span class="tab-badge" id="count-link">0</span></button>
-        <button class="tab-btn" data-tab="media">Media <span class="tab-badge" id="count-media">0</span></button>
-        <button class="tab-btn" data-tab="doc">Dokumen <span class="tab-badge" id="count-doc">0</span></button>
-        <button class="tab-btn" data-tab="code">Scripts &amp; CSS <span class="tab-badge" id="count-code">0</span></button>
+    <!-- FILTER & SEARCH TOOLBAR -->
+    <div class="filter-toolbar">
+      <div class="search-input-wrap">
+        <span class="search-input-icon">🔍</span>
+        <input type="text" id="search-input" class="search-input"
+          placeholder="Ketik kata kunci untuk memfilter URL, ekstensi, atau nama berkas..." />
       </div>
 
-      <div class="filter-actions-row">
-        <input type="text" id="search-input" class="search-input"
-          placeholder="🔍 Ketik kata kunci untuk memfilter URL, ekstensi, atau nama berkas..." />
+      <div class="chips-filter-row">
+        <button class="chip-btn tab-btn active" data-tab="all">Semua <span class="tab-badge" id="count-all">0</span></button>
+        <button class="chip-btn tab-btn" data-tab="image">Gambar <span class="tab-badge" id="count-image">0</span></button>
+        <button class="chip-btn tab-btn" data-tab="link">Links <span class="tab-badge" id="count-link">0</span></button>
+        <button class="chip-btn tab-btn" data-tab="media">Media <span class="tab-badge" id="count-media">0</span></button>
+        <button class="chip-btn tab-btn" data-tab="doc">Dokumen <span class="tab-badge" id="count-doc">0</span></button>
+        <button class="chip-btn tab-btn" data-tab="code">Scripts &amp; CSS <span class="tab-badge" id="count-code">0</span></button>
       </div>
 
       <div class="options-row">

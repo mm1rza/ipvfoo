@@ -373,10 +373,12 @@ Kedua halaman menggunakan hierarki elemen berikut secara seragam:
 │    │  Label    │ │  Label    │ │  Label    │ │  Label    │ │  Label    │ │   │ │
 │    └───────────┘ └───────────┘ └───────────┘ └───────────┘ └───────────┘ └───┘ │
 ├───────────────────────────────────────────────────────────────────────────────┤
-│ 4. INTERACTIVE TOOLBAR & FILTER                                               │
-│    [Tab 1: All] [Tab 2] [Tab 3] ... (atau Category Chips)                    │
-│    [ 🔍 Search Input dengan focus ring amber... ]                             │
-│    [☑ Dedup] [☑ Pihak Ke-3]               [List View] [Gallery View]         │
+│ 4. UNIFIED FILTER & SEARCH TOOLBAR (.filter-toolbar)                          │
+│    ┌─────────────────────────────────────────────────────────────────────┐    │
+│    │ 🔍 [Search Input Full-Width dengan focus ring amber...]             │    │
+│    └─────────────────────────────────────────────────────────────────────┘    │
+│    [Chip 1: All] [Chip 2] [Chip 3] ... (.chips-filter-row > .chip-btn)        │
+│    [☑ Dedup] [☑ Pihak Ke-3] [☑ Grup]      [List View] [Gallery View]         │
 ├───────────────────────────────────────────────────────────────────────────────┤
 │ 5. MAIN CONTENT AREA (.content-container / .app-layout)                       │
 │    ┌─────────────────────────────────────────────────┐ ┌────────────────────┐ │
@@ -423,13 +425,14 @@ Kedua halaman menggunakan `.grid-metrics` berkolom 6 dengan kartu `.card` berlat
   5. `JSON-LD Schemas`: Jumlah objek structured data terdeteksi.
   6. `Total Links`: Statistik keseluruhan anchor internal dan eksternal.
 
-#### D. Toolbar & Tabs Kontrol
-- **Shadcn UI Tabs (`.tabs-list`, `.tab-btn` / `.tab-trigger`)**:
-  Tab kategori horizontal dengan indikator angka aset berbentuk kapsul (`.tab-badge`).
-- **Search Input (`.search-input`)**:
-  Pencarian instan dengan ikon kaca pembesar dan focus ring aksen pendar oranye (`--ring`).
-- **View Mode Switcher (`.view-toggle`, `.view-btn`)**:
-  Pilihan tampilan daftar tabel rinci (*List View*) atau galeri visual (*Gallery View*).
+#### D. Filter & Search Toolbar Bersama (`.filter-toolbar`)
+Kedua modul mengadopsi susunan dan kelas `.filter-toolbar` yang seragam:
+- **Search Wrapper Penuh (`.search-input-wrap`)**:
+  Input pencarian instan berlebar penuh dengan ikon kaca pembesar tersemat (`.search-input-icon`), padding kiri `2.25rem`, dan pendar border amber (`--ring`).
+- **Filter Chips Interaktif (`.chips-filter-row`, `.chip-btn`)**:
+  Tombol filter berbentuk kapsul (*capsule chips* `border-radius: 9999px`) dengan efek hover pendar amber. Mendukung badge indikator hitungan angka (`.tab-badge`) di dalamnya.
+- **Baris Opsi Tambahan (`.options-row`)** *(khusus Link Grabber)*:
+  Garis pemisah subtle border dengan kontrol checkbox filter (`.checkbox-label`) serta pengalih mode tampilan galeri/daftar (`.view-toggle`, `.view-btn`).
 
 ---
 

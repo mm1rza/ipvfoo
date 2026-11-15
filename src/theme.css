@@ -740,6 +740,71 @@ code, pre, .font-mono {
   border-color: var(--primary);
 }
 
+.chip-btn.active .tab-badge {
+  background: rgba(250, 156, 27, 0.2);
+  color: var(--primary);
+  border-color: rgba(250, 156, 27, 0.4);
+}
+
+.chip-btn:hover .tab-badge {
+  color: var(--primary);
+  border-color: rgba(250, 156, 27, 0.25);
+}
+
+/* ==========================================================================
+   FILTER TOOLBAR & SEARCH WRAPPER
+   ========================================================================== */
+.filter-toolbar {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.search-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.search-input-icon {
+  position: absolute;
+  left: 12px;
+  color: var(--muted-foreground);
+  font-size: 0.875rem;
+  pointer-events: none;
+}
+
+.search-input-wrap .search-input {
+  width: 100%;
+  padding-left: 2.25rem;
+}
+
+.chips-filter-row {
+  display: flex;
+  gap: 0.45rem;
+  overflow-x: auto;
+  padding-bottom: 0.2rem;
+  align-items: center;
+}
+
+.options-row {
+  display: flex;
+  gap: 1.25rem;
+  font-size: 0.8125rem;
+  color: var(--muted-foreground);
+  align-items: center;
+  flex-wrap: wrap;
+  padding-top: 0.4rem;
+  border-top: 1px solid var(--border);
+}
+
 /* ==========================================================================
    INPUTS & FORM CONTROLS
    ========================================================================== */
