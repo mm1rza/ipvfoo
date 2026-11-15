@@ -984,10 +984,6 @@ function makeRow(isFirst, tuple) {
   let bgpFull = asn || "bgp";
   let bgpHref = `https://bgp.he.net/ip/${addr}`;
   if (asn) {
-    const m = asn.match(/AS\d+/i);
-    if (m) {
-      bgpHref = `https://bgp.he.net/${m[0]}`;
-    }
     const maxLen = 22;
     bgpDisplay = asn.length > maxLen ? asn.substring(0, maxLen - 2) + ".." : asn;
   }
@@ -995,7 +991,7 @@ function makeRow(isFirst, tuple) {
     const bgpLink = document.createElement("a");
     bgpLink.href = bgpHref;
     bgpLink.textContent = bgpDisplay;
-    bgpLink.title = `${bgpFull} (Klik untuk lookup HE BGP)`;
+    bgpLink.title = `${bgpFull} (Klik untuk lookup BGP IP: ${addr})`;
     bgpLink.target = "_blank";
     bgpLink.style.color = "#00d9ff";
     bgpLink.style.textDecoration = "none";

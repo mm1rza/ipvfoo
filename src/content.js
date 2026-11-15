@@ -1205,16 +1205,12 @@
     let bgpFull = asn || "bgp";
     let bgpHref = `https://bgp.he.net/ip/${addr}`;
     if (asn) {
-      const m = asn.match(/AS\d+/i);
-      if (m) {
-        bgpHref = `https://bgp.he.net/${m[0]}`;
-      }
       const maxLen = 22;
       bgpDisplay = asn.length > maxLen ? asn.substring(0, maxLen - 2) + ".." : asn;
     }
 
     const bgpHtml = (addr && addr !== "(x)" && !addr.startsWith("("))
-      ? `<a href="${bgpHref}" target="_blank" class="bgp-link" title="${bgpFull} (Klik untuk lookup HE BGP)">${bgpDisplay}</a>`
+      ? `<a href="${bgpHref}" target="_blank" class="bgp-link" title="${bgpFull} (Klik untuk lookup BGP IP: ${addr})">${bgpDisplay}</a>`
       : `<span style="color:#666;">-</span>`;
 
     const dSpeed = domainSpeedMap[domain] || 0;
@@ -1242,9 +1238,14 @@
     const ipTd = tr.querySelector(".ip-cell");
     if (ipTd && addr && addr !== "(x)" && !addr.startsWith("(")) {
       ipTd.style.cursor = "pointer";
+      ipTd.title = `Klik untuk lookup BGP IP: https://bgp.he.net/ip/${addr}\n(Ctrl+Click untuk copy IP)`;
       ipTd.onclick = (e) => {
         e.stopPropagation();
-        copyToClipboard(addr, "IP");
+        if (e.ctrlKey || e.altKey) {
+          copyToClipboard(addr, "IP");
+        } else {
+          window.open(`https://bgp.he.net/ip/${addr}`, "_blank");
+        }
       };
     }
 
