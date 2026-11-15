@@ -1,0 +1,1346 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cyber Obsidian & Neon Amber — shadcn/ui Theme Showcase</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    /* ==========================================================================
+       CSS VARIABLES: SHADCN/UI SYSTEM WITH COLOR_PALETTE.MD TOKENS
+       ========================================================================== */
+    :root {
+      /* Light Mode */
+      --background: #F5F7FA;
+      --foreground: #111827;
+      
+      --card: #FFFFFF;
+      --card-foreground: #111827;
+      
+      --popover: #FFFFFF;
+      --popover-foreground: #111827;
+      
+      --primary: #E0870E;
+      --primary-glow: #FA9C1B;
+      --primary-foreground: #FFFFFF;
+      
+      --secondary: #EEF2F6;
+      --secondary-foreground: #111827;
+      
+      --muted: #EEF2F6;
+      --muted-foreground: #6B7280;
+      
+      --accent: #E2E8F0;
+      --accent-foreground: #E0870E;
+      
+      --destructive: #EF4444;
+      --destructive-foreground: #FFFFFF;
+      
+      --border: rgba(209, 213, 219, 0.85);
+      --input: #E5E7EB;
+      --ring: #FA9C1B;
+      --radius: 0.5rem;
+
+      /* Cyber Specifics */
+      --cyber-cyan: #00BBD4;
+      --cyber-cyan-bg: rgba(0, 187, 212, 0.12);
+      --cyber-green: #10B981;
+      --cyber-green-bg: rgba(16, 185, 129, 0.12);
+      --cyber-blue: #1A79FF;
+      --glow-orange: 0 0 24px rgba(224, 135, 14, 0.25);
+      --glow-cyan: 0 0 24px rgba(0, 187, 212, 0.2);
+    }
+
+    .dark {
+      /* Dark Mode (Cyber Obsidian Deep Base) */
+      --background: #07090D;
+      --foreground: #FFFFFF;
+      
+      --card: #0D1016;
+      --card-foreground: #FFFFFF;
+      
+      --popover: #161A22;
+      --popover-foreground: #FFFFFF;
+      
+      --primary: #FA9C1B;
+      --primary-glow: #FFB03A;
+      --primary-foreground: #07090D;
+      
+      --secondary: #1D222D;
+      --secondary-foreground: #FFFFFF;
+      
+      --muted: #161A22;
+      --muted-foreground: #98A1B3;
+      
+      --accent: #1D222D;
+      --accent-foreground: #FA9C1B;
+      
+      --destructive: #F04242;
+      --destructive-foreground: #FFFFFF;
+      
+      --border: rgba(61, 71, 92, 0.45);
+      --input: rgba(61, 71, 92, 0.55);
+      --ring: #FA9C1B;
+      --radius: 0.5rem;
+
+      /* Cyber Specifics */
+      --cyber-cyan: #00EAFF;
+      --cyber-cyan-bg: rgba(0, 234, 255, 0.1);
+      --cyber-green: #1AE680;
+      --cyber-green-bg: rgba(26, 230, 128, 0.1);
+      --cyber-blue: #1A79FF;
+      --glow-orange: 0 0 35px rgba(250, 156, 27, 0.35);
+      --glow-cyan: 0 0 35px rgba(0, 234, 255, 0.25);
+    }
+
+    /* ==========================================================================
+       RESET & BASE STYLING
+       ========================================================================== */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--background);
+      color: var(--foreground);
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      transition: background-color 0.25s ease, color 0.25s ease;
+      min-height: 100vh;
+    }
+
+    code, pre, .font-mono {
+      font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    }
+
+    /* Container */
+    .container {
+      max-width: 1240px;
+      margin-left: auto;
+      margin-right: auto;
+      padding-left: 1.5rem;
+      padding-right: 1.5rem;
+    }
+
+    /* ==========================================================================
+       NAVBAR (SHADCN HEADER)
+       ========================================================================== */
+    .header {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      width: 100%;
+      border-bottom: 1px solid var(--border);
+      background-color: var(--background);
+      backdrop-filter: blur(12px);
+      transition: border-color 0.25s ease;
+    }
+
+    .header-content {
+      display: flex;
+      height: 4rem;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      text-decoration: none;
+      color: var(--foreground);
+      font-weight: 700;
+      font-size: 1.1rem;
+      letter-spacing: -0.025em;
+    }
+
+    .brand-icon {
+      width: 2rem;
+      height: 2rem;
+      border-radius: 0.375rem;
+      background: linear-gradient(135deg, var(--primary) 0%, #FF6B00 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: var(--glow-orange);
+      color: #07090D;
+    }
+
+    .brand-badge {
+      font-size: 0.7rem;
+      padding: 0.15rem 0.5rem;
+      border-radius: 9999px;
+      background: var(--secondary);
+      color: var(--primary);
+      border: 1px solid var(--border);
+      font-weight: 600;
+    }
+
+    .nav-links {
+      display: none;
+      align-items: center;
+      gap: 1.5rem;
+    }
+
+    @media (min-width: 768px) {
+      .nav-links {
+        display: flex;
+      }
+    }
+
+    .nav-link {
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--muted-foreground);
+      text-decoration: none;
+      transition: color 0.15s ease;
+    }
+
+    .nav-link:hover, .nav-link.active {
+      color: var(--foreground);
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .search-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 0.4rem 0.75rem;
+      font-size: 0.8125rem;
+      color: var(--muted-foreground);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .search-btn:hover {
+      border-color: var(--primary);
+      color: var(--foreground);
+    }
+
+    .search-btn kbd {
+      background: var(--secondary);
+      border: 1px solid var(--border);
+      border-radius: 0.25rem;
+      padding: 0.1rem 0.35rem;
+      font-size: 0.7rem;
+    }
+
+    /* Mode Toggle */
+    .icon-btn {
+      width: 2.25rem;
+      height: 2.25rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: var(--foreground);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .icon-btn:hover {
+      background: var(--accent);
+      color: var(--accent-foreground);
+      border-color: var(--primary);
+    }
+
+    /* ==========================================================================
+       HERO BANNER
+       ========================================================================== */
+    .hero {
+      padding: 3.5rem 0 2rem;
+      text-align: left;
+    }
+
+    .hero-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      border-radius: 9999px;
+      padding: 0.3rem 0.85rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      background: var(--secondary);
+      border: 1px solid var(--border);
+      color: var(--primary);
+      margin-bottom: 1.25rem;
+    }
+
+    .hero-title {
+      font-size: 2.5rem;
+      font-weight: 800;
+      letter-spacing: -0.035em;
+      line-height: 1.15;
+      margin-bottom: 1rem;
+    }
+
+    @media (min-width: 768px) {
+      .hero-title {
+        font-size: 3.25rem;
+      }
+    }
+
+    .text-gradient {
+      background: linear-gradient(135deg, var(--foreground) 30%, var(--primary) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-desc {
+      font-size: 1.125rem;
+      color: var(--muted-foreground);
+      max-width: 720px;
+      line-height: 1.6;
+      margin-bottom: 2rem;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+
+    /* ==========================================================================
+       SHADCN BUTTONS
+       ========================================================================== */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      border-radius: var(--radius);
+      font-size: 0.875rem;
+      font-weight: 600;
+      padding: 0.55rem 1.1rem;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      border: 1px solid transparent;
+      line-height: 1;
+    }
+
+    .btn:active {
+      transform: scale(0.98);
+    }
+
+    /* Primary: Cyber Amber */
+    .btn-primary {
+      background: var(--primary);
+      color: var(--primary-foreground);
+      box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-glow);
+      box-shadow: var(--glow-orange);
+    }
+
+    /* Secondary */
+    .btn-secondary {
+      background: var(--secondary);
+      color: var(--secondary-foreground);
+      border-color: var(--border);
+    }
+
+    .btn-secondary:hover {
+      background: var(--accent);
+      border-color: var(--primary);
+    }
+
+    /* Outline */
+    .btn-outline {
+      background: transparent;
+      color: var(--foreground);
+      border-color: var(--border);
+    }
+
+    .btn-outline:hover {
+      background: var(--accent);
+      color: var(--accent-foreground);
+      border-color: var(--border);
+    }
+
+    /* Ghost */
+    .btn-ghost {
+      background: transparent;
+      color: var(--muted-foreground);
+    }
+
+    .btn-ghost:hover {
+      background: var(--accent);
+      color: var(--foreground);
+    }
+
+    /* Destructive */
+    .btn-destructive {
+      background: var(--destructive);
+      color: var(--destructive-foreground);
+    }
+
+    .btn-destructive:hover {
+      opacity: 0.9;
+      box-shadow: 0 0 20px rgba(240, 66, 66, 0.35);
+    }
+
+    /* Cyan Accent */
+    .btn-cyan {
+      background: var(--cyber-cyan);
+      color: #07090D;
+      font-weight: 700;
+    }
+
+    .btn-cyan:hover {
+      box-shadow: var(--glow-cyan);
+    }
+
+    /* ==========================================================================
+       METRIC STAT CARDS
+       ========================================================================== */
+    .grid-metrics {
+      display: grid;
+      grid-template-columns: repeat(1, minmax(0, 1fr));
+      gap: 1rem;
+      margin-bottom: 2.5rem;
+    }
+
+    @media (min-width: 640px) {
+      .grid-metrics {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (min-width: 1024px) {
+      .grid-metrics {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      transition: all 0.2s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card:hover {
+      border-color: rgba(250, 156, 27, 0.4);
+      transform: translateY(-2px);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.75rem;
+    }
+
+    .card-title {
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--muted-foreground);
+    }
+
+    .card-value {
+      font-size: 1.875rem;
+      font-weight: 800;
+      letter-spacing: -0.025em;
+      color: var(--foreground);
+      margin-bottom: 0.25rem;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .card-trend {
+      font-size: 0.75rem;
+      color: var(--muted-foreground);
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    .trend-up {
+      color: var(--cyber-green);
+    }
+
+    .trend-amber {
+      color: var(--primary);
+    }
+
+    .trend-cyan {
+      color: var(--cyber-cyan);
+    }
+
+    /* ==========================================================================
+       SHADCN TABS
+       ========================================================================== */
+    .tabs-container {
+      margin-bottom: 3rem;
+    }
+
+    .tabs-list {
+      display: inline-flex;
+      height: 2.75rem;
+      align-items: center;
+      justify-content: center;
+      border-radius: var(--radius);
+      background: var(--secondary);
+      padding: 0.25rem;
+      color: var(--muted-foreground);
+      border: 1px solid var(--border);
+      margin-bottom: 1.5rem;
+    }
+
+    .tab-trigger {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      white-space: nowrap;
+      border-radius: calc(var(--radius) - 2px);
+      padding: 0.35rem 1rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      background: transparent;
+      border: none;
+      color: var(--muted-foreground);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .tab-trigger.active {
+      background: var(--card);
+      color: var(--foreground);
+      font-weight: 600;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    /* ==========================================================================
+       SHADCN TABLE
+       ========================================================================== */
+    .table-wrapper {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .table-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid var(--border);
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .search-input {
+      background: var(--background);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 0.45rem 0.85rem;
+      font-size: 0.875rem;
+      color: var(--foreground);
+      outline: none;
+      width: 260px;
+      transition: border-color 0.15s ease;
+    }
+
+    .search-input:focus {
+      border-color: var(--ring);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.875rem;
+    }
+
+    thead {
+      background: var(--secondary);
+      border-bottom: 1px solid var(--border);
+    }
+
+    th {
+      padding: 0.75rem 1.25rem;
+      font-weight: 600;
+      color: var(--muted-foreground);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    td {
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid var(--border);
+      color: var(--foreground);
+      vertical-align: middle;
+    }
+
+    tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    tbody tr {
+      transition: background-color 0.15s ease;
+    }
+
+    tbody tr:hover {
+      background-color: var(--accent);
+    }
+
+    /* ==========================================================================
+       SHADCN BADGES
+       ========================================================================== */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      border-radius: 0.25rem;
+      padding: 0.2rem 0.55rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      line-height: 1;
+      font-family: 'JetBrains Mono', monospace;
+      border: 1px solid transparent;
+    }
+
+    .badge-primary {
+      background: rgba(250, 156, 27, 0.15);
+      color: var(--primary);
+      border-color: rgba(250, 156, 27, 0.3);
+    }
+
+    .badge-cyan {
+      background: var(--cyber-cyan-bg);
+      color: var(--cyber-cyan);
+      border-color: rgba(0, 234, 255, 0.25);
+    }
+
+    .badge-green {
+      background: var(--cyber-green-bg);
+      color: var(--cyber-green);
+      border-color: rgba(26, 230, 128, 0.25);
+    }
+
+    .badge-secondary {
+      background: var(--secondary);
+      color: var(--muted-foreground);
+      border-color: var(--border);
+    }
+
+    .badge-destructive {
+      background: rgba(240, 66, 66, 0.15);
+      color: var(--destructive);
+      border-color: rgba(240, 66, 66, 0.3);
+    }
+
+    /* ==========================================================================
+       COMPONENT GALLERY (GRID DEMO)
+       ========================================================================== */
+    .grid-components {
+      display: grid;
+      grid-template-columns: repeat(1, minmax(0, 1fr));
+      gap: 1.5rem;
+    }
+
+    @media (min-width: 768px) {
+      .grid-components {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    .component-box {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+    }
+
+    .box-title {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    .box-desc {
+      font-size: 0.8125rem;
+      color: var(--muted-foreground);
+      margin-bottom: 1.25rem;
+    }
+
+    .component-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      align-items: center;
+    }
+
+    /* Switches */
+    .switch-label {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      padding: 0.5rem 0;
+      cursor: pointer;
+    }
+
+    .switch-info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .switch-title {
+      font-size: 0.875rem;
+      font-weight: 600;
+    }
+
+    .switch-desc {
+      font-size: 0.75rem;
+      color: var(--muted-foreground);
+    }
+
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 44px;
+      height: 24px;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: var(--secondary);
+      border: 1px solid var(--border);
+      transition: .25s ease;
+      border-radius: 34px;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 16px;
+      width: 16px;
+      left: 3px;
+      bottom: 3px;
+      background-color: var(--foreground);
+      transition: .25s ease;
+      border-radius: 50%;
+    }
+
+    input:checked + .slider {
+      background-color: var(--primary);
+      border-color: var(--primary);
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(20px);
+      background-color: var(--primary-foreground);
+    }
+
+    /* Alerts */
+    .alert {
+      display: flex;
+      gap: 0.875rem;
+      padding: 1rem;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background: var(--card);
+      margin-bottom: 1rem;
+    }
+
+    .alert-amber {
+      border-left: 4px solid var(--primary);
+      background: rgba(250, 156, 27, 0.04);
+    }
+
+    .alert-cyan {
+      border-left: 4px solid var(--cyber-cyan);
+      background: rgba(0, 234, 255, 0.04);
+    }
+
+    .alert-icon {
+      flex-shrink: 0;
+    }
+
+    .alert-title {
+      font-size: 0.875rem;
+      font-weight: 700;
+      margin-bottom: 0.25rem;
+    }
+
+    .alert-desc {
+      font-size: 0.8125rem;
+      color: var(--muted-foreground);
+      line-height: 1.4;
+    }
+
+    /* Color Palette Swatches */
+    .palette-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1rem;
+    }
+
+    @media (min-width: 640px) {
+      .palette-grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
+    }
+
+    .swatch-card {
+      border: 1px solid var(--border);
+      background: var(--card);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .swatch-color {
+      height: 70px;
+      width: 100%;
+    }
+
+    .swatch-info {
+      padding: 0.75rem;
+    }
+
+    .swatch-name {
+      font-size: 0.8125rem;
+      font-weight: 700;
+      margin-bottom: 0.15rem;
+    }
+
+    .swatch-token {
+      font-size: 0.7rem;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--muted-foreground);
+    }
+
+    .swatch-hex {
+      font-size: 0.75rem;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--primary);
+      font-weight: 600;
+      margin-top: 0.25rem;
+    }
+
+    /* Footer */
+    .footer {
+      border-top: 1px solid var(--border);
+      padding: 2.5rem 0;
+      margin-top: 4rem;
+      font-size: 0.875rem;
+      color: var(--muted-foreground);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    @media (min-width: 768px) {
+      .footer {
+        flex-direction: row;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ========================================================================
+       NAVBAR
+       ======================================================================== -->
+  <header class="header">
+    <div class="container header-content">
+      <div style="display: flex; align-items: center; gap: 2rem;">
+        <a href="#" class="brand">
+          <div class="brand-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="2" y1="12" x2="22" y2="12"></line>
+              <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+            </svg>
+          </div>
+          <span>IPvFooKan</span>
+          <span class="brand-badge">shadcn/ui v4</span>
+        </a>
+        <nav class="nav-links">
+          <a href="#monitor" class="nav-link active">Network Monitor</a>
+          <a href="#components" class="nav-link">Component UI</a>
+          <a href="#tokens" class="nav-link">Color Tokens</a>
+          <a href="https://github.com/mm1rza/ipvfoo" target="_blank" class="nav-link">GitHub</a>
+        </nav>
+      </div>
+
+      <div class="nav-actions">
+        <button class="search-btn" onclick="alert('Tekan Tab untuk navigasi komponen shadcn.')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <span>Search docs...</span>
+          <kbd>Ctrl K</kbd>
+        </button>
+
+        <!-- Mode Toggle -->
+        <button class="icon-btn" id="theme-toggle" title="Toggle Light / Dark Mode">
+          <!-- Sun (Light) -->
+          <svg id="sun-icon" style="display: none;" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          </svg>
+          <!-- Moon (Dark) -->
+          <svg id="moon-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- ========================================================================
+         HERO SECTION
+         ======================================================================== -->
+    <section class="hero">
+      <div class="hero-pill">
+        <span style="display:inline-block; width:6px; height:6px; border-radius:50%; background:var(--primary);"></span>
+        Design System COLOR_PALETTE.md × ui.shadcn.com
+      </div>
+      <h1 class="hero-title">
+        The <span class="text-gradient">Cyber Obsidian</span> Theme<br>for modern extensions.
+      </h1>
+      <p class="hero-desc">
+        Komponen UI yang dapat diakses, modular, dan dirancang khusus mengikuti standar token CSS <b>shadcn/ui</b>. Menggunakan warna dasar <i>Obsidian Deep</i>, aksen pendar <i>Cyber Amber</i>, dan <i>Electric Cyan</i>.
+      </p>
+      <div class="hero-actions">
+        <button class="btn btn-primary" onclick="switchTab('tab-monitor')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+          Live Network Inspector
+        </button>
+        <button class="btn btn-secondary" onclick="switchTab('tab-components')">
+          Browse Components
+        </button>
+        <button class="btn btn-outline" onclick="switchTab('tab-tokens')">
+          Token Colors
+        </button>
+      </div>
+    </section>
+
+    <!-- ========================================================================
+         METRICS OVERVIEW CARDS
+         ======================================================================== -->
+    <section class="grid-metrics">
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Live Throughput</span>
+          <span class="badge badge-cyan">42.8 MB/s</span>
+        </div>
+        <div class="card-value">128.4 <span style="font-size: 1rem; font-weight: normal; color: var(--muted-foreground);">Mbps</span></div>
+        <div class="card-trend trend-cyan">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline></svg>
+          +14.2% peak passive transfer
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Origin Server IP</span>
+          <span class="badge badge-primary">IPv6</span>
+        </div>
+        <div class="card-value" style="font-size: 1.35rem; line-height: 2.2rem;">2606:4700::6810</div>
+        <div class="card-trend trend-amber">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+          RTT Ping: 7 ms (Direct Peering)
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">BGP Transit ASN</span>
+          <span class="badge badge-green">3 Hops</span>
+        </div>
+        <div class="card-value">AS13335</div>
+        <div class="card-trend trend-up">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          Cloudflare BGP Anycast OK
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Deep SEO Health</span>
+          <span class="badge badge-primary">96 / 100</span>
+        </div>
+        <div class="card-value">A+</div>
+        <div class="card-trend trend-up">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+          0 Critical Errors found
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================================
+         INTERACTIVE TABS
+         ======================================================================== -->
+    <section class="tabs-container">
+      <div class="tabs-list">
+        <button class="tab-trigger active" onclick="switchTab('tab-monitor')" id="trigger-monitor">Network Table</button>
+        <button class="tab-trigger" onclick="switchTab('tab-components')" id="trigger-components">Component Gallery</button>
+        <button class="tab-trigger" onclick="switchTab('tab-tokens')" id="trigger-tokens">Color Palette Tokens</button>
+      </div>
+
+      <!-- TAB 1: NETWORK MONITOR TABLE -->
+      <div class="tab-content active" id="tab-monitor">
+        <div class="table-wrapper">
+          <div class="table-toolbar">
+            <div style="display: flex; align-items: center; gap: 0.75rem;">
+              <input type="text" class="search-input" placeholder="Filter domain / IP address..." id="filter-input">
+              <span class="badge badge-secondary">4 Elements</span>
+            </div>
+            <div style="display: flex; gap: 0.5rem;">
+              <button class="btn btn-outline" style="padding: 0.4rem 0.8rem; font-size: 0.8125rem;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                Export CSV
+              </button>
+              <button class="btn btn-primary" style="padding: 0.4rem 0.8rem; font-size: 0.8125rem;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                LINK GRABBER
+              </button>
+            </div>
+          </div>
+
+          <table>
+            <thead>
+              <tr>
+                <th>Domain / Host</th>
+                <th>Server IP</th>
+                <th>Protocol</th>
+                <th>Security</th>
+                <th>Latency</th>
+                <th>Transfer</th>
+                <th style="text-align: right;">BGP ASN</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="font-weight: 600;">github.com</td>
+                <td><span class="badge badge-primary">20.205.243.166</span></td>
+                <td><span class="badge badge-cyan">HTTP/2</span></td>
+                <td><span class="badge badge-green">TLS 1.3</span></td>
+                <td class="font-mono text-xs" style="color: var(--cyber-green);">12 ms</td>
+                <td class="font-mono text-xs">842 KB</td>
+                <td style="text-align: right;"><span class="font-mono text-xs" style="color: var(--muted-foreground);">AS8075 MICROSOFT</span></td>
+              </tr>
+              <tr>
+                <td style="font-weight: 600;">ui.shadcn.com</td>
+                <td><span class="badge badge-primary">76.76.21.21</span></td>
+                <td><span class="badge badge-cyan">HTTP/3 QUIC</span></td>
+                <td><span class="badge badge-green">TLS 1.3</span></td>
+                <td class="font-mono text-xs" style="color: var(--cyber-green);">8 ms</td>
+                <td class="font-mono text-xs">1.4 MB</td>
+                <td style="text-align: right;"><span class="font-mono text-xs" style="color: var(--muted-foreground);">AS44786 VERCEL</span></td>
+              </tr>
+              <tr>
+                <td style="font-weight: 600;">cloudflare.com</td>
+                <td><span class="badge badge-primary">104.16.132.229</span></td>
+                <td><span class="badge badge-cyan">HTTP/3 QUIC</span></td>
+                <td><span class="badge badge-green">TLS 1.3</span></td>
+                <td class="font-mono text-xs" style="color: var(--cyber-green);">5 ms</td>
+                <td class="font-mono text-xs">218 KB</td>
+                <td style="text-align: right;"><span class="font-mono text-xs" style="color: var(--muted-foreground);">AS13335 CLOUDFLARE</span></td>
+              </tr>
+              <tr>
+                <td style="font-weight: 600;">legacy-api.internal</td>
+                <td><span class="badge badge-secondary">192.168.1.1</span></td>
+                <td><span class="badge badge-secondary">HTTP/1.1</span></td>
+                <td><span class="badge badge-destructive">Insecure HTTP</span></td>
+                <td class="font-mono text-xs" style="color: var(--primary);">48 ms</td>
+                <td class="font-mono text-xs">12 KB</td>
+                <td style="text-align: right;"><span class="font-mono text-xs" style="color: var(--muted-foreground);">Private LAN</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- TAB 2: COMPONENT GALLERY -->
+      <div class="tab-content" id="tab-components">
+        <div class="grid-components">
+          
+          <!-- Box 1: Button Variants -->
+          <div class="component-box">
+            <h3 class="box-title">Button Variants (shadcn/ui)</h3>
+            <p class="box-desc">Tombol dengan beragam state visual dan aksen glow.</p>
+            <div class="component-row" style="margin-bottom: 1rem;">
+              <button class="btn btn-primary">Primary Amber</button>
+              <button class="btn btn-secondary">Secondary</button>
+              <button class="btn btn-outline">Outline</button>
+              <button class="btn btn-ghost">Ghost</button>
+              <button class="btn btn-destructive">Destructive</button>
+            </div>
+            <div class="component-row">
+              <button class="btn btn-cyan">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+                Electric Cyan CTA
+              </button>
+              <button class="btn btn-primary" style="box-shadow: var(--glow-orange);">
+                Neon Glow
+              </button>
+            </div>
+          </div>
+
+          <!-- Box 2: Badges & Tags -->
+          <div class="component-box">
+            <h3 class="box-title">Badge Variants</h3>
+            <p class="box-desc">Indikator status protokol, enkripsi, dan metadata.</p>
+            <div class="component-row" style="margin-bottom: 1rem;">
+              <span class="badge badge-primary">--primary (#FA9C1B)</span>
+              <span class="badge badge-cyan">--cyber-cyan (#00EAFF)</span>
+              <span class="badge badge-green">--cyber-green (#1AE680)</span>
+            </div>
+            <div class="component-row">
+              <span class="badge badge-secondary">--muted-surface</span>
+              <span class="badge badge-destructive">--destructive (#F04242)</span>
+            </div>
+          </div>
+
+          <!-- Box 3: Form Controls & Switch Toggles -->
+          <div class="component-box">
+            <h3 class="box-title">Form Controls & Switches</h3>
+            <p class="box-desc">Opsi pengaturan ekstensi bergaya modern minimalis.</p>
+            
+            <label class="switch-label">
+              <div class="switch-info">
+                <span class="switch-title">In-Page Floating Overlay</span>
+                <span class="switch-desc">Tampilkan widget status di pojok kanan atas layar.</span>
+              </div>
+              <div class="switch">
+                <input type="checkbox" checked>
+                <span class="slider"></span>
+              </div>
+            </label>
+
+            <label class="switch-label" style="border-top: 1px solid var(--border); margin-top: 0.5rem; padding-top: 0.75rem;">
+              <div class="switch-info">
+                <span class="switch-title">Auto BGP AS-Path Lookup</span>
+                <span class="switch-desc">Resolusi rute upstream ISP secara background via RIPE NCC.</span>
+              </div>
+              <div class="switch">
+                <input type="checkbox" checked>
+                <span class="slider"></span>
+              </div>
+            </label>
+          </div>
+
+          <!-- Box 4: Alerts & Callouts -->
+          <div class="component-box">
+            <h3 class="box-title">Callouts & Alerts</h3>
+            <p class="box-desc">Banner notifikasi informasi dan peringatan.</p>
+            
+            <div class="alert alert-amber">
+              <div class="alert-icon" style="color: var(--primary);">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+              </div>
+              <div>
+                <h4 class="alert-title">Mixed Content Warning</h4>
+                <p class="alert-desc">Sebagian asset dimuat menggunakan HTTP tidak terenkripsi pada halaman HTTPS.</p>
+              </div>
+            </div>
+
+            <div class="alert alert-cyan">
+              <div class="alert-icon" style="color: var(--cyber-cyan);">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+              </div>
+              <div>
+                <h4 class="alert-title">BGP Direct Peering Terdeteksi</h4>
+                <p class="alert-desc">Hop latency router terhubung langsung ke OpenIXP / IIX dengan 0 packet loss.</p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- TAB 3: COLOR PALETTE TOKENS -->
+      <div class="tab-content" id="tab-tokens">
+        <div class="palette-grid">
+          
+          <div class="swatch-card">
+            <div class="swatch-color" style="background: #FA9C1B;"></div>
+            <div class="swatch-info">
+              <div class="swatch-name">Cyber Amber</div>
+              <div class="swatch-token">--primary</div>
+              <div class="swatch-hex">#FA9C1B</div>
+            </div>
+          </div>
+
+          <div class="swatch-card">
+            <div class="swatch-color" style="background: #FFB03A;"></div>
+            <div class="swatch-info">
+              <div class="swatch-name">Amber Glow</div>
+              <div class="swatch-token">--primary-glow</div>
+              <div class="swatch-hex">#FFB03A</div>
+            </div>
+          </div>
+
+          <div class="swatch-card">
+            <div class="swatch-color" style="background: #00EAFF;"></div>
+            <div class="swatch-info">
+              <div class="swatch-name">Electric Cyan</div>
+              <div class="swatch-token">--cyber-cyan</div>
+              <div class="swatch-hex">#00EAFF</div>
+            </div>
+          </div>
+
+          <div class="swatch-card">
+            <div class="swatch-color" style="background: #1AE680;"></div>
+            <div class="swatch-info">
+              <div class="swatch-name">Cyber Green</div>
+              <div class="swatch-token">--cyber-green</div>
+              <div class="swatch-hex">#1AE680</div>
+            </div>
+          </div>
+
+          <div class="swatch-card">
+            <div class="swatch-color" style="background: #07090D; border-bottom: 1px solid var(--border);"></div>
+            <div class="swatch-info">
+              <div class="swatch-name">Obsidian Deep</div>
+              <div class="swatch-token">--background (Dark)</div>
+              <div class="swatch-hex">#07090D</div>
+            </div>
+          </div>
+
+          <div class="swatch-card">
+            <div class="swatch-color" style="background: #0D1016; border-bottom: 1px solid var(--border);"></div>
+            <div class="swatch-info">
+              <div class="swatch-name">Obsidian Surface 1</div>
+              <div class="swatch-token">--card (Dark)</div>
+              <div class="swatch-hex">#0D1016</div>
+            </div>
+          </div>
+
+          <div class="swatch-card">
+            <div class="swatch-color" style="background: #161A22; border-bottom: 1px solid var(--border);"></div>
+            <div class="swatch-info">
+              <div class="swatch-name">Elevated Panel</div>
+              <div class="swatch-token">--popover (Dark)</div>
+              <div class="swatch-hex">#161A22</div>
+            </div>
+          </div>
+
+          <div class="swatch-card">
+            <div class="swatch-color" style="background: #F04242;"></div>
+            <div class="swatch-info">
+              <div class="swatch-name">Alert Red</div>
+              <div class="swatch-token">--destructive</div>
+              <div class="swatch-hex">#F04242</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================================
+         FOOTER
+         ======================================================================== -->
+    <footer class="footer">
+      <div>
+        Built with the <b>shadcn/ui</b> design methodology &amp; <b>COLOR_PALETTE.md</b> tokens.
+      </div>
+      <div>
+        <a href="SHADCN_THEME.md" style="color: var(--primary); text-decoration: none; font-weight: 600;">Lihat Dokumentasi SHADCN_THEME.md &rarr;</a>
+      </div>
+    </footer>
+  </main>
+
+  <!-- ==========================================================================
+       CLIENT-SIDE INTERACTION SCRIPT
+       ========================================================================== -->
+  <script>
+    // Tab switching
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.tab-trigger').forEach(el => el.classList.remove('active'));
+      
+      const target = document.getElementById(tabId);
+      if (target) target.classList.add('active');
+
+      if (tabId === 'tab-monitor') document.getElementById('trigger-monitor').classList.add('active');
+      if (tabId === 'tab-components') document.getElementById('trigger-components').classList.add('active');
+      if (tabId === 'tab-tokens') document.getElementById('trigger-tokens').classList.add('active');
+    }
+
+    // Dark / Light Theme Toggle
+    const themeBtn = document.getElementById('theme-toggle');
+    const sunIcon = document.getElementById('sun-icon');
+    const moonIcon = document.getElementById('moon-icon');
+
+    themeBtn.addEventListener('click', () => {
+      const isDark = document.documentElement.classList.toggle('dark');
+      if (isDark) {
+        sunIcon.style.display = 'none';
+        moonIcon.style.display = 'block';
+      } else {
+        sunIcon.style.display = 'block';
+        moonIcon.style.display = 'none';
+      }
+    });
+
+    // Realtime search filter on table
+    const filterInput = document.getElementById('filter-input');
+    if (filterInput) {
+      filterInput.addEventListener('input', (e) => {
+        const query = e.target.value.toLowerCase();
+        const rows = document.querySelectorAll('tbody tr');
+        rows.forEach(row => {
+          const text = row.innerText.toLowerCase();
+          row.style.display = text.includes(query) ? '' : 'none';
+        });
+      });
+    }
+  </script>
+</body>
+</html>
