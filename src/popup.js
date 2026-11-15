@@ -236,7 +236,7 @@ function compareTuples(a, b) {
   return a[0].localeCompare(b[0]);
 }
 
-// Klasifikasi Jalur Trafik: IIX / OIXP, Direct CDN, Transit Intl
+// Klasifikasi Jalur Trafik: IIX, CDN, Internasional
 function classifyTraffic(addr, domain, asn, latency) {
   if (!addr || addr === "(x)" || addr === "(lost)" || addr.startsWith("(")) {
     return { code: "UNKNOWN", label: "-", class: "badge-unknown", desc: "No IP address" };
@@ -265,20 +265,20 @@ function classifyTraffic(addr, domain, asn, latency) {
   const isCdnAsn = cdnAsnRegex.test(a) || /GOOGLE|CLOUDFLARE|AKAMAI|FASTLY|FACEBOOK|META|NETFLIX|AMAZON|CLOUDFRONT|MICROSOFT/i.test(a);
   const isCdnDomain = cdnDomainRegex.test(d);
 
-  // 1. [Direct CDN]
+  // 1. [CDN]
   // Trafik yang ditarik dari Google/Meta/Akamai/Cloudflare Edge server yang ada di dalam ISP / lokal
   if (isCdnAsn || isCdnDomain) {
     if (isIdCountry || (lat > 0 && lat <= 32) || /googlevideo|fbcdn|tiktokcdn/i.test(d)) {
       return {
         code: "CDN",
-        label: "[Direct CDN]",
+        label: "[CDN]",
         class: "badge-cdn",
         desc: "Trafik ditarik dari Google/Meta/Akamai/Cloudflare Edge server di ISP / lokal"
       };
     }
   }
 
-  // 2. [IIX / OIXP]
+  // 2. [IIX]
   // Trafik domestik Indonesia via OpenIXP/IIX/CDIX
   const isIdDomain = /\.(id|co\.id|go\.id|ac\.id|my\.id|web\.id|biz\.id|sch\.id|net\.id|or\.id)$/i.test(d);
   const isIdAsn = /INDONESIA|TELKOM|BIZNET|MORATEL|APJII|IDNIC|CBN|FIRSTMEDIA|LINKNET|INDOSAT|XL|SMARTFREN|HALLONET|IFORTE|FIBERSTAR/i.test(a);
@@ -286,18 +286,18 @@ function classifyTraffic(addr, domain, asn, latency) {
   if (isIdCountry || isIdDomain || isIdAsn) {
     return {
       code: "IIX",
-      label: "[IIX / OIXP]",
+      label: "[IIX]",
       class: "badge-iix",
       desc: "Trafik domestik Indonesia via OpenIXP/IIX/CDIX"
     };
   }
 
-  // 3. [Transit Intl]
+  // 3. [Internasional]
   // Trafik yang keluar lewat kabel laut ke Singapura / Hong Kong / AS
   if (country && country !== "ID") {
     return {
       code: "INTL",
-      label: "[Transit Intl]",
+      label: "[Internasional]",
       class: "badge-intl",
       desc: `Trafik keluar lewat kabel laut ke luar negeri (${country})`
     };
@@ -306,7 +306,7 @@ function classifyTraffic(addr, domain, asn, latency) {
   if (lat > 40) {
     return {
       code: "INTL",
-      label: "[Transit Intl]",
+      label: "[Internasional]",
       class: "badge-intl",
       desc: "Trafik keluar lewat kabel laut ke Singapura / Hong Kong / AS"
     };
@@ -315,7 +315,7 @@ function classifyTraffic(addr, domain, asn, latency) {
   if (lat > 0 && lat <= 32) {
     return {
       code: "IIX",
-      label: "[IIX / OIXP]",
+      label: "[IIX]",
       class: "badge-iix",
       desc: "Trafik domestik Indonesia via OpenIXP/IIX/CDIX"
     };
@@ -323,7 +323,7 @@ function classifyTraffic(addr, domain, asn, latency) {
 
   return {
     code: "INTL",
-    label: "[Transit Intl]",
+    label: "[Internasional]",
     class: "badge-intl",
     desc: "Trafik keluar lewat kabel laut ke Singapura / Hong Kong / AS"
   };
