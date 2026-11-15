@@ -1,4 +1,4 @@
-/*
+﻿/*
  * IPvFoo In-Page Floating Overlay Widget
  * Injected into webpages directly at top-right with z-index: 2147483647
  */
@@ -985,7 +985,7 @@
         <button id="btn-linkgrabber" class="btn btn-grabber" title="Ekstrak Semua Link di Halaman Ini (Link Grabber)">LINKGRABBER</button>
         <button id="btn-rst" class="btn btn-rst" title="Reset Hit & Size Counter">RESET HITS</button>
         <button id="btn-min" class="btn btn-action" title="Minimize / Sembunyikan">_</button>
-        <button id="btn-close" class="btn btn-action" title="Tutup Widget">âœ•</button>
+        <button id="btn-close" class="btn btn-action" title="Tutup Widget">Ã¢Å“â€¢</button>
       </div>
     </div>
     <div id="table-wrap">
@@ -1041,7 +1041,7 @@
         const icon = el.querySelector(".sort-icon");
         if (icon) {
           if (currentSort.column === c) {
-            icon.textContent = currentSort.order === "asc" ? " â–²" : " â–¼";
+            icon.textContent = currentSort.order === "asc" ? " Ã¢â€“Â²" : " Ã¢â€“Â¼";
             el.style.color = "#00d9ff";
           } else {
             icon.textContent = "";
@@ -1167,7 +1167,7 @@
     const csvContent = rows.join("\r\n");
     const filename = getExportFilename(mainDomain, "csv");
     triggerDownload(csvContent, filename, "text/csv;charset=utf-8;");
-    showCopyToast(`âœ… Exported CSV (${tuples.length} baris)`);
+    showCopyToast(`Ã¢Å“â€¦ Exported CSV (${tuples.length} baris)`);
   }
 
   function exportTxtSession(tuples, mainDomain) {
@@ -1245,7 +1245,7 @@
     const txtContent = lines.join("\r\n");
     const filename = getExportFilename(mainDomain, "txt");
     triggerDownload(txtContent, filename, "text/plain;charset=utf-8;");
-    showCopyToast(`âœ… Exported TXT (${tuples.length} baris)`);
+    showCopyToast(`Ã¢Å“â€¦ Exported TXT (${tuples.length} baris)`);
   }
 
   // Buttons
@@ -1305,7 +1305,7 @@
     tr._tuple = tuple;
     tr._domain = domain;
 
-    const lockIcon = (flags & (DFLAG_H1 | DFLAG_H2 | DFLAG_H3) || !(flags & DFLAG_NO_TLS)) ? "ðŸ”’ " : "";
+    const lockIcon = (flags & (DFLAG_H1 | DFLAG_H2 | DFLAG_H3) || !(flags & DFLAG_NO_TLS)) ? "Ã°Å¸â€â€™ " : "";
     const ipClass = version === "6" ? "ip6" : "ip4";
 
     let statusClass = "status-2xx";
@@ -1368,7 +1368,7 @@
       : `<span style="color:#666;">-</span>`;
 
     const dSpeed = domainSpeedMap[domain] || 0;
-    const speedHtml = dSpeed >= 200 ? `<span class="speed-tag">âš¡${formatSpeed(dSpeed)}</span> ` : "";
+    const speedHtml = dSpeed >= 200 ? `<span class="speed-tag">Ã¢Å¡Â¡${formatSpeed(dSpeed)}</span> ` : "";
 
     tr.innerHTML = `
       <td class="domain-cell" title="Klik untuk copy: ${domain}">${lockIcon}${domain}</td>
@@ -1470,7 +1470,7 @@
       totalHits += t[4] || 0;
       totalBytes += t[5] || 0;
     });
-    const speedStr = currentSpeedBps >= 200 ? ` | âš¡ ${formatSpeed(currentSpeedBps)}` : "";
+    const speedStr = currentSpeedBps >= 200 ? ` | Ã¢Å¡Â¡ ${formatSpeed(currentSpeedBps)}` : "";
     const miniText = shadow.getElementById("mini-text");
     if (miniText) {
       miniText.textContent = `${mainAddr} | ${mainStatus}${mainLat} | ${totalHits} req | ${formatBytes(totalBytes)}${speedStr}`;
@@ -1521,7 +1521,7 @@
     const speedEl = shadow.getElementById("widget-speed");
     if (speedEl) {
       if (currentSpeedBps >= 200) {
-        speedEl.textContent = `âš¡ ${formatSpeed(currentSpeedBps)}`;
+        speedEl.textContent = `Ã¢Å¡Â¡ ${formatSpeed(currentSpeedBps)}`;
         speedEl.style.display = "inline-flex";
       } else {
         speedEl.style.display = "none";
@@ -1539,7 +1539,7 @@
           const sizeTd = tr.querySelector(".size-cell");
           if (sizeTd) {
             const bytes = tr._tuple[5] || 0;
-            const speedHtml = dSpeed >= 200 ? `<span class="speed-tag">âš¡${formatSpeed(dSpeed)}</span> ` : "";
+            const speedHtml = dSpeed >= 200 ? `<span class="speed-tag">Ã¢Å¡Â¡${formatSpeed(dSpeed)}</span> ` : "";
             sizeTd.innerHTML = `${speedHtml}${formatBytes(bytes)}`;
           }
         }
@@ -1595,12 +1595,12 @@
     <div id="bgp-modal">
       <div id="bgp-modal-header">
         <div class="title">
-          <span>ðŸ›°ï¸ Live Traceroute & BGP AS-Path (HalloNet LG)</span>
+          <span>Ã°Å¸â€ºÂ°Ã¯Â¸Â Live Traceroute & BGP AS-Path (HalloNet LG)</span>
         </div>
-        <button id="bgp-modal-close" title="Tutup Modal">âœ•</button>
+        <button id="bgp-modal-close" title="Tutup Modal">Ã¢Å“â€¢</button>
       </div>
       <div id="bgp-modal-body">
-        <div class="bgp-loading">â³ Menjalankan traceroute live...</div>
+        <div class="bgp-loading">Ã¢ÂÂ³ Menjalankan traceroute live...</div>
       </div>
     </div>
   `;
@@ -1626,7 +1626,7 @@
     const body = modalBackdrop.querySelector("#bgp-modal-body");
     body.innerHTML = `
       <div class="bgp-loading">
-        <div style="font-size: 26px; margin-bottom: 8px;">ðŸ›°ï¸</div>
+        <div style="font-size: 26px; margin-bottom: 8px;">Ã°Å¸â€ºÂ°Ã¯Â¸Â</div>
         Menjalankan Live Traceroute dari <strong>Looking Glass HalloNet</strong> ke <strong>${addr}</strong> (${domain})...
       </div>
     `;
@@ -1643,7 +1643,7 @@
             } else {
               body.innerHTML = `
                 <div style="color:#ff5252; padding: 25px; text-align:center;">
-                  âš ï¸ Gagal mengambil rute: ${res?.error || bgpRes?.error || "Koneksi timeout"}
+                  Ã¢Å¡Â Ã¯Â¸Â Gagal mengambil rute: ${res?.error || bgpRes?.error || "Koneksi timeout"}
                 </div>
               `;
             }
@@ -1693,10 +1693,10 @@
       flowHtml = `
         <div class="bgp-path-container">
           <div class="bgp-path-title">
-            <span>ðŸ›£ï¸ Jalur Transit ISP (AS-Path Breadcrumb)</span>
+            <span>Ã°Å¸â€ºÂ£Ã¯Â¸Â Jalur Transit ISP (AS-Path Breadcrumb)</span>
           </div>
           <div class="bgp-flow-wrapper">
-            ${nodes.join('<span class="bgp-arrow">â”€â”€â–¶</span>')}
+            ${nodes.join('<span class="bgp-arrow">Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€“Â¶</span>')}
           </div>
         </div>
       `;
@@ -1732,17 +1732,17 @@
     body.innerHTML = `
       <div class="bgp-summary-grid">
         <div class="bgp-card">
-          <div class="bgp-card-label">ðŸŽ¯ Target Host & IP</div>
+          <div class="bgp-card-label">Ã°Å¸Å½Â¯ Target Host & IP</div>
           <div class="bgp-card-val">${addr}</div>
           <div class="bgp-card-sub">${domain}</div>
         </div>
         <div class="bgp-card">
-          <div class="bgp-card-label">âš¡ Traceroute Latency (RTT)</div>
+          <div class="bgp-card-label">Ã¢Å¡Â¡ Traceroute Latency (RTT)</div>
           <div class="bgp-card-val" style="color:#48ff00;">${targetRtt}</div>
           <div class="bgp-card-sub">${data.hops_count || hops.length} Hops Total (${data.timestamp || 'Real-time'})</div>
         </div>
         <div class="bgp-card">
-          <div class="bgp-card-label">ðŸ¢ Destination AS & ISP</div>
+          <div class="bgp-card-label">Ã°Å¸ÂÂ¢ Destination AS & ISP</div>
           <div class="bgp-card-val" style="color:#00d9ff;">${targetAsn}</div>
           <div class="bgp-card-sub" style="color:#ccc;">Source: gw-ixp.106-1.hallonet.id (AS151584 HalloNet)</div>
         </div>
@@ -1767,10 +1767,10 @@
       </div>
 
       <div class="bgp-actions">
-        <button id="btn-re-trace" class="bgp-btn" style="background:#334466; color:#fff;">ðŸ”„ Re-Run</button>
-        <button id="btn-copy-mkt-rule" class="bgp-btn bgp-btn-mkt">ðŸ“‹ Copy MikroTik Address-List</button>
-        <button id="btn-open-lg" class="bgp-btn" style="background:#2e7d32; color:#fff;">ðŸŒ Looking Glass â†—</button>
-        <button id="btn-open-he-bgp" class="bgp-btn bgp-btn-he">ðŸŒ BGP.HE.NET â†—</button>
+        <button id="btn-re-trace" class="bgp-btn" style="background:#334466; color:#fff;">Ã°Å¸â€â€ž Re-Run</button>
+        <button id="btn-copy-mkt-rule" class="bgp-btn bgp-btn-mkt">Ã°Å¸â€œâ€¹ Copy MikroTik Address-List</button>
+        <button id="btn-open-lg" class="bgp-btn" style="background:#2e7d32; color:#fff;">Ã°Å¸Å’Â Looking Glass Ã¢â€ â€”</button>
+        <button id="btn-open-he-bgp" class="bgp-btn bgp-btn-he">Ã°Å¸Å’Â BGP.HE.NET Ã¢â€ â€”</button>
       </div>
     `;
 
@@ -1837,14 +1837,14 @@
       pathHtml = `
         <div class="bgp-path-container">
           <div class="bgp-path-title">
-            <span>ðŸ›£ï¸ AS-Path Route (Global Ingress âž” Origin)</span>
+            <span>Ã°Å¸â€ºÂ£Ã¯Â¸Â AS-Path Route (Global Ingress Ã¢Å¾â€ Origin)</span>
           </div>
           <div class="bgp-flow-wrapper">
-            ${flowNodes.join('<span class="bgp-arrow">â”€â”€â–¶</span>')}
+            ${flowNodes.join('<span class="bgp-arrow">Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€“Â¶</span>')}
           </div>
           <div style="font-size:11px; color:#8fa0b5; margin-top:8px;">
-            â€¢ Total Hop AS: <strong>${primaryPath.length} AS</strong> &nbsp;|&nbsp; 
-            â€¢ Total Jalur BGP Terdeteksi: <strong>${data.totalPaths || paths.length} rute global</strong>
+            Ã¢â‚¬Â¢ Total Hop AS: <strong>${primaryPath.length} AS</strong> &nbsp;|&nbsp; 
+            Ã¢â‚¬Â¢ Total Jalur BGP Terdeteksi: <strong>${data.totalPaths || paths.length} rute global</strong>
           </div>
         </div>
       `;
@@ -1862,17 +1862,17 @@
     body.innerHTML = `
       <div class="bgp-summary-grid">
         <div class="bgp-card">
-          <div class="bgp-card-label">ðŸŽ¯ Target Host & IP</div>
+          <div class="bgp-card-label">Ã°Å¸Å½Â¯ Target Host & IP</div>
           <div class="bgp-card-val">${addr}</div>
           <div class="bgp-card-sub">${domain}</div>
         </div>
         <div class="bgp-card">
-          <div class="bgp-card-label">ðŸ“¡ BGP Announced Prefix</div>
+          <div class="bgp-card-label">Ã°Å¸â€œÂ¡ BGP Announced Prefix</div>
           <div class="bgp-card-val" style="color:#00d9ff;">${prefix}</div>
           <div class="bgp-card-sub">Route Advertisement</div>
         </div>
         <div class="bgp-card" style="grid-column: span 2;">
-          <div class="bgp-card-label">ðŸ¢ Origin Autonomous System</div>
+          <div class="bgp-card-label">Ã°Å¸ÂÂ¢ Origin Autonomous System</div>
           <div class="bgp-card-val" style="color:#48ff00;">${originAsn}</div>
           <div class="bgp-card-sub" style="color:#ccc;">${originHolder}</div>
         </div>
@@ -1881,8 +1881,8 @@
       ${pathHtml}
 
       <div class="bgp-actions">
-        <button id="btn-copy-mkt-rule" class="bgp-btn bgp-btn-mkt">ðŸ“‹ Copy MikroTik Address-List</button>
-        <button id="btn-open-he-bgp" class="bgp-btn bgp-btn-he">ðŸŒ Buka BGP.HE.NET â†—</button>
+        <button id="btn-copy-mkt-rule" class="bgp-btn bgp-btn-mkt">Ã°Å¸â€œâ€¹ Copy MikroTik Address-List</button>
+        <button id="btn-open-he-bgp" class="bgp-btn bgp-btn-he">Ã°Å¸Å’Â Buka BGP.HE.NET Ã¢â€ â€”</button>
       </div>
     `;
 
@@ -2055,7 +2055,7 @@
     const sourceUrl = window.location.href;
     const sourceHost = window.location.hostname;
 
-    showCopyToast(`ðŸš€ Membuka Grabber (${assets.length} aset) di Tab Baru...`);
+    showCopyToast(`Ã°Å¸Å¡â‚¬ Membuka Grabber (${assets.length} aset) di Tab Baru...`);
 
     const html = `<!DOCTYPE html>
 <html lang="id">
@@ -2539,31 +2539,31 @@
 <body>
   <header>
     <div class="brand">
-      <h1>ðŸ“¦ Content & Asset Grabber</h1>
+      <h1>Ã°Å¸â€œÂ¦ Content & Asset Grabber</h1>
       <span class="header-badge" id="header-total-count">0 items</span>
-      <a href="${escapeHtml(sourceUrl)}" target="_blank" class="source-link" title="Buka website asli">ðŸŒ ${escapeHtml(sourceUrl)}</a>
+      <a href="${escapeHtml(sourceUrl)}" target="_blank" class="source-link" title="Buka website asli">Ã°Å¸Å’Â ${escapeHtml(sourceUrl)}</a>
     </div>
   </header>
 
   <div class="main-wrap">
     <div class="toolbar-card">
       <div class="tabs-row" id="tabs-bar">
-        <button class="tab-btn active" data-tab="all">ðŸŒŸ Semua <span class="tab-badge" id="count-all">0</span></button>
-        <button class="tab-btn" data-tab="image">ðŸ–¼ï¸ Gambar (PNG/B64) <span class="tab-badge" id="count-image">0</span></button>
-        <button class="tab-btn" data-tab="link">ðŸ”— Links <span class="tab-badge" id="count-link">0</span></button>
-        <button class="tab-btn" data-tab="media">ðŸŽ¬ Video & Audio <span class="tab-badge" id="count-media">0</span></button>
-        <button class="tab-btn" data-tab="doc">ðŸ“„ Dokumen <span class="tab-badge" id="count-doc">0</span></button>
-        <button class="tab-btn" data-tab="code">âš¡ Scripts & CSS <span class="tab-badge" id="count-code">0</span></button>
+        <button class="tab-btn active" data-tab="all">Ã°Å¸Å’Å¸ Semua <span class="tab-badge" id="count-all">0</span></button>
+        <button class="tab-btn" data-tab="image">Ã°Å¸â€“Â¼Ã¯Â¸Â Gambar (PNG/B64) <span class="tab-badge" id="count-image">0</span></button>
+        <button class="tab-btn" data-tab="link">Ã°Å¸â€â€” Links <span class="tab-badge" id="count-link">0</span></button>
+        <button class="tab-btn" data-tab="media">Ã°Å¸Å½Â¬ Video & Audio <span class="tab-badge" id="count-media">0</span></button>
+        <button class="tab-btn" data-tab="doc">Ã°Å¸â€œâ€ž Dokumen <span class="tab-badge" id="count-doc">0</span></button>
+        <button class="tab-btn" data-tab="code">Ã¢Å¡Â¡ Scripts & CSS <span class="tab-badge" id="count-code">0</span></button>
       </div>
 
       <div class="filter-actions-row">
         <input type="text" id="search-input" class="search-input" placeholder="Ketik untuk filter: nama file, domain, ekstensi .png, base64, dll..." autofocus />
-        <button id="btn-copy-urls" class="btn btn-primary" title="Copy semua URL yang tampil">ðŸ“‹ Copy URLs (<span id="copy-count">0</span>)</button>
-        <button id="btn-export-txt" class="btn btn-purple" title="Download daftar URL sebagai file teks">ðŸ“¥ Export TXT</button>
+        <button id="btn-copy-urls" class="btn btn-primary" title="Copy semua URL yang tampil">Ã°Å¸â€œâ€¹ Copy URLs (<span id="copy-count">0</span>)</button>
+        <button id="btn-export-txt" class="btn btn-purple" title="Download daftar URL sebagai file teks">Ã°Å¸â€œÂ¥ Export TXT</button>
         
         <div class="view-toggle">
-          <button id="btn-view-list" class="view-btn active" title="Tampilan List">â˜° List</button>
-          <button id="btn-view-grid" class="view-btn" title="Tampilan Grid Galeri">âŠž Grid</button>
+          <button id="btn-view-list" class="view-btn active" title="Tampilan List">Ã¢ËœÂ° List</button>
+          <button id="btn-view-grid" class="view-btn" title="Tampilan Grid Galeri">Ã¢Å Å¾ Grid</button>
         </div>
       </div>
 
@@ -2600,7 +2600,7 @@
     function copyToClipboard(text, label) {
       if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(text).then(() => {
-          showToast("âœ… Berhasil copy " + (label || "teks") + "!");
+          showToast("Ã¢Å“â€¦ Berhasil copy " + (label || "teks") + "!");
         }).catch(() => fallbackCopy(text, label));
       } else {
         fallbackCopy(text, label);
@@ -2614,7 +2614,7 @@
       ta.select();
       document.execCommand("copy");
       document.body.removeChild(ta);
-      showToast("âœ… Berhasil copy " + (label || "teks") + "!");
+      showToast("Ã¢Å“â€¦ Berhasil copy " + (label || "teks") + "!");
     }
 
     function downloadFile(url, filename) {
@@ -2731,7 +2731,7 @@
       const hasImages = activeCategory === "image" || filtered.some(f => f.category === "image");
 
       if (filtered.length === 0) {
-        contentArea.innerHTML = '<div class="empty-state">ðŸ” Tidak ada aset yang cocok dengan filter "' + escapeHtml(searchVal) + '"</div>';
+        contentArea.innerHTML = '<div class="empty-state">Ã°Å¸â€Â Tidak ada aset yang cocok dengan filter "' + escapeHtml(searchVal) + '"</div>';
         return;
       }
 
@@ -2757,7 +2757,7 @@
 
         let dimHtml = "";
         if (item.width && item.height) {
-          dimHtml = '<span class="item-dim">' + item.width + 'Ã—' + item.height + '</span>';
+          dimHtml = '<span class="item-dim">' + item.width + 'Ãƒâ€”' + item.height + '</span>';
         }
 
         const displayUrl = isB64 ? item.url.substring(0, 85) + "..." : item.url;
@@ -2771,9 +2771,9 @@
           (item.title && item.title !== item.url ? '<span class="item-title" title="' + escapeHtml(item.title) + '">' + escapeHtml(item.title) + '</span>' : '') +
           '<a href="' + escapeHtml(item.url) + '" target="_blank" class="item-url" title="' + escapeHtml(item.url) + '">' + escapeHtml(displayUrl) + '</a>' +
           '<div class="item-actions">' +
-            '<button class="btn-action btn-copy-url" data-idx="' + idx + '">ðŸ“‹ URL</button>' +
-            (isImg ? '<button class="btn-action btn-action-b64 btn-copy-b64" data-idx="' + idx + '">ðŸ§¬ Base64</button>' : '') +
-            '<button class="btn-action btn-download" data-idx="' + idx + '">â¬‡ï¸</button>' +
+            '<button class="btn-action btn-copy-url" data-idx="' + idx + '">Ã°Å¸â€œâ€¹ URL</button>' +
+            (isImg ? '<button class="btn-action btn-action-b64 btn-copy-b64" data-idx="' + idx + '">Ã°Å¸Â§Â¬ Base64</button>' : '') +
+            '<button class="btn-action btn-download" data-idx="' + idx + '">Ã¢Â¬â€¡Ã¯Â¸Â</button>' +
           '</div>' +
         '</li>';
       });
@@ -2791,18 +2791,18 @@
 
         html += '<div class="grid-card">' +
           '<div class="grid-img-wrap">' +
-            (isImg ? '<a href="' + escapeHtml(item.url) + '" target="_blank"><img src="' + escapeHtml(item.url) + '" loading="lazy" alt="asset" /></a>' : '<div style="font-size:32px;">ðŸ“„</div>') +
+            (isImg ? '<a href="' + escapeHtml(item.url) + '" target="_blank"><img src="' + escapeHtml(item.url) + '" loading="lazy" alt="asset" /></a>' : '<div style="font-size:32px;">Ã°Å¸â€œâ€ž</div>') +
           '</div>' +
           '<div class="grid-body">' +
             '<div class="grid-meta">' +
               '<span class="item-badge badge-' + item.category + '">' + escapeHtml(typeLabel) + '</span>' +
-              (item.width ? '<span>' + item.width + 'Ã—' + item.height + '</span>' : '') +
+              (item.width ? '<span>' + item.width + 'Ãƒâ€”' + item.height + '</span>' : '') +
             '</div>' +
             '<div class="grid-title" title="' + escapeHtml(item.title || item.url) + '">' + escapeHtml(item.title || item.hostname) + '</div>' +
             '<div class="grid-actions">' +
-              '<button class="btn-action btn-copy-url" data-idx="' + idx + '" title="Copy URL">ðŸ“‹ URL</button>' +
-              (isImg ? '<button class="btn-action btn-action-b64 btn-copy-b64" data-idx="' + idx + '" title="Copy Base64">ðŸ§¬ B64</button>' : '') +
-              '<button class="btn-action btn-download" data-idx="' + idx + '" title="Download">â¬‡ï¸</button>' +
+              '<button class="btn-action btn-copy-url" data-idx="' + idx + '" title="Copy URL">Ã°Å¸â€œâ€¹ URL</button>' +
+              (isImg ? '<button class="btn-action btn-action-b64 btn-copy-b64" data-idx="' + idx + '" title="Copy Base64">Ã°Å¸Â§Â¬ B64</button>' : '') +
+              '<button class="btn-action btn-download" data-idx="' + idx + '" title="Download">Ã¢Â¬â€¡Ã¯Â¸Â</button>' +
             '</div>' +
           '</div>' +
         '</div>';
@@ -2826,16 +2826,16 @@
           e.stopPropagation();
           const item = items[parseInt(btn.getAttribute("data-idx"), 10)];
           if (!item) return;
-          btn.textContent = "â³...";
+          btn.textContent = "Ã¢ÂÂ³...";
           const b64 = await convertImgToBase64(item.url);
           if (b64) {
             copyToClipboard(b64, "Base64 Image");
-            btn.textContent = "âœ… Copied!";
+            btn.textContent = "Ã¢Å“â€¦ Copied!";
           } else {
-            showToast("âŒ Gagal convert Base64 (CORS)");
-            btn.textContent = "âŒ Gagal";
+            showToast("Ã¢ÂÅ’ Gagal convert Base64 (CORS)");
+            btn.textContent = "Ã¢ÂÅ’ Gagal";
           }
-          setTimeout(() => { btn.textContent = currentViewMode === "grid" ? "ðŸ§¬ B64" : "ðŸ§¬ Base64"; }, 1500);
+          setTimeout(() => { btn.textContent = currentViewMode === "grid" ? "Ã°Å¸Â§Â¬ B64" : "Ã°Å¸Â§Â¬ Base64"; }, 1500);
         };
       });
 
@@ -2903,7 +2903,7 @@
       const url = URL.createObjectURL(blob);
       downloadFile(url, "assets_" + SOURCE_HOST + "_" + Date.now() + ".txt");
       URL.revokeObjectURL(url);
-      showToast("âœ… Exported " + currentFiltered.length + " assets!");
+      showToast("Ã¢Å“â€¦ Exported " + currentFiltered.length + " assets!");
     };
 
     // Init
@@ -3668,22 +3668,22 @@
       <header class="report-header">
         <div class="header-top">
           <div class="brand-title">
-            <span style="font-size:24px;">🔍</span>
+            <span style="font-size:24px;">ðŸ”</span>
             <div>
               <h1>META SEO Inspector &mdash; <span style="color:#fff;">${escapeHtml(sourceHost)}</span></h1>
               <span class="version-tag">v3.11.7 Compatible</span>
             </div>
           </div>
           <div class="header-actions">
-            <button id="btn-copy-summary" class="btn" title="Copy Ringkasan SEO (Markdown)">📋 Copy Summary</button>
-            <button id="btn-export-json" class="btn" title="Export Raw Data ke JSON">💾 Export JSON</button>
-            <button id="btn-print" class="btn btn-primary" title="Cetak atau Simpan PDF">🖨️ Print / PDF</button>
+            <button id="btn-copy-summary" class="btn" title="Copy Ringkasan SEO (Markdown)">ðŸ“‹ Copy Summary</button>
+            <button id="btn-export-json" class="btn" title="Export Raw Data ke JSON">ðŸ’¾ Export JSON</button>
+            <button id="btn-print" class="btn btn-primary" title="Cetak atau Simpan PDF">ðŸ–¨ï¸ Print / PDF</button>
           </div>
         </div>
 
         <div class="target-url-box">
           <div style="display:flex; align-items:center; gap:8px;">
-            <span>🌐</span>
+            <span>ðŸŒ</span>
             <a id="target-url-link" href="${escapeHtml(sourceUrl)}" target="_blank" class="target-url-link">${escapeHtml(sourceUrl)}</a>
           </div>
           <button class="copy-btn" id="btn-copy-url" title="Copy URL">Copy</button>
@@ -3700,12 +3700,12 @@
       </header>
 
       <div class="filter-bar">
-        <input type="text" id="search-input" class="search-input" placeholder="🔍 Cari meta tag, nilai property, atau heading di laporan..." />
+        <input type="text" id="search-input" class="search-input" placeholder="ðŸ” Cari meta tag, nilai property, atau heading di laporan..." />
       </div>
 
       <section id="diagnostics-section" class="report-section">
         <div class="section-header">
-          <div class="section-title"><span>🩺</span> SEO Health Diagnostics</div>
+          <div class="section-title"><span>ðŸ©º</span> SEO Health Diagnostics</div>
           <span id="badge-diag-count" class="section-badge">${diagnostics.length} checks</span>
         </div>
         <div class="section-body" id="diagnostics-container">${diagHtml}</div>
@@ -3713,7 +3713,7 @@
 
       <section id="common" class="report-section">
         <div class="section-header">
-          <div class="section-title"><span>📄</span> COMMON & CORE META</div>
+          <div class="section-title"><span>ðŸ“„</span> COMMON & CORE META</div>
           <span class="section-badge">Core SEO</span>
         </div>
         <div class="section-body" id="common-container">${commonHtml}</div>
@@ -3721,7 +3721,7 @@
 
       <section id="mobile" class="report-section">
         <div class="section-header">
-          <div class="section-title"><span>📱</span> MOBILE & VIEWPORT</div>
+          <div class="section-title"><span>ðŸ“±</span> MOBILE & VIEWPORT</div>
           <span class="section-badge">Mobile Ready</span>
         </div>
         <div class="section-body" id="mobile-container">${mobileHtml}</div>
@@ -3729,7 +3729,7 @@
 
       <section id="social" class="report-section">
         <div class="section-header">
-          <div class="section-title"><span>🌐</span> SOCIAL (OPEN GRAPH & TWITTER)</div>
+          <div class="section-title"><span>ðŸŒ</span> SOCIAL (OPEN GRAPH & TWITTER)</div>
           <span id="badge-social-count" class="section-badge">${ogList.length + twList.length} tags</span>
         </div>
         <div class="section-body" id="social-container">
@@ -3740,7 +3740,7 @@
 
       <section id="structureddata" class="report-section">
         <div class="section-header">
-          <div class="section-title"><span>🧩</span> STRUCTURED DATA (JSON-LD & SCHEMA)</div>
+          <div class="section-title"><span>ðŸ§©</span> STRUCTURED DATA (JSON-LD & SCHEMA)</div>
           <span id="badge-schema-count" class="section-badge">${schemas.length} schemas</span>
         </div>
         <div class="section-body" id="schema-container">${schemaHtml}</div>
@@ -3748,7 +3748,7 @@
 
       <section id="headings" class="report-section">
         <div class="section-header">
-          <div class="section-title"><span>📑</span> MARKUP & HEADINGS (H1 - H6)</div>
+          <div class="section-title"><span>ðŸ“‘</span> MARKUP & HEADINGS (H1 - H6)</div>
           <span id="badge-headings-count" class="section-badge">${headings.length} headings</span>
         </div>
         <div class="section-body" id="headings-container">
@@ -3761,7 +3761,7 @@
 
       <section id="links" class="report-section">
         <div class="section-header">
-          <div class="section-title"><span>⚓</span> LINKS & ANCHORS ANALYSIS</div>
+          <div class="section-title"><span>âš“</span> LINKS & ANCHORS ANALYSIS</div>
           <span id="badge-links-count" class="section-badge">${lStats.total} links</span>
         </div>
         <div class="section-body" id="links-container">${linksHtml}</div>
@@ -3769,7 +3769,7 @@
 
       <section id="rhints" class="report-section">
         <div class="section-header">
-          <div class="section-title"><span>⚡</span> RESOURCE HINTS</div>
+          <div class="section-title"><span>âš¡</span> RESOURCE HINTS</div>
           <span id="badge-hints-count" class="section-badge">${hints.length} hints</span>
         </div>
         <div class="section-body" id="hints-container">${hintsHtml}</div>
@@ -3777,7 +3777,7 @@
 
       <section id="externalr" class="report-section">
         <div class="section-header">
-          <div class="section-title"><span>🏢</span> EXTERNAL RESOURCES & 3RD PARTIES</div>
+          <div class="section-title"><span>ðŸ¢</span> EXTERNAL RESOURCES & 3RD PARTIES</div>
           <span id="badge-ext-count" class="section-badge">${extDomains.length} domains</span>
         </div>
         <div class="section-body" id="external-container">${extHtml}</div>
@@ -3785,7 +3785,7 @@
 
       <section id="security" class="report-section">
         <div class="section-header">
-          <div class="section-title"><span>🛡️</span> SECURITY & CONFIG</div>
+          <div class="section-title"><span>ðŸ›¡ï¸</span> SECURITY & CONFIG</div>
           <span class="section-badge">HTTPS & CSP</span>
         </div>
         <div class="section-body" id="security-container">${secHtml}</div>
@@ -3795,16 +3795,16 @@
     <aside class="sidebar-nav">
       <div class="sidebar-nav-title">Daftar Bagian</div>
       <ul class="nav-list">
-        <li class="nav-item"><a href="#diagnostics-section" class="nav-link"><span>🩺 Diagnostics</span></a></li>
-        <li class="nav-item"><a href="#common" class="nav-link"><span>📄 Common Meta</span></a></li>
-        <li class="nav-item"><a href="#mobile" class="nav-link"><span>📱 Mobile & Viewport</span></a></li>
-        <li class="nav-item"><a href="#social" class="nav-link"><span>🌐 Social Meta</span> <span id="nav-badge-social" class="nav-count">${ogList.length + twList.length}</span></a></li>
-        <li class="nav-item"><a href="#structureddata" class="nav-link"><span>🧩 Structured Data</span> <span id="nav-badge-schema" class="nav-count">${schemas.length}</span></a></li>
-        <li class="nav-item"><a href="#headings" class="nav-link"><span>📑 Headings (H1-H6)</span> <span id="nav-badge-headings" class="nav-count">${headings.length}</span></a></li>
-        <li class="nav-item"><a href="#links" class="nav-link"><span>⚓ Links Analysis</span> <span id="nav-badge-links" class="nav-count">${lStats.total}</span></a></li>
-        <li class="nav-item"><a href="#rhints" class="nav-link"><span>⚡ Resource Hints</span> <span id="nav-badge-hints" class="nav-count">${hints.length}</span></a></li>
-        <li class="nav-item"><a href="#externalr" class="nav-link"><span>🏢 External Resources</span> <span id="nav-badge-ext" class="nav-count">${extDomains.length}</span></a></li>
-        <li class="nav-item"><a href="#security" class="nav-link"><span>🛡️ Security & Config</span></a></li>
+        <li class="nav-item"><a href="#diagnostics-section" class="nav-link"><span>ðŸ©º Diagnostics</span></a></li>
+        <li class="nav-item"><a href="#common" class="nav-link"><span>ðŸ“„ Common Meta</span></a></li>
+        <li class="nav-item"><a href="#mobile" class="nav-link"><span>ðŸ“± Mobile & Viewport</span></a></li>
+        <li class="nav-item"><a href="#social" class="nav-link"><span>ðŸŒ Social Meta</span> <span id="nav-badge-social" class="nav-count">${ogList.length + twList.length}</span></a></li>
+        <li class="nav-item"><a href="#structureddata" class="nav-link"><span>ðŸ§© Structured Data</span> <span id="nav-badge-schema" class="nav-count">${schemas.length}</span></a></li>
+        <li class="nav-item"><a href="#headings" class="nav-link"><span>ðŸ“‘ Headings (H1-H6)</span> <span id="nav-badge-headings" class="nav-count">${headings.length}</span></a></li>
+        <li class="nav-item"><a href="#links" class="nav-link"><span>âš“ Links Analysis</span> <span id="nav-badge-links" class="nav-count">${lStats.total}</span></a></li>
+        <li class="nav-item"><a href="#rhints" class="nav-link"><span>âš¡ Resource Hints</span> <span id="nav-badge-hints" class="nav-count">${hints.length}</span></a></li>
+        <li class="nav-item"><a href="#externalr" class="nav-link"><span>ðŸ¢ External Resources</span> <span id="nav-badge-ext" class="nav-count">${extDomains.length}</span></a></li>
+        <li class="nav-item"><a href="#security" class="nav-link"><span>ðŸ›¡ï¸ Security & Config</span></a></li>
       </ul>
       <div style="margin-top:24px; padding-top:16px; border-top:1px solid var(--border-color); font-size:11px; color:#64748b; line-height:1.4;">
         META SEO Inspector Report<br>Generated by IPvFoo Extension
@@ -3828,7 +3828,7 @@
     function copyText(text, label = "Teks") {
       if (!text) return;
       navigator.clipboard.writeText(text).then(() => {
-        showToast("✅ " + label + " disalin ke clipboard!");
+        showToast("âœ… " + label + " disalin ke clipboard!");
       }).catch(() => {
         const ta = document.createElement("textarea");
         ta.value = text;
@@ -3836,7 +3836,7 @@
         ta.select();
         document.execCommand("copy");
         document.body.removeChild(ta);
-        showToast("✅ " + label + " disalin ke clipboard!");
+        showToast("âœ… " + label + " disalin ke clipboard!");
       });
     }
 
@@ -3900,7 +3900,7 @@
         a.download = "seo_" + (DATA.hostname || "report") + "_" + Date.now() + ".json";
         a.click();
         URL.revokeObjectURL(url);
-        showToast("✅ Berhasil mengekspor JSON!");
+        showToast("âœ… Berhasil mengekspor JSON!");
       };
     }
 
@@ -3930,17 +3930,38 @@
   }
 
   function openSeoInNewTab() {
-    const seoData = extractPageSeoData();
     const sourceUrl = window.location.href;
     const sourceHost = window.location.hostname || "page";
 
+    showCopyToast("🚀 Membuka META SEO Inspector (" + escapeHtml(sourceHost) + ") di Tab Baru...");
+
+    try {
+      if (typeof getPageData === "function") {
+        const pageData = getPageData({ mode: "full" });
+        if (pageData && pageData.sections) {
+          chrome.storage.local.set({
+            page: { url: sourceUrl, title: document.title },
+            sections: pageData.sections
+          }, () => {
+            chrome.runtime.sendMessage({ cmd: "open_seo_tab" }, (res) => {
+              if (chrome.runtime.lastError || !res || res.status !== "ok") {
+                openPreRenderedSeoBlob(extractPageSeoData());
+              }
+            });
+          });
+          return;
+        }
+      }
+    } catch(e) {
+      console.warn("openSeoInNewTab getPageData error:", e);
+    }
+
+    const seoData = extractPageSeoData();
     try {
       if (typeof chrome !== "undefined" && chrome.storage && chrome.storage.local) {
         chrome.storage.local.set({ last_seo_data: seoData });
       }
     } catch(e) {}
-
-    showCopyToast("🚀 Membuka META SEO Inspector (" + escapeHtml(sourceHost) + ") di Tab Baru...");
 
     try {
       if (typeof chrome !== "undefined" && chrome.runtime && chrome.runtime.sendMessage) {

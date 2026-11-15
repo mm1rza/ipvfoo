@@ -1,0 +1,538 @@
+{
+   "aboutpanel": {
+      "message": "New feature! Popup content can now also be displayed in the sidebar."
+   },
+   "canonical_relative_url": {
+      "message": "Relative URL used in canonical tag"
+   },
+   "canonicaldifferent": {
+      "message": "Canonical посилання та URL сторінки різні"
+   },
+   "canonicalmultiple": {
+      "message": "Canonical is defined multiple times"
+   },
+   "canonicalnotinhead": {
+      "message": "canonical посилання знаходиться не всередині тега HEAD"
+   },
+   "characters": {
+      "message": "символів"
+   },
+   "clickdonate": {
+      "message": "Клацніть для пожертвування через PayPal"
+   },
+   "clickdonate_coffee": {
+      "message": "Клацніть для покупки мені кави ☕"
+   },
+   "close": {
+      "message": "закрити"
+   },
+   "copy": {
+      "message": "копіювати"
+   },
+   "descriptiontoolong": {
+      "message": "опис занадто довгий (&gt;170 символів)"
+   },
+   "descriptiontooshort": {
+      "message": "опис занадто короткий (&lt;50 символів)"
+   },
+   "doctypeis": {
+      "message": "Doctype"
+   },
+   "donationtitle": {
+      "message": "Підтримай нас пожертвуванням"
+   },
+   "empty": {
+      "message": "пусто"
+   },
+   "extDescription": {
+      "description": "Chrome extension description.",
+      "message": "Легко перевіряйте метадані, знайдені на веб-сторінках, знаходьте проблеми та отримуйте поради щодо їх усунення."
+   },
+   "extName": {
+      "description": "Chrome extension name.",
+      "message": "META SEO inspector"
+   },
+   "external": {
+      "message": "зовнішні"
+   },
+   "external_url_tip": {
+      "message": "ПІДКАЗКА: ctrl-клік відкрити посилання, залишивши це спливаюче вікно відкритим."
+   },
+   "firstheadernoth1": {
+      "message": "перший тег заголовка повинен бути h1"
+   },
+   "h1optimalsize": {
+      "message": "H1 має містити 20-70 символів"
+   },
+   "headtitle": {
+      "message": "заголовок сторінки"
+   },
+   "headtitleempty": {
+      "message": "ЗАГОЛОВОК ЗАГОЛОВОК знайдено, але порожній"
+   },
+   "help_intro": {
+      "message": "META SEO Inspector надає детальний огляд SEO-інформації вебсторінки, дозволяючи користувачам переглядати та оцінювати різні ключові аспекти, які можуть впливати на її видимість у пошукових системах.\n\n\u003Cb>Просто зверніть увагу на червоні (попередження) та сині (інформаційні) значки для підказок.\u003C/b>\nЯкщо ви їх не бачите — сторінка у нормі.\n\nІнструмент часто використовується для швидкої перевірки, чи немає серйозних проблем після редагування сторінки, а також може надати поради щодо їх виправлення — просто натисніть жовті кнопки FIX IT у розділі SEO Check."
+   },
+   "help_intro2": {
+      "message": "Розділ Explore натомість показує дані, які можуть бути корисними, хоча й не пов’язані з безпосередніми проблемами, але можуть допомогти дослідити сайт, про який ви мало знаєте.\nЦей розділ також можна використовувати для завантаження деяких елементів сторінки, таких як вбудовані SVG, зображення чи відео."
+   },
+   "hide": {
+      "message": "приховати"
+   },
+   "hreflang_canonical": {
+      "message": "Canonical"
+   },
+   "hreflang_canonical_conflict": {
+      "message": "Canonical conflicts with hreflang alternate"
+   },
+   "hreflang_duplicate_code": {
+      "message": "Duplicate hreflang language code"
+   },
+   "hreflang_invalid_syntax": {
+      "message": "Invalid hreflang locale code format"
+   },
+   "hreflang_missing_self": {
+      "message": "Self-referencing hreflang tag is missing"
+   },
+   "hreflang_missing_xdefault": {
+      "message": "Missing x-default hreflang tag"
+   },
+   "hreflang_outside_head": {
+      "message": "Hreflang alternate link is not inside the HEAD tag"
+   },
+   "hreflang_relative_url": {
+      "message": "Relative URL used in hreflang alternate tag"
+   },
+   "hreflang_self": {
+      "message": "Self"
+   },
+   "html4tags": {
+      "message": "але також має застарілі HTML4 теги"
+   },
+   "html5tags": {
+      "message": "має HTML5 теги"
+   },
+   "httpequiv_info": {
+      "message": "Видаліть цей тег, якщо вам не потрібна підтримка старих застарілих браузерів."
+   },
+   "info": {
+      "message": "ІНФО"
+   },
+   "info_applemobile": {
+      "message": "Apple-mobile-web-app-capable is deprecated. Please use mobile-web-app-capable instead."
+   },
+   "info_appletouch": {
+      "message": "Відсутній apple-touch-icon або apple-touch-icon-precomposed"
+   },
+   "info_googleplay": {
+      "message": "It's not actually used to show a smart banner like the iOS version."
+   },
+   "info_headtag_above_primary": {
+      "message": "Цей тег має бути розміщений вище"
+   },
+   "info_headtag_above_secondary": {
+      "message": "Цей тег повинен бути вище"
+   },
+   "info_headtag_wrongtype": {
+      "message": "Цей тип тегу не повинен знаходитися всередині секції &lt;head&gt;."
+   },
+   "info_intresources_limit": {
+      "message": "Too many resources"
+   },
+   "info_maximumscale": {
+      "message": "maximum-scale в viewport не треба встановлювати значення"
+   },
+   "info_missingthemecolor": {
+      "message": "Відсутній theme-color"
+   },
+   "info_structured_data": {
+      "message": "Нижче наведено приблизне уявлення знайдених структурованих даних. Для отримання додаткової інформації, будь ласка, перевірте тут:"
+   },
+   "info_thumbnail": {
+      "message": "This is actually needed only for Google custom search."
+   },
+   "info_title": {
+      "message": "Not really needed. use the &lt;title&gt; tag instead."
+   },
+   "info_tobots": {
+      "message": "The page contains 'noindex' or 'nofollow' which may prevent it from being indexed."
+   },
+   "info_toomanyanchors": {
+      "message": "На цій сторінці занадто багато якірних посилань (лінків)."
+   },
+   "info_userscalable": {
+      "message": "user-scalable в viewport має бути встановлений у значенні 'yes'"
+   },
+   "info_viewportwidth": {
+      "message": "width в viewport має бути встановлений у значенні 'device-width'"
+   },
+   "info_xua": {
+      "message": "Obsolete unless you need to support IE9 or IE8."
+   },
+   "internal": {
+      "message": "внутрішні"
+   },
+   "intro_cms": {
+      "message": "Ці теги повинні надати деякі підказки про те, які CMS або будь-які інші інструменти для створення сайту використовувалися."
+   },
+   "intro_common": {
+      "message": "Тут ви можете знайти всі основні елементи, які ніколи не повинні повідомляти про будь-які проблеми на кожній сторінці веб-сайту."
+   },
+   "intro_externalr": {
+      "message": "Зовнішні ресурси - це елементи сторінки або скрипти, що завантажуються з інших місць, які зазвичай використовуються для додавання функцій або відстеження використання сайту."
+   },
+   "intro_head": {
+      "message": "Упорядкуйте елементи в секції &lt;head&gt;, щоб покращити швидкодію завантаження сторінки.\nВищий пріоритет означає, що елемент має бути розташований вище за ті, що мають нижчий пріоритет.\nЦей звіт все ще перебуває у стадії БЕТА і буде вдосконалюватися надалі."
+   },
+   "intro_headers": {
+      "message": "Натисніть назву заголовків, щоб виділити їх на сторінці.\nЯкщо елемент прихований, нічого не станеться."
+   },
+   "intro_internalr": {
+      "message": "В даний час рекомендується використовувати внутрішні ресурси, якщо сервер використовує HTTP/2 (також відомий як h2), тому що запити оптимізовані у багатьох відношеннях, і тому сторінка завантажується швидше."
+   },
+   "intro_largeimages": {
+      "message": "Великі зображення мають більше шансів з'явитись на сторінках пошукової видачі зображень."
+   },
+   "intro_othermetadata": {
+      "message": "У цьому розділі ви можете побачити всі нерозпізнані метатеги.\nУ більшості випадків це теги користувача, корисні тільки розробникам веб-сайтів."
+   },
+   "intro_rec": {
+      "message": "Цей розділ використовується для запису даних будь-якої сторінки, коли ви їх відвідуєте, тільки для вибраних сайтів."
+   },
+   "intro_rhints": {
+      "message": "Підказка за ресурсами — це використання dns-prefetch, preconnect, prefetch або prerender, які використовуються для вказівки джерела або ресурсу, який повинен бути підключений або отриманий за допомогою user agent. контент, поки користувач переглядає сторінку.\n\nПам'ятайте, що приоритизація певної дії забирає ресурси браузера в інших дій. Таким чином, ресурсні підказки слід використовувати продумано і не для всього."
+   },
+   "intro_structureddata": {
+      "message": "Структуровані дані допомагають пошуковим системам краще зрозуміти зміст сторінки і дозволяють користувачам побачити цінність веб-сайту до його відвідування за допомогою сніпетів у пошуку. Структуровані дані на сторінці повинні описувати зміст цієї сторінки.\n\nВи повинні розмітити сторінки свого сайту, використовуючи один з трьох форматів, що підтримуються:\n• JSON-LD (рекомендується Google)\n• Microdata\n• RDFa."
+   },
+   "intro_svg": {
+      "message": "Список вбудованих SVG, вони не завантажуються на сторінці як зовнішні файли.\nстрілка вниз дозволяє завантажувати ці зображення як файли, але якщо всередині розмітки SVG є елементи 'use', вони можуть відображатися не так, як хотілося б."
+   },
+   "invalidvalue": {
+      "message": "некоректне значення атрибуту"
+   },
+   "item": {
+      "message": "пункт"
+   },
+   "items": {
+      "message": "пунктів"
+   },
+   "justthink": {
+      "message": "Просто подумайте про те, скільки часу ви заощадили за допомогою цього інструменту, настільки швидкого, що вам достатньо одного кліку, щоб отримати всю необхідну інформацію.\nТакож подумайте про те, скільки ви заощадили, не купуючи аналогічні, але повільніші та платніші інструменти."
+   },
+   "keywordsuseless": {
+      "message": "метатег 'keywords' застарів і не використовується"
+   },
+   "lazyabove1": {
+      "message": "зображень (з"
+   },
+   "lazyabove2": {
+      "message": "ліниво завантажені і знаходяться на першому екрані"
+   },
+   "lazyabove_tip": {
+      "message": "Не використовуйте load='lazy' для зображень у верхній частині сторінки, вони почнуть відображатися лише після повного завантаження CSS."
+   },
+   "menu_about": {
+      "message": "Інфо"
+   },
+   "menu_broken_links": {
+      "message": "непрацюючі посилання"
+   },
+   "menu_explore": {
+      "message": "Огляд"
+   },
+   "menu_help": {
+      "message": "починаємо"
+   },
+   "menu_onlinetools": {
+      "message": "інструменти"
+   },
+   "menu_options": {
+      "message": "Налаштування"
+   },
+   "menu_seocheck": {
+      "message": "SEO перевірка"
+   },
+   "missing": {
+      "message": "відсутнє"
+   },
+   "missingaltp1": {
+      "message": "зображень (з"
+   },
+   "missingaltp2": {
+      "message": "з відсутнім атрибутом ALT"
+   },
+   "missingaltp2_tip": {
+      "message": "ALT текст посилює повідомлення вашого контенту для пошукових роботів та покращує доступність вашого веб-сайту"
+   },
+   "missingdescription": {
+      "message": "відсутній опис"
+   },
+   "missingh1tag": {
+      "message": "відсутній тег &lt;h1&gt;"
+   },
+   "missingheadtitle": {
+      "message": "відсутній заголовок сторінки"
+   },
+   "missinghtmltag": {
+      "message": "відсутній тег &lt;html&gt;"
+   },
+   "missingloadingp1": {
+      "message": "зображень (з"
+   },
+   "missingloadingp2": {
+      "message": "з відсутнім атрибутом LOADING"
+   },
+   "missingloadingp2_tip": {
+      "message": "Атрибут LOADING зі значенням 'lazy' прискорює завантаження сторінки."
+   },
+   "missingtitlep1": {
+      "message": "зображень (з"
+   },
+   "missingtitlep1_tip": {
+      "message": "TITLE текст посилює повідомлення вашого контенту для пошукових роботів."
+   },
+   "missingtitlep2": {
+      "message": "з відсутнім атрибутом TITLE"
+   },
+   "missingviewport": {
+      "message": "відсутній метатег viewport"
+   },
+   "missingwidhei1": {
+      "message": "зображень (з"
+   },
+   "missingwidhei2": {
+      "message": "з відсутніми атрибутами WIDTH або HEIGHT"
+   },
+   "missingwidhei2_tip": {
+      "message": "Завжди вказуйте атрибути ширини та висоти для ваших елементів зображень, щоб дозволити браузеру виділити правильний обсяг місця в документі під час завантаження зображення. (для покращення CLS)"
+   },
+   "no_image_size": {
+      "message": "не вказано розмір зображення"
+   },
+   "no_lang": {
+      "message": "HTML атрибут 'lang' не визначено"
+   },
+   "nohtml5tags": {
+      "message": "не має HTML5 теги"
+   },
+   "noobsoletetags": {
+      "message": "і застарілі HTML теги не знайденi"
+   },
+   "notdefined": {
+      "message": "не визначений"
+   },
+   "nothtml5": {
+      "message": "не є HTML5"
+   },
+   "offer1": {
+      "message": "Improve your SEO with this tool I recommend 🔹"
+   },
+   "openpanel": {
+      "message": "View page data on sidebar"
+   },
+   "other": {
+      "message": "інше"
+   },
+   "pleaseconsider": {
+      "message": "Дякую, що вирішили зробити пожертву для підтримки цього розширення Chrome."
+   },
+   "print": {
+      "message": "друк"
+   },
+   "print_export": {
+      "message": "друк / експорт у PDF"
+   },
+   "rateus": {
+      "message": "💗 META SEO Inspector? Будь ласка, оцініть нас 😀"
+   },
+   "rateus_menu": {
+      "message": "оцініть нас"
+   },
+   "section_anchors": {
+      "message": "АНКОРИ"
+   },
+   "section_common": {
+      "message": "ЗАГАЛЬНЕ"
+   },
+   "section_commontags": {
+      "message": "ЗАГАЛЬНІ ТЕГИ"
+   },
+   "section_externalr": {
+      "message": "ЗОВНІШНІ РЕСУРСИ"
+   },
+   "section_head": {
+      "message": "&lt;HEAD&gt;"
+   },
+   "section_headers": {
+      "message": "HEADERS"
+   },
+   "section_hreflang": {
+      "message": "HREFLANG / ALTERNATES"
+   },
+   "section_htmlreport": {
+      "message": "HTML5 ЗВІТ"
+   },
+   "section_htmltags": {
+      "message": "ОГЛЯД"
+   },
+   "section_images": {
+      "message": "ЗОБРАЖЕННЯ"
+   },
+   "section_inlinesvg": {
+      "message": "ВБУДОВАНІ SVG"
+   },
+   "section_internalr": {
+      "message": "ВНУТРІШНІ РЕСУРСИ"
+   },
+   "section_jsondata": {
+      "message": "ДАНІ JSON"
+   },
+   "section_localstorage": {
+      "message": "LOCAL STORAGE"
+   },
+   "section_othermetadata": {
+      "message": "ІНШІ МЕТА-ДАНІ"
+   },
+   "section_presentation": {
+      "message": "ЗОВНІШНІЙ ВИГЛЯД"
+   },
+   "section_resourcehints": {
+      "message": "ПОРАДИ З РЕСУРСІВ"
+   },
+   "section_security": {
+      "message": "БЕЗПЕКА ТА КОНФІДЕНЦІЙНІСТЬ"
+   },
+   "section_siteverification": {
+      "message": "ВЕРИФІКАЦІЯ САЙТУ"
+   },
+   "section_structureddata": {
+      "message": "СТРУКТУРОВАНІ ДАНІ"
+   },
+   "sections": {
+      "message": "sections"
+   },
+   "sectionscloseall": {
+      "message": "згорнути все"
+   },
+   "sectionsopenall": {
+      "message": "розгорнути все"
+   },
+   "streaming": {
+      "message": "стрімінг, що не завантажується"
+   },
+   "tip_appletouch": {
+      "message": "Для ідеального відображення на iOS, коли користувачі додають сторінку на головний екран, визначте apple-touch-icon. Він має вказувати на непрозорий квадратний PNG розміром 192px (або 180px)."
+   },
+   "tip_bad_head_tag": {
+      "message": "Це може статися, якщо розділ HEAD містить елементи, які не належать до метаданих. (наприклад, DIV, SPAN і т.д.)"
+   },
+   "tip_canonical_defined": {
+      "message": "Canonical посилання є. Сторінка захищена від внутрішнього дублювання контенту."
+   },
+   "tip_canonical_missing": {
+      "message": "Canonical посилання відсутнє. Сторінка не захищена від внутрішнього дублювання контенту."
+   },
+   "tip_canonical_multiple": {
+      "message": "This could be caused by CMS themes and plugins conflicts."
+   },
+   "tip_canonical_relative_url": {
+      "message": "A canonical URL should always be an absolute URL (including https://) to avoid search engine interpretation errors."
+   },
+   "tip_canonicaldifferent": {
+      "message": "Саме собою це не так, можливо, автор хотів виключити зайві сторінки."
+   },
+   "tip_h1optimalsize": {
+      "message": "Балансування довжини мітки має вирішальне значення. Стислі теги максимізують ефективність, тоді як надто довгі послаблюють силу тегів.\nПам’ятайте, що якщо Google виявить брак назви вашої сторінки, він може замінити її заголовком H1."
+   },
+   "tip_headercontenthidden": {
+      "message": "Здається, що контент прихований"
+   },
+   "tip_headtag_above_primary": {
+      "message": "Елементи в head із найвищим пріоритетом мають бути серед перших."
+   },
+   "tip_headtag_above_secondary": {
+      "message": "Теги з вищим пріоритетом повинні розташовуватися перед тегами з нижчим пріоритетом."
+   },
+   "tip_headtitleempty": {
+      "message": "Тег TITLE залишився порожнім або якийсь скрипт очищає його вміст."
+   },
+   "tip_hreflang_canonical_conflict": {
+      "message": "The canonical URL points to a different language version. Each localized page must have a canonical pointing to itself to avoid de-indexing."
+   },
+   "tip_hreflang_duplicate_code": {
+      "message": "Multiple alternate tags specify the same hreflang code."
+   },
+   "tip_hreflang_invalid_syntax": {
+      "message": "Hreflang codes must follow BCP 47 (e.g. 'en', 'en-US', 'pt-BR', 'zh-Hant', or 'x-default'). Underscores or invalid codes are not accepted by search engines."
+   },
+   "tip_hreflang_missing_self": {
+      "message": "Google requires each localized page to include a self-referencing hreflang tag pointing to its own URL."
+   },
+   "tip_hreflang_missing_xdefault": {
+      "message": "An x-default hreflang tag is recommended as a fallback for unmatched languages or international users."
+   },
+   "tip_hreflang_relative_url": {
+      "message": "Absolute URLs (including https://) should always be used for canonical and hreflang tags to prevent crawler ambiguity."
+   },
+   "tip_html_lang": {
+      "message": "Якщо на сторінці не вказано lang для HTML тега, програма для читання з екрана передбачає, що сторінка написана мовою за замовчуванням."
+   },
+   "tip_intresources_limit": {
+      "message": "Try to reduce the number of loaded resources by packing them together."
+   },
+   "tip_missingh1tag": {
+      "message": "Це робить структуру документа не до кінця певною і може стати проблемою, пов'язаною із SEO."
+   },
+   "tip_missingheadtitle": {
+      "message": "Використовуйте цей тег, щоб задати назву вкладки в браузері. Це може впливати на позиції в пошукових системах і на показник клікабельності (CTR) у результатах пошуку."
+   },
+   "tip_missingthemecolor": {
+      "message": "Метатег theme-color дозволяє запропонувати колір, який браузери повинні використовувати для налаштування відображення сторінки або навколишнього інтерфейсу користувача, і може значно збільшити «вау» ефект вашого веб-сайту на мобільних пристроях."
+   },
+   "tip_missingviewport": {
+      "message": "Без мета-тега viewport неможливо коректно реалізувати адаптивний дизайн, і показник First Input Delay (FID) може отримати нижчі оцінки."
+   },
+   "tip_no_doctype": {
+      "message": "На сторінці відсутній DOCTYPE, що запускає режим химер, який може призвести до того, що ваша сторінка буде відображатися несподіваним чином."
+   },
+   "tip_titletoolong": {
+      "message": "Не є фактором ранжирування, але якщо місця недостатньо, його можна скоротити в пошуковій видачі."
+   },
+   "tip_toomanyanchors": {
+      "message": "Пошукові роботи можуть не переходити за всіма ними."
+   },
+   "tip_toomanyh1": {
+      "message": "Тег H1 повинен описувати суть сторінки.\nНаявність більш ніж одного тега може послабити вплив SEO на ключову фразу або речення"
+   },
+   "titlenotinhead": {
+      "message": "Заголовок сторінки знайдено, але він не всередині тега HEAD"
+   },
+   "titletoolong": {
+      "message": "заголовок сторінки занадто довгий (>65 символів)"
+   },
+   "toggletext": {
+      "message": "змінити розмір тексту"
+   },
+   "toggletheme": {
+      "message": "переключити темний/світлий режим"
+   },
+   "toomanyh1": {
+      "message": "занадто багато тегів &lt;h1&gt;"
+   },
+   "total_bytes": {
+      "message": "всього байт"
+   },
+   "v3_intro": {
+      "message": "Ласкаво просимо до нової, повністю переписаної версії, що відповідає стандартам Manifest V3."
+   },
+   "viewhistory": {
+      "message": "Перегляд історії змін"
+   },
+   "warning": {
+      "message": "ПОПЕРЕДЖЕННЯ"
+   },
+   "wepromise": {
+      "message": "Я обіцяю оновлювати це розширення, наслідуючи останні тенденції SEO і отримуючи будь-які відгуки від вас."
+   }
+}

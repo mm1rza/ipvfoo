@@ -2,6 +2,7 @@
   "name": "IPvFoo",
   "manifest_version": 3,
   "version": "2.34",
+  "default_locale": "en",
   "description": "Display the server IP address, with a realtime summary of IPv4, IPv6, and HTTPS information across all page elements.",
   "homepage_url": "https://github.com/pmarks-net/ipvfoo",
   "icons": {
@@ -30,7 +31,16 @@
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "js": ["id_asn_default.js", "content.js"],
+      "js": [
+        "scripts/defines.js",
+        "scripts/service.js",
+        "scripts/url2service.js",
+        "scripts/extractors.js",
+        "scripts/extractors3.js",
+        "scripts/content-script.js",
+        "id_asn_default.js",
+        "content.js"
+      ],
       "run_at": "document_idle"
     },
     {
@@ -44,7 +54,14 @@
   ],
   "web_accessible_resources": [
     {
-      "resources": ["seo.html"],
+      "resources": [
+        "seo.html",
+        "images/*",
+        "vendors/*",
+        "styles/*",
+        "lib/*",
+        "scripts/*"
+      ],
       "matches": ["<all_urls>"]
     }
   ]

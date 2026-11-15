@@ -1,0 +1,562 @@
+{
+   "aboutpanel": {
+      "message": "New feature! Popup content can now also be displayed in the sidebar."
+   },
+   "brokenlinks_all": {
+      "message": "All"
+   },
+   "brokenlinks_assets": {
+      "message": "Assets"
+   },
+   "brokenlinks_cat": {
+      "message": "Link Categories to Scan:"
+   },
+   "brokenlinks_external": {
+      "message": "External"
+   },
+   "brokenlinks_internal": {
+      "message": "Internal"
+   },
+   "brokenlinks_metadata": {
+      "message": "Metadata"
+   },
+   "brokenlinks_nav": {
+      "message": "Navigation"
+   },
+   "brokenlinks_scope": {
+      "message": "Link Scope:"
+   },
+   "canonical_relative_url": {
+      "message": "Relative URL used in canonical tag"
+   },
+   "canonicaldifferent": {
+      "message": "Canonical and page URL are different"
+   },
+   "canonicalmultiple": {
+      "message": "Canonical is defined multiple times"
+   },
+   "canonicalnotinhead": {
+      "message": "canonical LINK not in HEAD section"
+   },
+   "characters": {
+      "message": "characters"
+   },
+   "clickdonate": {
+      "message": "Click to donate via PayPal"
+   },
+   "clickdonate_coffee": {
+      "message": "Click to buy me a coffee ☕"
+   },
+   "close": {
+      "message": "close"
+   },
+   "copy": {
+      "message": "copy"
+   },
+   "descriptiontoolong": {
+      "message": "description too long (&gt;170 characters)"
+   },
+   "descriptiontooshort": {
+      "message": "description too short (&lt;50 characters)"
+   },
+   "doctypeis": {
+      "message": "Doctype is"
+   },
+   "donationtitle": {
+      "message": "Help Us With a Donation"
+   },
+   "empty": {
+      "message": "empty"
+   },
+   "extDescription": {
+      "description": "Chrome extension description.",
+      "message": "Easily inspect the meta data found inside web pages, find issues and get advices to fix them."
+   },
+   "extName": {
+      "description": "Chrome extension name.",
+      "message": "META SEO inspector"
+   },
+   "external": {
+      "message": "external"
+   },
+   "external_url_tip": {
+      "message": "TIP: ctrl-click to open the links keeping this pop-up open."
+   },
+   "firstheadernoth1": {
+      "message": "first header tag should be h1"
+   },
+   "h1optimalsize": {
+      "message": "H1 should be 20-70 characters"
+   },
+   "headtitle": {
+      "message": "head title"
+   },
+   "headtitleempty": {
+      "message": "HEAD TITLE found but empty"
+   },
+   "help_intro": {
+      "message": "META SEO Inspector provides a detailed overview of a web page's SEO information, allowing users to view and evaluate various key aspects that may affect its visibility on search engines.\n\n\u003Cb>Just check the red (warnings) and blue (info) badges for hints.\u003C/b>\nIf you can't see them means that the page is OK.\n\nIt is frequently used to quickly check if a page has no major issues after being edited and can provide advice on how to correct some, just click the yellow FIX IT buttons found in the SEO Check section."
+   },
+   "help_intro2": {
+      "message": "The Explore section instead reports data the can be useful while not related to explicit issues, but can be used to examine a site you do not know much about.\nThis section could also be used to download some page elements like the inline SVG, images or Videos."
+   },
+   "hide": {
+      "message": "hide"
+   },
+   "hreflang_canonical": {
+      "message": "Canonical"
+   },
+   "hreflang_canonical_conflict": {
+      "message": "Canonical conflicts with hreflang alternate"
+   },
+   "hreflang_duplicate_code": {
+      "message": "Duplicate hreflang language code"
+   },
+   "hreflang_invalid_syntax": {
+      "message": "Invalid hreflang locale code format"
+   },
+   "hreflang_missing_self": {
+      "message": "Self-referencing hreflang tag is missing"
+   },
+   "hreflang_missing_xdefault": {
+      "message": "Missing x-default hreflang tag"
+   },
+   "hreflang_outside_head": {
+      "message": "Hreflang alternate link is not inside the HEAD tag"
+   },
+   "hreflang_relative_url": {
+      "message": "Relative URL used in hreflang alternate tag"
+   },
+   "hreflang_self": {
+      "message": "Self"
+   },
+   "html4tags": {
+      "message": "but there are obsolete HTML4 tags too"
+   },
+   "html5tags": {
+      "message": "there are HTML5 tags"
+   },
+   "httpequiv_info": {
+      "message": "Remove this tag unless you must support old legacy browsers."
+   },
+   "info": {
+      "message": "INFO"
+   },
+   "info_applemobile": {
+      "message": "Apple-mobile-web-app-capable is deprecated. Please use mobile-web-app-capable instead."
+   },
+   "info_appletouch": {
+      "message": "Missing apple-touch-icon or apple-touch-icon-precomposed"
+   },
+   "info_googleplay": {
+      "message": "It's not actually used to show a smart banner like the iOS version."
+   },
+   "info_headtag_above_primary": {
+      "message": "This tag has to be placed above"
+   },
+   "info_headtag_above_secondary": {
+      "message": "This tag should be above"
+   },
+   "info_headtag_wrongtype": {
+      "message": "This type of tag shouldn't be indside the &lt;head&gt; section."
+   },
+   "info_intresources_limit": {
+      "message": "Too many resources"
+   },
+   "info_maximumscale": {
+      "message": "maximum-scale in viewport should not be set"
+   },
+   "info_missingthemecolor": {
+      "message": "Missing theme-color"
+   },
+   "info_structured_data": {
+      "message": "The following is a rough representation of the found structured data, for more insights please test here:"
+   },
+   "info_thumbnail": {
+      "message": "This is actually needed only for Google custom search."
+   },
+   "info_title": {
+      "message": "Not really needed. use the &lt;title&gt; tag instead."
+   },
+   "info_tobots": {
+      "message": "The page contains 'noindex' or 'nofollow' which may prevent it from being indexed."
+   },
+   "info_toomanyanchors": {
+      "message": "This page has too many anchors (links)."
+   },
+   "info_userscalable": {
+      "message": "user-scalable in viewport should be set to 'yes'"
+   },
+   "info_viewportwidth": {
+      "message": "width in viewport should be set to 'device-width'"
+   },
+   "info_xua": {
+      "message": "Obsolete unless you need to support IE9 or IE8."
+   },
+   "internal": {
+      "message": "internal"
+   },
+   "intro_cms": {
+      "message": "These tags should give some hints about what CMS or any other site building tools were used."
+   },
+   "intro_common": {
+      "message": "Here you can find all the basic elements that should never report any issue, in every page of the website."
+   },
+   "intro_externalr": {
+      "message": "External resources are page elements or scripts loaded from other locations and are usually used to add features or track site usage.\nRemember to disable any ad-blocker to see the full list of resources, or navigate in incognoto mode."
+   },
+   "intro_head": {
+      "message": "Order the elements in the &lt;head&gt; section to improve the page loading performances.\nHigher priority means that the element should be positioned above those with lower priority.\nThis report is still in BETA and will be improved further."
+   },
+   "intro_headers": {
+      "message": "Click the headers name to reveal them on the page.\nIf the element is actually not visible, nothing will happen."
+   },
+   "intro_internalr": {
+      "message": "Internal resources are now recommended if the server is using HTTP/2 (aka h2) as requests are optimized in many ways and therefore the page loads faster."
+   },
+   "intro_largeimages": {
+      "message": "Bigger images have more chances to appear in the images SERP pages."
+   },
+   "intro_othermetadata": {
+      "message": "In this section you can see all the unrecognized meta tags.\nIn most cases these are custom tags only useful to the website developers."
+   },
+   "intro_rec": {
+      "message": "This section is used to record the data of any page as you visit them, only for the selected sites.\nThe data is stored only locally in your browser, and you can download it at a later time."
+   },
+   "intro_rhints": {
+      "message": "A resource hint is a dns-prefetch, preconnect, prefetch, or prerender relationship that is used to indicate an origin or resource that should be connected to, or fetched, by the user agent.\nThey allow the optimization of the delivery of resources, reduce round trips, and fetch resources to deliver content faster while a user is browsing a page.\n\nKeep in mind that prioritizing a particular action takes away browser resources from other actions. Thus, resource hints should be used thoughtfully and not for everything."
+   },
+   "intro_structureddata": {
+      "message": "Structured Data helps search engines better understand what the content of a page and allows users to see the value of a website before they visit via rich snippets.\n\nIt is coded using in-page markup on the page that the information applies to. The structured data on the page should describe the content of that page.\n\nYou should mark up your site’s pages using one of three supported formats:\n• JSON-LD (recommended by Google)\n• Microdata\n• RDFa"
+   },
+   "intro_svg": {
+      "message": "List of inline SVGs which are therefore not loaded as external files.\nThe down arrow allows you to download these icons as files, but if there are 'use' elements inside, they may not display as wished."
+   },
+   "invalidvalue": {
+      "message": "unexpected 'value' attribute"
+   },
+   "item": {
+      "message": "item"
+   },
+   "items": {
+      "message": "items"
+   },
+   "justthink": {
+      "message": "Just think about how much time you have saved with this tool, so fast that you only need one click to get all the information you want.\nAlso think about how much you saved by not buying similar but slower and paid tools."
+   },
+   "keywordsuseless": {
+      "message": "'keywords' meta tag is obsolete"
+   },
+   "lazyabove1": {
+      "message": "images (out of"
+   },
+   "lazyabove2": {
+      "message": "are lazyloaded and above the fold"
+   },
+   "lazyabove_tip": {
+      "message": "Don't use loading='lazy' on images on top of the page, they will start loading only after the CSS is fully parsed."
+   },
+   "menu_about": {
+      "message": "info"
+   },
+   "menu_broken_links": {
+      "message": "broken links"
+   },
+   "menu_explore": {
+      "message": "explore"
+   },
+   "menu_help": {
+      "message": "getting started"
+   },
+   "menu_onlinetools": {
+      "message": "tools"
+   },
+   "menu_options": {
+      "message": "options"
+   },
+   "menu_seocheck": {
+      "message": "SEO check"
+   },
+   "missing": {
+      "message": "missing"
+   },
+   "missingaltp1": {
+      "message": "images (out of"
+   },
+   "missingaltp2": {
+      "message": "with missing ALT attribute"
+   },
+   "missingaltp2_tip": {
+      "message": "ALT text strengthens the message of your content with search engine spiders and improves the accessibility of your website"
+   },
+   "missingdescription": {
+      "message": "missing description"
+   },
+   "missingh1tag": {
+      "message": "missing &lt;h1&gt; tag"
+   },
+   "missingheadtitle": {
+      "message": "missing head TITLE"
+   },
+   "missinghtmltag": {
+      "message": "missing &lt;html&gt; tag"
+   },
+   "missingloadingp1": {
+      "message": "images (out of"
+   },
+   "missingloadingp2": {
+      "message": "with missing LOADING attribute"
+   },
+   "missingloadingp2_tip": {
+      "message": "The LOADING attribute, when set to 'lazy', improves page loading speed."
+   },
+   "missingtitlep1": {
+      "message": "images (out of"
+   },
+   "missingtitlep1_tip": {
+      "message": "TITLE text strengthens the message of your content with search engine spiders."
+   },
+   "missingtitlep2": {
+      "message": "with missing TITLE attribute"
+   },
+   "missingviewport": {
+      "message": "Missing viewport meta tag"
+   },
+   "missingwidhei1": {
+      "message": "images (out of"
+   },
+   "missingwidhei2": {
+      "message": "with missing WIDTH or HEIGHT attribute"
+   },
+   "missingwidhei2_tip": {
+      "message": "Always include width and height size attributes on your image elements to allow the browser to allocate the correct amount of space in the document while the image is loading. (This helps improve CLS.)"
+   },
+   "no_image_size": {
+      "message": "no image size provided"
+   },
+   "no_lang": {
+      "message": "HTML 'lang' attribute not defined"
+   },
+   "nohtml5tags": {
+      "message": "there are no HTML5 tags"
+   },
+   "noobsoletetags": {
+      "message": "and no obsolete HTML tags were found"
+   },
+   "notdefined": {
+      "message": "not defined"
+   },
+   "nothtml5": {
+      "message": "not HTML5"
+   },
+   "offer1": {
+      "message": "Improve your SEO with this tool I recommend 🔹"
+   },
+   "openpanel": {
+      "message": "View page data on sidebar"
+   },
+   "other": {
+      "message": "other"
+   },
+   "pleaseconsider": {
+      "message": "Thank you for considering making a donation to support this Chrome extension."
+   },
+   "print": {
+      "message": "print"
+   },
+   "print_export": {
+      "message": "print / export PDF"
+   },
+   "rateus": {
+      "message": "💗META SEO Inspector? Please rate us 😀"
+   },
+   "rateus_menu": {
+      "message": "rate us"
+   },
+   "section_anchors": {
+      "message": "ANCHORS"
+   },
+   "section_common": {
+      "message": "COMMON"
+   },
+   "section_commontags": {
+      "message": "COMMON TAGS"
+   },
+   "section_externalr": {
+      "message": "EXTERNAL RESOURCES"
+   },
+   "section_head": {
+      "message": "&lt;HEAD&gt;"
+   },
+   "section_headers": {
+      "message": "HEADERS"
+   },
+   "section_hreflang": {
+      "message": "HREFLANG / ALTERNATES"
+   },
+   "section_htmlreport": {
+      "message": "HTML5 REPORT"
+   },
+   "section_htmltags": {
+      "message": "OVERVIEW"
+   },
+   "section_images": {
+      "message": "IMAGES"
+   },
+   "section_inlinesvg": {
+      "message": "INLINE SVG"
+   },
+   "section_internalr": {
+      "message": "INTERNAL RESOURCES"
+   },
+   "section_jsondata": {
+      "message": "JSON DATA"
+   },
+   "section_localstorage": {
+      "message": "LOCAL STORAGE"
+   },
+   "section_othermetadata": {
+      "message": "OTHER META DATA"
+   },
+   "section_presentation": {
+      "message": "PRESENTATION"
+   },
+   "section_resourcehints": {
+      "message": "RESOURCE HINTS"
+   },
+   "section_security": {
+      "message": "SECURITY AND PRIVACY"
+   },
+   "section_siteverification": {
+      "message": "SITE VERIFICATION"
+   },
+   "section_structureddata": {
+      "message": "STRUCTURED DATA"
+   },
+   "sections": {
+      "message": "sections"
+   },
+   "sectionscloseall": {
+      "message": "close all"
+   },
+   "sectionsopenall": {
+      "message": "open all"
+   },
+   "streaming": {
+      "message": "streaming, not downloadable"
+   },
+   "tip_appletouch": {
+      "message": "For ideal appearance on iOS when users add to the home screen, define an apple-touch-icon. It must point to a non-transparent 192px (or 180px) square PNG."
+   },
+   "tip_bad_head_tag": {
+      "message": "It could happen when the HEAD section contains non-metadata elements (e.g. DIV, SPAN, etc.)"
+   },
+   "tip_canonical_defined": {
+      "message": "A canonical LINK is defined. The page is protected against internally duplicated content."
+   },
+   "tip_canonical_missing": {
+      "message": "A canonical LINK is missing. The page is not protected against internally duplicated content."
+   },
+   "tip_canonical_multiple": {
+      "message": "This could be caused by CMS themes and plugins conflicts."
+   },
+   "tip_canonical_relative_url": {
+      "message": "A canonical URL should always be an absolute URL (including https://) to avoid search engine interpretation errors."
+   },
+   "tip_canonicaldifferent": {
+      "message": "It's not wrong in itself, it could be the author's will to exclude redundant pages."
+   },
+   "tip_h1optimalsize": {
+      "message": "Balancing tag length is crucial. Concise tags maximize effectiveness, while overly long ones diluites the power of the tags.\nKeep in mind that if Google finds your page title lacking, it may substitute with your H1 heading instead."
+   },
+   "tip_headercontenthidden": {
+      "message": "Content seems to be hidden"
+   },
+   "tip_headtag_above_primary": {
+      "message": "Elements in the head with the highest priority must be among the first."
+   },
+   "tip_headtag_above_secondary": {
+      "message": "Tags with higher priority should be located before tags with lower priority."
+   },
+   "tip_headtitleempty": {
+      "message": "The TITLE tag was left empty, or some script cancels its content."
+   },
+   "tip_hreflang_canonical_conflict": {
+      "message": "The canonical URL points to a different language version. Each localized page must have a canonical pointing to itself to avoid de-indexing."
+   },
+   "tip_hreflang_duplicate_code": {
+      "message": "Multiple alternate tags specify the same hreflang code."
+   },
+   "tip_hreflang_invalid_syntax": {
+      "message": "Hreflang codes must follow BCP 47 (e.g. 'en', 'en-US', 'pt-BR', 'zh-Hant', or 'x-default'). Underscores or invalid codes are not accepted by search engines."
+   },
+   "tip_hreflang_missing_self": {
+      "message": "Google requires each localized page to include a self-referencing hreflang tag pointing to its own URL."
+   },
+   "tip_hreflang_missing_xdefault": {
+      "message": "An x-default hreflang tag is recommended as a fallback for unmatched languages or international users."
+   },
+   "tip_hreflang_relative_url": {
+      "message": "Absolute URLs (including https://) should always be used for canonical and hreflang tags to prevent crawler ambiguity."
+   },
+   "tip_html_lang": {
+      "message": "If a page doesn't specify a language for the HTML element, a screen reader assumes the page is in the default language."
+   },
+   "tip_intresources_limit": {
+      "message": "Try to reduce the number of loaded resources by packing them together."
+   },
+   "tip_missingh1tag": {
+      "message": "This makes the document structure not clearly defined and could become a SEO-related issue"
+   },
+   "tip_missingheadtitle": {
+      "message": "Use this tag to provide the title of the tab in the browser. It may affect search engine rankings and click-through-rate from the search results."
+   },
+   "tip_missingthemecolor": {
+      "message": "The theme-color meta tag provides a way to propose a color that browsers should use to customize the display of the page or of the surrounding user interface, and can drastically increase the 'wow' factor of your website on mobile devices."
+   },
+   "tip_missingviewport": {
+      "message": "Without the viewport meta tag it is not possible to correctly implement responsive design, and the First Input Delay (FID) could get lower scores."
+   },
+   "tip_no_doctype": {
+      "message": "Page lacks the HTML doctype, thus triggering quirks-mode which can cause your page to render in unexpected ways."
+   },
+   "tip_titletoolong": {
+      "message": "This is not a ranking factor, but if there is no much room is available it could be shortened in the SERP"
+   },
+   "tip_toomanyanchors": {
+      "message": "Crawlers may not follow all of them."
+   },
+   "tip_toomanyh1": {
+      "message": "The H1 tag should describe the topic of the page.\nMore than one could dilute the SEO efforts on one keyword phrase or sentence"
+   },
+   "titlenotinhead": {
+      "message": "TITLE found, but not inside HEAD"
+   },
+   "titletoolong": {
+      "message": "head TITLE too long (>65 characters)"
+   },
+   "toggletext": {
+      "message": "toggle text size"
+   },
+   "toggletheme": {
+      "message": "toggle dark/light"
+   },
+   "toomanyh1": {
+      "message": "too many &lt;h1&gt; tags"
+   },
+   "total_bytes": {
+      "message": "total bytes"
+   },
+   "v3_intro": {
+      "message": "Welcome to the new entirely rewritten version compliant with manifest v3 standards."
+   },
+   "viewhistory": {
+      "message": "View the changelog"
+   },
+   "warning": {
+      "message": "WARNING"
+   },
+   "wepromise": {
+      "message": "I promise to keep this extension updated following the latest SEO trends and hearing any feedback from you."
+   }
+}
