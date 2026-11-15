@@ -63,13 +63,13 @@
       { property: "og:title", content: "Demo Website — Internet & Digital Solutions" },
       { property: "og:description", content: "Layanan konektivitas internet fiber optik dan solusi transformasi digital berkecepatan tinggi." },
       { property: "og:site_name", content: "DemoISP" },
-      { property: "og:image", content: "images/48.png" }
+      { property: "og:image", content: "icon128.png" }
     ],
     twitter: [
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "Demo Website — Internet & Digital Solutions" },
       { name: "twitter:description", content: "Layanan konektivitas internet fiber optik dan solusi transformasi digital berkecepatan tinggi." },
-      { name: "twitter:image", content: "images/48.png" }
+      { name: "twitter:image", content: "icon128.png" }
     ],
     jsonLd: [
       {

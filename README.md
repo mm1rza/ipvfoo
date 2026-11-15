@@ -11,7 +11,7 @@
 **IPvFooKan** adalah evolusi dan penggabungan mandiri dari beberapa tool analisis web open-source terpopuler yang disatukan ke dalam satu ekstensi browser yang ringan, cepat, dan modular:
 
 1. **IPvFoo Core Engine** — Memantau alamat IP server asli setiap domain di halaman aktif secara *real-time* (IPv4, IPv6, HTTP/1.1, HTTP/2, HTTP/3 QUIC, TLS), statistik hit & bandwidth, serta latency response.
-2. **BGP & Live Traceroute Visualizer** — Breadcrumb AS-Path transit ISP, integrasi live traceroute Looking Glass (HalloNet LG), lookup BGP.he.net, dan auto-generator script Address-List MikroTik RouterOS.
+2. **BGP AS-Path Visualizer** — Breadcrumb AS-Path transit ISP global, lookup BGP.he.net, dan auto-generator script Address-List MikroTik RouterOS.
 3. **Link & Asset Grabber** — Ekstraktor aset lengkap (Link, Gambar, Dokumen, Video/Audio, Scripts/CSS) dengan filter cerdas, konversi Base64 instan, tampilan Galeri Grid / List, serta ekspor teks.
 4. **Deep META SEO Diagnostics** — Laporan audit SEO halaman mendalam (Common Meta, Social Open Graph & Twitter Card Previews, hierarki heading H1–H6, Schema.org JSON-LD structured data, status canonical & robots, serta ekspor Markdown / Print PDF).
 
@@ -113,7 +113,7 @@ Berikut adalah bagan alur kerja sistem di balik **IPvFooKan**:
 Pada rilis versi **v0.1**, halaman **Extension Options** (`options.html`) sengaja dibuat seringan mungkin (menggunakan konfigurasi bawaan otomatis) agar ekstensi dapat langsung digunakan tanpa setup manual.
 
 Rencana pembaruan untuk menu Options di rilis berikutnya:
-- [ ] Pengaturan Looking Glass endpoint kustom (selain HalloNet LG).
+- [ ] Pengaturan Looking Glass / BGP endpoint kustom.
 - [ ] Opsi kustomisasi daftar blacklist / whitelist domain di floating widget.
 - [ ] Pilihan format nama file ekspor otomatis (CSV/TXT).
 - [ ] Konfigurasi filter otomatis tipe file pada Link Grabber.

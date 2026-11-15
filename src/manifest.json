@@ -56,11 +56,8 @@
     {
       "resources": [
         "seo.html",
-        "images/*",
-        "vendors/*",
-        "styles/*",
-        "lib/*",
-        "scripts/*"
+        "scripts/print.js",
+        "icon128.png"
       ],
       "matches": ["<all_urls>"]
     }

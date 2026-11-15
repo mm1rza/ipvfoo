@@ -258,7 +258,7 @@
     // 2. [IIX]
     // Trafik domestik Indonesia via OpenIXP/IIX/CDIX
     // Menggunakan database resmi ASN Indonesia (id_asn) atau WHOIS ID
-    const isIdAsnRegex = /INDONESIA|TELKOM|BIZNET|MORATEL|APJII|IDNIC|CBN|FIRSTMEDIA|LINKNET|INDOSAT|XL|SMARTFREN|HALLONET|IFORTE|FIBERSTAR/i.test(a);
+    const isIdAsnRegex = /INDONESIA|TELKOM|BIZNET|MORATEL|APJII|IDNIC|CBN|FIRSTMEDIA|LINKNET|INDOSAT|XL|SMARTFREN|IFORTE|FIBERSTAR/i.test(a);
     if (isIdAsnListed || isIdCountry || isIdAsnRegex) {
       return {
         code: "IIX",
@@ -1594,19 +1594,19 @@
     updateMiniBadge(allTuples);
   }
 
-  // BGP / Traceroute Modal DOM
+  // BGP / AS-Path Modal DOM
   const modalBackdrop = document.createElement("div");
   modalBackdrop.id = "bgp-modal-backdrop";
   modalBackdrop.innerHTML = `
     <div id="bgp-modal">
       <div id="bgp-modal-header">
         <div class="title">
-          <span>🛰️ Live Traceroute & BGP AS-Path (HalloNet LG)</span>
+          <span>🛰️ BGP AS-Path & Route Visualizer</span>
         </div>
         <button id="bgp-modal-close" title="Tutup Modal">✕</button>
       </div>
       <div id="bgp-modal-body">
-        <div class="bgp-loading">⏳ Menjalankan traceroute live...</div>
+        <div class="bgp-loading">⏳ Memuat rute BGP AS-Path...</div>
       </div>
     </div>
   `;
@@ -1624,7 +1624,7 @@
 
   async function openBgpVisualizer(addr, domain, asn) {
     if (!addr || addr === "(x)" || addr.startsWith("(")) {
-      showCopyToast("IP tidak valid untuk Traceroute");
+      showCopyToast("IP tidak valid untuk rute BGP");
       return;
     }
 
@@ -1633,181 +1633,24 @@
     body.innerHTML = `
       <div class="bgp-loading">
         <div style="font-size: 26px; margin-bottom: 8px;">🛰️</div>
-        Menjalankan Live Traceroute dari <strong>Looking Glass HalloNet</strong> ke <strong>${addr}</strong> (${domain})...
+        Memuat data BGP AS-Path global untuk <strong>${addr}</strong> (${domain})...
       </div>
     `;
 
     try {
-      chrome.runtime.sendMessage({ cmd: "traceroute", ip: addr }, (res) => {
-        if (res && res.status === "success" && res.hops && res.hops.length > 0) {
-          renderTracerouteModalContent(res, domain, addr, asn);
+      chrome.runtime.sendMessage({ cmd: "lookupBgpPath", ip: addr }, (bgpRes) => {
+        if (bgpRes && !bgpRes.error) {
+          renderBgpModalContent(bgpRes, domain, addr, asn);
         } else {
-          // Fallback to BGP Looking Glass
-          chrome.runtime.sendMessage({ cmd: "lookupBgpPath", ip: addr }, (bgpRes) => {
-            if (bgpRes && !bgpRes.error) {
-              renderBgpModalContent(bgpRes, domain, addr, asn);
-            } else {
-              body.innerHTML = `
-                <div style="color:#ff5252; padding: 25px; text-align:center;">
-                  ⚠️ Gagal mengambil rute: ${res?.error || bgpRes?.error || "Koneksi timeout"}
-                </div>
-              `;
-            }
-          });
+          body.innerHTML = `
+            <div style="color:#ff5252; padding: 25px; text-align:center;">
+              ⚠️ Gagal mengambil rute: ${bgpRes?.error || "Koneksi timeout"}
+            </div>
+          `;
         }
       });
     } catch (e) {
       body.innerHTML = `<div style="color:#ff5252; padding:25px; text-align:center;">Error: ${e.message}</div>`;
-    }
-  }
-
-  function renderTracerouteModalContent(data, domain, addr, asn) {
-    const body = modalBackdrop.querySelector("#bgp-modal-body");
-    const hops = data.hops || [];
-    const lastHop = hops[hops.length - 1] || {};
-    const targetRtt = lastHop.rtt || "-";
-    const targetAsn = lastHop.asn || asn || "Target Server";
-
-    // Extract unique ASNs in order for the breadcrumb flow
-    const uniqueAsns = [];
-    const seenAsn = new Set();
-    for (const h of hops) {
-      if (h.asn) {
-        const asCode = h.asn.split(" ")[0];
-        if (!seenAsn.has(asCode)) {
-          seenAsn.add(asCode);
-          uniqueAsns.push({ asCode, fullName: h.asn });
-        }
-      }
-    }
-
-    let flowHtml = "";
-    if (uniqueAsns.length > 0) {
-      const nodes = uniqueAsns.map((item, idx) => {
-        const isOrigin = idx === uniqueAsns.length - 1;
-        const isClient = idx === 0;
-        const nameParts = item.fullName.split(" - ");
-        const shortName = nameParts.length > 1 ? nameParts[1] : item.fullName;
-        return `
-          <div class="bgp-node ${isOrigin ? 'bgp-node-origin' : (isClient ? 'bgp-node-client' : '')}">
-            <div class="bgp-node-asn">${item.asCode}</div>
-            <div class="bgp-node-name" title="${item.fullName}">${shortName}</div>
-          </div>
-        `;
-      });
-
-      flowHtml = `
-        <div class="bgp-path-container">
-          <div class="bgp-path-title">
-            <span>🛣️ Jalur Transit ISP (AS-Path Breadcrumb)</span>
-          </div>
-          <div class="bgp-flow-wrapper">
-            ${nodes.join('<span class="bgp-arrow">──►</span>')}
-          </div>
-        </div>
-      `;
-    }
-
-    // Build Hop table
-    let tableRows = "";
-    for (const h of hops) {
-      const rttNum = parseFloat(h.rtt);
-      let rttClass = "bgp-rtt-fast";
-      if (isNaN(rttNum) || rttNum > 100) rttClass = "bgp-rtt-slow";
-      else if (rttNum > 35) rttClass = "bgp-rtt-med";
-
-      const asDisplay = h.asn ? `<span style="color:#00d9ff; font-weight:600;">${h.asn}</span>` : `<span style="color:#666;">-</span>`;
-
-      tableRows += `
-        <tr>
-          <td style="text-align:center; font-weight:bold; color:#ffd700;">${h.hop}</td>
-          <td>
-            <div style="color:#fff; font-weight:600;">${h.ip}</div>
-            <div style="font-size:10px; color:#8fa0b5;">${h.host !== h.ip ? h.host : ''}</div>
-          </td>
-          <td class="${rttClass}" style="text-align:right;">${h.rtt}</td>
-          <td>${asDisplay}</td>
-        </tr>
-      `;
-    }
-
-    const cleanAsn = (targetAsn.split(" ")[0] || "").replace(/[^A-Z0-9]/g, "");
-    const heUrl = cleanAsn.startsWith("AS") ? `https://bgp.he.net/${cleanAsn}` : `https://bgp.he.net/ip/${addr}`;
-    const lgUrl = `https://lg.hallonet.id/?cmd=traceroute&target=${encodeURIComponent(addr)}`;
-
-    body.innerHTML = `
-      <div class="bgp-summary-grid">
-        <div class="bgp-card">
-          <div class="bgp-card-label">🎯 Target Host & IP</div>
-          <div class="bgp-card-val">${addr}</div>
-          <div class="bgp-card-sub">${domain}</div>
-        </div>
-        <div class="bgp-card">
-          <div class="bgp-card-label">⚡ Traceroute Latency (RTT)</div>
-          <div class="bgp-card-val" style="color:#48ff00;">${targetRtt}</div>
-          <div class="bgp-card-sub">${data.hops_count || hops.length} Hops Total (${data.timestamp || 'Real-time'})</div>
-        </div>
-        <div class="bgp-card">
-          <div class="bgp-card-label">🏢 Destination AS & ISP</div>
-          <div class="bgp-card-val" style="color:#00d9ff;">${targetAsn}</div>
-          <div class="bgp-card-sub" style="color:#ccc;">Source: gw-ixp.106-1.hallonet.id (AS151584 HalloNet)</div>
-        </div>
-      </div>
-
-      ${flowHtml}
-
-      <div class="bgp-path-container" style="padding:0; overflow:hidden;">
-        <table class="bgp-table">
-          <thead>
-            <tr>
-              <th style="width:40px; text-align:center;">Hop</th>
-              <th>Host / Router IP</th>
-              <th style="width:75px; text-align:right;">RTT</th>
-              <th>ASN / Organization</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${tableRows}
-          </tbody>
-        </table>
-      </div>
-
-      <div class="bgp-actions">
-        <button id="btn-re-trace" class="bgp-btn" style="background:#334466; color:#fff;">🔄 Re-Run</button>
-        <button id="btn-copy-mkt-rule" class="bgp-btn bgp-btn-mkt">📋 Copy MikroTik Address-List</button>
-        <button id="btn-open-lg" class="bgp-btn" style="background:#2e7d32; color:#fff;">🌐 Looking Glass ↗</button>
-        <button id="btn-open-he-bgp" class="bgp-btn bgp-btn-he">🌐 BGP.HE.NET ↗</button>
-      </div>
-    `;
-
-    const reBtn = body.querySelector("#btn-re-trace");
-    if (reBtn) {
-      reBtn.onclick = () => {
-        openBgpVisualizer(addr, domain, asn);
-      };
-    }
-
-    const mktBtn = body.querySelector("#btn-copy-mkt-rule");
-    if (mktBtn) {
-      mktBtn.onclick = () => {
-        const listName = "LIST_" + domain.toUpperCase().replace(/[^A-Z0-9]/g, "_").slice(0, 20);
-        const script = `/ip firewall address-list add list="${listName}" address=${addr} comment="${cleanAsn} ${domain}"`;
-        copyToClipboard(script, "MikroTik Script");
-      };
-    }
-
-    const lgBtn = body.querySelector("#btn-open-lg");
-    if (lgBtn) {
-      lgBtn.onclick = () => {
-        window.open(lgUrl, "_blank");
-      };
-    }
-
-    const heBtn = body.querySelector("#btn-open-he-bgp");
-    if (heBtn) {
-      heBtn.onclick = () => {
-        window.open(heUrl, "_blank");
-      };
     }
   }
 

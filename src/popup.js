@@ -283,7 +283,7 @@ function classifyTraffic(addr, domain, asn, latency) {
   // 2. [IIX]
   // Trafik domestik Indonesia via OpenIXP/IIX/CDIX
   // Menggunakan database resmi ASN Indonesia (id_asn) atau WHOIS ID
-  const isIdAsnRegex = /INDONESIA|TELKOM|BIZNET|MORATEL|APJII|IDNIC|CBN|FIRSTMEDIA|LINKNET|INDOSAT|XL|SMARTFREN|HALLONET|IFORTE|FIBERSTAR/i.test(a);
+  const isIdAsnRegex = /INDONESIA|TELKOM|BIZNET|MORATEL|APJII|IDNIC|CBN|FIRSTMEDIA|LINKNET|INDOSAT|XL|SMARTFREN|IFORTE|FIBERSTAR/i.test(a);
   if (isIdAsnListed || isIdCountry || isIdAsnRegex) {
     return {
       code: "IIX",

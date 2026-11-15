@@ -1906,21 +1906,6 @@ async function fetchBgpPath(ip) {
   }
 }
 
-async function fetchHalloNetTraceroute(ip) {
-  if (!ip || ip === "(x)" || ip.startsWith("(")) {
-    return { error: "Invalid IP address" };
-  }
-
-  try {
-    const res = await fetch(`https://lg.hallonet.id/api/traceroute.php?target=${encodeURIComponent(ip)}`);
-    const data = await res.json();
-    return data;
-  } catch (err) {
-    console.error("fetchHalloNetTraceroute error:", err);
-    return { error: err.message || "Gagal menghubungi Looking Glass HalloNet" };
-  }
-}
-
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   if (msg.cmd === "resetHitCounter") {
     ipHitCounter = {};
@@ -1936,15 +1921,8 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     chrome.tabs.create({ url: msg.url });
     sendResponse({ status: "ok" });
     return true;
-  } else if (msg.cmd === "lookupBgpPath") {
+  } else if (msg.cmd === "lookupBgpPath" || msg.cmd === "traceroute") {
     fetchBgpPath(msg.ip).then((data) => {
-      sendResponse(data);
-    }).catch((err) => {
-      sendResponse({ error: err.message });
-    });
-    return true;
-  } else if (msg.cmd === "traceroute") {
-    fetchHalloNetTraceroute(msg.ip).then((data) => {
       sendResponse(data);
     }).catch((err) => {
       sendResponse({ error: err.message });
