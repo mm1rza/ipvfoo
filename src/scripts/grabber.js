@@ -413,7 +413,7 @@
             sourceHost: "hallonet.id",
             assets: [
               { category: "image", url: "icons/icon128.png", hostname: "extension", title: "IPvFooKan Logo", ext: "png", width: 128, height: 128 },
-              { category: "link", url: "https://github.com/mm1rza/ipvfoo", hostname: "github.com", title: "GitHub Repo", ext: "html" }
+              { category: "link", url: "https://hallonet.id/layanan", hostname: "hallonet.id", title: "Layanan Internet", ext: "html" }
             ]
           });
         }

@@ -3673,7 +3673,6 @@
           <div class="header-actions">
             <button id="btn-copy-summary" class="btn" title="Copy Ringkasan SEO (Markdown)">&#x1F4CB; Copy Summary</button>
             <button id="btn-export-json" class="btn" title="Export Raw Data ke JSON">&#x1F4BE; Export JSON</button>
-            <button id="btn-print" class="btn btn-primary" title="Cetak atau Simpan PDF">&#x1F5A8;&#xFE0F; Print / PDF</button>
           </div>
         </div>
 
@@ -3863,8 +3862,7 @@
     const btnSum = document.getElementById("btn-copy-summary");
     if (btnSum) {
       btnSum.onclick = () => {
-        let md = "# SEO Audit Report - " + (DATA.hostname || "") + "\\r\\n";
-        md += "URL: " + (DATA.url || "") + "\\r\\n";
+        let md = "URL: " + (DATA.url || "") + "\\r\\n";
         md += "Generated: " + (DATA.generatedAt || "") + "\\r\\n\\r\\n";
         md += "## Ringkasan Skor\\r\\n";
         md += "- Total Tests: " + (DATA.diagnostics ? DATA.diagnostics.length : 0) + "\\r\\n";
@@ -3900,10 +3898,6 @@
       };
     }
 
-    const btnPrint = document.getElementById("btn-print");
-    if (btnPrint) {
-      btnPrint.onclick = () => { window.print(); };
-    }
 
     const searchInput = document.getElementById("search-input");
     if (searchInput) {

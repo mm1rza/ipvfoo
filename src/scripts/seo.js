@@ -137,11 +137,6 @@
       targetLink.textContent = sourceUrl;
     }
 
-    const navLink = document.getElementById("target-url-link-nav");
-    if (navLink) {
-      navLink.href = sourceUrl;
-      navLink.textContent = "🌐 " + sourceUrl;
-    }
 
     const badgeProto = document.getElementById("badge-protocol");
     if (badgeProto) {
@@ -585,8 +580,7 @@
         const d = CURRENT_SEO || {};
         const diag = d.diagnostics || [];
         const hCounts = d.headingCounts || {};
-        let md = "# IPvFooKan SEO Audit Report — " + (d.hostname || location.hostname) + "\r\n";
-        md += "URL: " + (d.url || location.href) + "\r\n";
+        let md = "URL: " + (d.url || location.href) + "\r\n";
         md += "Generated: " + (d.generatedAt || new Date().toLocaleString()) + "\r\n\r\n";
         md += "## Ringkasan KPI\r\n";
         md += "- Passed: " + diag.filter(x => x.level === 'good').length + "\r\n";
@@ -612,8 +606,7 @@
     if (btnExport) {
       btnExport.onclick = () => {
         const payload = {
-          page: CURRENT_PAGE,
-          seoData: CURRENT_SEO,
+          ...(CURRENT_SEO || {}),
           exportedAt: new Date().toISOString()
         };
         const jsonStr = JSON.stringify(payload, null, 2);
@@ -626,12 +619,6 @@
         URL.revokeObjectURL(url);
         showToast("✅ Berhasil mengekspor JSON!");
       };
-    }
-
-    // Print / PDF
-    const btnPrint = document.getElementById("btn-print");
-    if (btnPrint) {
-      btnPrint.onclick = () => { window.print(); };
     }
 
     // Real-time Global Search Input
