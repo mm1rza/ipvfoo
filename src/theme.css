@@ -1,0 +1,167 @@
+/* ==========================================================================
+   IPvFooKan Design System — Cyber Obsidian & Neon Amber (shadcn/ui compatible)
+   Source: themes/SHADCN_THEME.md & COLOR_PALETTE.md
+   Semua variabel tema didefinisikan pada :root dan .dark untuk kemudahan modifikasi
+   ========================================================================== */
+
+:root {
+  /* ------------------------------------------------------------------------
+     LIGHT MODE (Default fallback / [data-theme="light"])
+     ------------------------------------------------------------------------ */
+  --background: #F5F7FA;
+  --foreground: #111827;
+
+  --card: #FFFFFF;
+  --card-foreground: #111827;
+
+  --popover: #FFFFFF;
+  --popover-foreground: #111827;
+
+  --primary: #E0870E;
+  --primary-glow: #FA9C1B;
+  --primary-foreground: #FFFFFF;
+
+  --secondary: #EEF2F6;
+  --secondary-foreground: #111827;
+
+  --muted: #EEF2F6;
+  --muted-foreground: #6B7280;
+
+  --accent: #E2E8F0;
+  --accent-foreground: #E0870E;
+
+  --destructive: #EF4444;
+  --destructive-foreground: #FFFFFF;
+
+  --border: rgba(209, 213, 219, 0.85);
+  --input: #E5E7EB;
+  --ring: #FA9C1B;
+  --radius: 8px;
+  --radius-sm: 4px;
+
+  /* Specialty Cyber Accents */
+  --cyber-cyan: #00BBD4;
+  --cyber-cyan-bg: rgba(0, 187, 212, 0.12);
+  --cyber-green: #10B981;
+  --cyber-green-bg: rgba(16, 185, 129, 0.12);
+  --cyber-blue: #1A79FF;
+  --glow-orange: 0 0 20px rgba(224, 135, 14, 0.25);
+  --glow-cyan: 0 0 20px rgba(0, 187, 212, 0.2);
+
+  /* Legacy mappings for backwards-compatibility */
+  --bg-body: var(--background);
+  --bg-surface: var(--card);
+  --bg-surface-alt: var(--secondary);
+  --bg-card: var(--card);
+  --bg-card-header: var(--secondary);
+  --border-color: var(--border);
+  --border-focus: var(--ring);
+  --text-main: var(--foreground);
+  --text-dim: var(--muted-foreground);
+  --accent-emerald: var(--cyber-green);
+  --accent-amber: var(--primary);
+  --accent-rose: var(--destructive);
+  --card-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
+}
+
+/* ------------------------------------------------------------------------
+   DARK MODE (Default Extension Theme: Cyber Obsidian Deep)
+   ------------------------------------------------------------------------ */
+body,
+.dark,
+[data-theme="dark"] {
+  --background: #07090D;
+  --foreground: #FFFFFF;
+
+  --card: #0D1016;
+  --card-foreground: #FFFFFF;
+
+  --popover: #161A22;
+  --popover-foreground: #FFFFFF;
+
+  --primary: #FA9C1B;
+  --primary-glow: #FFB03A;
+  --primary-foreground: #07090D;
+
+  --secondary: #1D222D;
+  --secondary-foreground: #FFFFFF;
+
+  --muted: #161A22;
+  --muted-foreground: #98A1B3;
+
+  --accent: #1D222D;
+  --accent-foreground: #FA9C1B;
+
+  --destructive: #F04242;
+  --destructive-foreground: #FFFFFF;
+
+  --border: rgba(61, 71, 92, 0.45);
+  --border-light: rgba(82, 95, 122, 0.25);
+  --input: rgba(61, 71, 92, 0.55);
+  --ring: #FA9C1B;
+  --radius: 8px;
+  --radius-sm: 4px;
+
+  /* Specialty Cyber Accents */
+  --cyber-cyan: #00EAFF;
+  --cyber-cyan-bg: rgba(0, 234, 255, 0.1);
+  --cyber-green: #1AE680;
+  --cyber-green-bg: rgba(26, 230, 128, 0.1);
+  --cyber-blue: #1A79FF;
+  --glow-orange: 0 0 30px rgba(250, 156, 27, 0.35);
+  --glow-cyan: 0 0 30px rgba(0, 234, 255, 0.25);
+
+  /* Legacy mappings */
+  --bg-body: var(--background);
+  --bg-surface: var(--card);
+  --bg-surface-alt: var(--popover);
+  --bg-card: var(--card);
+  --bg-card-header: var(--popover);
+  --border-color: var(--border);
+  --border-focus: var(--ring);
+  --text-main: var(--foreground);
+  --text-dim: #606876;
+  --accent-emerald: var(--cyber-green);
+  --accent-amber: var(--primary);
+  --accent-rose: var(--destructive);
+  --card-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.55);
+}
+
+/* Light theme class override */
+body.light-theme {
+  --background: #F5F7FA;
+  --foreground: #111827;
+  --card: #FFFFFF;
+  --card-foreground: #111827;
+  --popover: #FFFFFF;
+  --popover-foreground: #111827;
+  --primary: #E0870E;
+  --primary-glow: #FA9C1B;
+  --primary-foreground: #FFFFFF;
+  --secondary: #EEF2F6;
+  --secondary-foreground: #111827;
+  --muted: #EEF2F6;
+  --muted-foreground: #6B7280;
+  --accent: #E2E8F0;
+  --accent-foreground: #E0870E;
+  --destructive: #EF4444;
+  --destructive-foreground: #FFFFFF;
+  --border: rgba(209, 213, 219, 0.85);
+  --input: #E5E7EB;
+  --ring: #FA9C1B;
+  --cyber-cyan: #00BBD4;
+  --cyber-green: #10B981;
+  --bg-body: var(--background);
+  --bg-surface: var(--card);
+  --bg-surface-alt: var(--secondary);
+  --bg-card: var(--card);
+  --bg-card-header: var(--secondary);
+  --border-color: var(--border);
+  --border-focus: var(--ring);
+  --text-main: var(--foreground);
+  --text-dim: var(--muted-foreground);
+  --accent-emerald: var(--cyber-green);
+  --accent-amber: var(--primary);
+  --accent-rose: var(--destructive);
+  --card-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
+}

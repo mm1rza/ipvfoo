@@ -1,49 +1,68 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>IPvFooKan - Deep Page &amp; SEO Audit</title>
   <link rel="icon" type="image/png" href="icons/icon128.png">
+  <link rel="stylesheet" href="theme.css">
   <style>
+    /* ========================================================================
+       SHADCN UI THEME VARIABLES (Cyber Obsidian & Neon Amber)
+       Diambil dari themes/SHADCN_THEME.md & COLOR_PALETTE.md
+       ======================================================================== */
     :root {
-      --bg-body: #090d16;
-      --bg-surface: #101726;
-      --bg-surface-alt: #162035;
-      --bg-card: #12192b;
-      --bg-card-header: #172138;
-      --border-color: #22304d;
-      --border-focus: #38bdf8;
-      --text-main: #f8fafc;
-      --text-muted: #94a3b8;
-      --text-dim: #64748b;
-      --accent-cyan: #38bdf8;
-      --accent-blue: #0284c7;
-      --accent-emerald: #10b981;
-      --accent-amber: #f59e0b;
-      --accent-rose: #ef4444;
-      --accent-purple: #a855f7;
-      --accent-indigo: #6366f1;
-      --card-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.45);
-      --font-mono: Consolas, Monaco, "Courier New", monospace;
+      --bg-body: var(--background, #07090D);
+      --bg-surface: var(--card, #0D1016);
+      --bg-surface-alt: var(--popover, #161A22);
+      --bg-card: var(--card, #0D1016);
+      --bg-card-header: var(--popover, #161A22);
+      --border-color: var(--border, rgba(61, 71, 92, 0.45));
+      --border-focus: var(--ring, #FA9C1B);
+      --text-main: var(--foreground, #FFFFFF);
+      --text-muted: var(--muted-foreground, #98A1B3);
+      --text-dim: #606876;
+      --accent-cyan: var(--cyber-cyan, #00EAFF);
+      --accent-blue: var(--cyber-blue, #1A79FF);
+      --accent-emerald: var(--cyber-green, #1AE680);
+      --accent-amber: var(--primary, #FA9C1B);
+      --accent-rose: var(--destructive, #F04242);
+      --accent-purple: #c084fc;
+      --accent-indigo: #818cf8;
+      --card-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.55);
+      --glow-primary: 0 0 25px rgba(250, 156, 27, 0.35);
+      --glow-cyan: 0 0 25px rgba(0, 234, 255, 0.25);
+      --font-mono: 'JetBrains Mono', Consolas, Monaco, "Courier New", monospace;
     }
 
     body.light-theme {
-      --bg-body: #f1f5f9;
-      --bg-surface: #ffffff;
-      --bg-surface-alt: #f8fafc;
-      --bg-card: #ffffff;
-      --bg-card-header: #f1f5f9;
-      --border-color: #cbd5e1;
-      --border-focus: #0284c7;
-      --text-main: #0f172a;
-      --text-muted: #475569;
-      --text-dim: #94a3b8;
-      --card-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.08);
+      --bg-body: #F5F7FA;
+      --bg-surface: #FFFFFF;
+      --bg-surface-alt: #EEF2F6;
+      --bg-card: #FFFFFF;
+      --bg-card-header: #EEF2F6;
+      --border-color: rgba(209, 213, 219, 0.85);
+      --border-focus: #FA9C1B;
+      --text-main: #111827;
+      --text-muted: #6B7280;
+      --text-dim: #94A3B8;
+      --accent-amber: #E0870E;
+      --accent-cyan: #00BBD4;
+      --accent-emerald: #10B981;
+      --card-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
+      --glow-primary: 0 0 20px rgba(224, 135, 14, 0.25);
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    html { scroll-behavior: smooth; }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
 
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -168,13 +187,27 @@
     }
 
     .btn-primary {
-      background: var(--accent-blue);
-      border-color: #0369a1;
-      color: #fff;
+      background: var(--accent-amber);
+      border-color: rgba(250, 156, 27, 0.5);
+      color: #07090D;
+      font-weight: 700;
     }
+
     .btn-primary:hover {
-      background: #0284c7;
-      box-shadow: 0 0 12px rgba(2, 132, 199, 0.4);
+      background: #FFB03A;
+      box-shadow: var(--glow-primary);
+      color: #000;
+    }
+
+    .btn-cyan {
+      background: var(--accent-cyan);
+      border-color: rgba(0, 234, 255, 0.4);
+      color: #07090D;
+      font-weight: 700;
+    }
+
+    .btn-cyan:hover {
+      box-shadow: var(--glow-cyan);
     }
 
     /* URL Box */
@@ -217,7 +250,10 @@
       font-family: var(--font-mono);
       font-weight: 600;
     }
-    .target-url-link:hover { text-decoration: underline; }
+
+    .target-url-link:hover {
+      text-decoration: underline;
+    }
 
     /* KPI Dashboard Scorecards */
     .kpi-grid {
@@ -257,12 +293,29 @@
       letter-spacing: 0.5px;
     }
 
-    .val-pass { color: var(--accent-emerald); }
-    .val-warn { color: var(--accent-amber); }
-    .val-err  { color: var(--accent-rose); }
-    .val-head { color: var(--accent-purple); }
-    .val-data { color: var(--accent-cyan); }
-    .val-link { color: var(--accent-indigo); }
+    .val-pass {
+      color: var(--accent-emerald);
+    }
+
+    .val-warn {
+      color: var(--accent-amber);
+    }
+
+    .val-err {
+      color: var(--accent-rose);
+    }
+
+    .val-head {
+      color: var(--accent-purple);
+    }
+
+    .val-data {
+      color: var(--accent-cyan);
+    }
+
+    .val-link {
+      color: var(--accent-indigo);
+    }
 
     /* Search & Filter Toolbar */
     .filter-toolbar {
@@ -328,7 +381,8 @@
       white-space: nowrap;
     }
 
-    .chip-btn:hover, .chip-btn.active {
+    .chip-btn:hover,
+    .chip-btn.active {
       background: rgba(56, 189, 248, 0.18);
       color: var(--accent-cyan);
       border-color: rgba(56, 189, 248, 0.45);
@@ -392,7 +446,8 @@
     }
 
     /* Rows & Items */
-    .ad_seo_item, .meta-row {
+    .ad_seo_item,
+    .meta-row {
       display: flex;
       align-items: flex-start;
       padding: 10px 0;
@@ -401,19 +456,23 @@
       transition: background-color 0.15s ease;
     }
 
-    body.light-theme .ad_seo_item, body.light-theme .meta-row {
+    body.light-theme .ad_seo_item,
+    body.light-theme .meta-row {
       border-bottom: 1px solid rgba(0, 0, 0, 0.06);
     }
 
-    .ad_seo_item:last-child, .meta-row:last-child {
+    .ad_seo_item:last-child,
+    .meta-row:last-child {
       border-bottom: none;
     }
 
-    .ad_seo_item:hover, .meta-row:hover {
+    .ad_seo_item:hover,
+    .meta-row:hover {
       background: rgba(255, 255, 255, 0.015);
     }
 
-    .attr_name, .meta-key {
+    .attr_name,
+    .meta-key {
       width: 175px;
       min-width: 175px;
       font-weight: 700;
@@ -430,9 +489,13 @@
       color: var(--accent-cyan);
       text-decoration: none;
     }
-    .attr_link:hover { text-decoration: underline; }
 
-    .content, .meta-content {
+    .attr_link:hover {
+      text-decoration: underline;
+    }
+
+    .content,
+    .meta-content {
       color: var(--text-main);
       word-break: break-word;
       font-size: 13.5px;
@@ -440,7 +503,8 @@
       flex: 1;
     }
 
-    .item_count, .char-count {
+    .item_count,
+    .char-count {
       font-size: 11px;
       color: var(--text-dim);
       font-family: var(--font-mono);
@@ -448,7 +512,9 @@
     }
 
     /* Alert Pills */
-    .warning, .info, .alert-pill {
+    .warning,
+    .info,
+    .alert-pill {
       display: inline-flex;
       align-items: center;
       gap: 6px;
@@ -460,7 +526,8 @@
       width: auto !important;
     }
 
-    .warning, .alert-warn {
+    .warning,
+    .alert-warn {
       background: rgba(245, 158, 11, 0.15);
       border: 1px solid rgba(245, 158, 11, 0.4);
       color: #fbbf24;
@@ -472,7 +539,8 @@
       color: #f87171;
     }
 
-    .info, .alert-info {
+    .info,
+    .alert-info {
       background: rgba(56, 189, 248, 0.15);
       border: 1px solid rgba(56, 189, 248, 0.4);
       color: #7dd3fc;
@@ -515,12 +583,12 @@
       border: 1px solid var(--border-color);
       border-radius: 12px;
       overflow: hidden;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
     }
 
     .preview-card-top {
       padding: 10px 14px;
-      background: rgba(0,0,0,0.2);
+      background: rgba(0, 0, 0, 0.2);
       font-size: 11px;
       font-weight: 700;
       color: var(--text-muted);
@@ -613,29 +681,76 @@
       flex-shrink: 0;
     }
 
-    .htag-h1 { background: #7c3aed; color: #fff; }
-    .htag-h2 { background: #0284c7; color: #fff; }
-    .htag-h3 { background: #0d9488; color: #fff; }
-    .htag-h4 { background: #ca8a04; color: #fff; }
-    .htag-h5 { background: #475569; color: #fff; }
-    .htag-h6 { background: #334155; color: #cbd5e1; }
+    .htag-h1 {
+      background: #7c3aed;
+      color: #fff;
+    }
 
-    .hlevel-1 { margin-left: 0; }
-    .hlevel-2 { margin-left: 20px; border-left: 3px solid #0284c7; }
-    .hlevel-3 { margin-left: 40px; border-left: 3px solid #0d9488; }
-    .hlevel-4 { margin-left: 60px; border-left: 3px solid #ca8a04; }
-    .hlevel-5 { margin-left: 80px; border-left: 3px solid #475569; }
-    .hlevel-6 { margin-left: 100px; border-left: 3px solid #334155; }
+    .htag-h2 {
+      background: #0284c7;
+      color: #fff;
+    }
+
+    .htag-h3 {
+      background: #0d9488;
+      color: #fff;
+    }
+
+    .htag-h4 {
+      background: #ca8a04;
+      color: #fff;
+    }
+
+    .htag-h5 {
+      background: #475569;
+      color: #fff;
+    }
+
+    .htag-h6 {
+      background: #334155;
+      color: #cbd5e1;
+    }
+
+    .hlevel-1 {
+      margin-left: 0;
+    }
+
+    .hlevel-2 {
+      margin-left: 20px;
+      border-left: 3px solid #0284c7;
+    }
+
+    .hlevel-3 {
+      margin-left: 40px;
+      border-left: 3px solid #0d9488;
+    }
+
+    .hlevel-4 {
+      margin-left: 60px;
+      border-left: 3px solid #ca8a04;
+    }
+
+    .hlevel-5 {
+      margin-left: 80px;
+      border-left: 3px solid #475569;
+    }
+
+    .hlevel-6 {
+      margin-left: 100px;
+      border-left: 3px solid #334155;
+    }
 
     /* Tables */
-    table, table.data-table {
+    table,
+    table.data-table {
       width: 100%;
       border-collapse: collapse;
       font-size: 13px;
       word-break: break-all;
     }
 
-    table th, table.data-table th {
+    table th,
+    table.data-table th {
       text-align: left;
       padding: 10px 14px;
       background: var(--bg-surface-alt);
@@ -647,7 +762,8 @@
       letter-spacing: 0.5px;
     }
 
-    table td, table.data-table td {
+    table td,
+    table.data-table td {
       padding: 10px 14px;
       border-bottom: 1px solid rgba(255, 255, 255, 0.05);
       vertical-align: middle;
@@ -731,7 +847,8 @@
       border-left: 3px solid transparent;
     }
 
-    .section-nav-link:hover, .section-nav-link.active {
+    .section-nav-link:hover,
+    .section-nav-link.active {
       background: var(--bg-surface-alt);
       color: var(--accent-cyan);
       border-left-color: var(--accent-cyan);
@@ -763,7 +880,7 @@
       border-radius: 8px;
       font-weight: 600;
       font-size: 13px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
       opacity: 0;
       transform: translateY(12px);
       transition: all 0.25s ease;
@@ -778,17 +895,53 @@
 
     /* Print Styles */
     @media print {
-      body { background: #fff !important; color: #000 !important; }
-      .sidebar-viewport, .filter-toolbar, .header-actions, .copy-btn { display: none !important; }
-      .main-viewport { max-width: 100% !important; padding: 0 !important; }
-      section.seo-card { border: 1px solid #ccc !important; box-shadow: none !important; break-inside: avoid; margin-bottom: 20px; }
-      .card-header { background: #f0f0f0 !important; color: #000 !important; }
-      .card-title-text, .content { color: #000 !important; }
-      .url-bar-container { border: 1px solid #ccc !important; background: #fafafa !important; }
-      pre.json-code { color: #222 !important; max-height: none !important; }
+      body {
+        background: #fff !important;
+        color: #000 !important;
+      }
+
+      .sidebar-viewport,
+      .filter-toolbar,
+      .header-actions,
+      .copy-btn {
+        display: none !important;
+      }
+
+      .main-viewport {
+        max-width: 100% !important;
+        padding: 0 !important;
+      }
+
+      section.seo-card {
+        border: 1px solid #ccc !important;
+        box-shadow: none !important;
+        break-inside: avoid;
+        margin-bottom: 20px;
+      }
+
+      .card-header {
+        background: #f0f0f0 !important;
+        color: #000 !important;
+      }
+
+      .card-title-text,
+      .content {
+        color: #000 !important;
+      }
+
+      .url-bar-container {
+        border: 1px solid #ccc !important;
+        background: #fafafa !important;
+      }
+
+      pre.json-code {
+        color: #222 !important;
+        max-height: none !important;
+      }
     }
   </style>
 </head>
+
 <body data-theme="dark">
   <div class="app-layout">
     <!-- Main Viewport -->
@@ -850,7 +1003,8 @@
       <div class="filter-toolbar">
         <div class="search-input-wrap">
           <span class="search-input-icon">🔍</span>
-          <input type="text" id="global-search-input" class="search-input" placeholder="Ketik untuk memfilter meta tag, properti, heading, atau domain..." />
+          <input type="text" id="global-search-input" class="search-input"
+            placeholder="Ketik untuk memfilter meta tag, properti, heading, atau domain..." />
         </div>
         <div class="chips-filter-row">
           <button class="chip-btn active" data-tab="all">Semua Bagian</button>
@@ -937,7 +1091,8 @@
           <span id="badge-headings-count" class="card-badge-count">0 headings</span>
         </div>
         <div class="card-body">
-          <div id="headings-summary-badges" style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px;"></div>
+          <div id="headings-summary-badges" style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px;">
+          </div>
           <div class="heading-tree-list" id="headings-tree-container"></div>
           <div id="forms-container" style="margin-top: 20px;"></div>
           <div id="html5-container" style="margin-top: 14px;"></div>
@@ -997,20 +1152,31 @@
     <aside class="sidebar-viewport">
       <div class="sidebar-title">Daftar Bagian Audit</div>
       <ul class="section-nav-list">
-        <li class="section-nav-item"><a href="#diagnostics-section" class="section-nav-link active"><span>🩺 Diagnostics</span> <span id="nav-badge-diag" class="nav-count-badge">0</span></a></li>
-        <li class="section-nav-item"><a href="#common" class="section-nav-link"><span>📄 Common Meta</span> <span id="nav-badge-common" class="nav-count-badge">0</span></a></li>
+        <li class="section-nav-item"><a href="#diagnostics-section" class="section-nav-link active"><span>🩺
+              Diagnostics</span> <span id="nav-badge-diag" class="nav-count-badge">0</span></a></li>
+        <li class="section-nav-item"><a href="#common" class="section-nav-link"><span>📄 Common Meta</span> <span
+              id="nav-badge-common" class="nav-count-badge">0</span></a></li>
         <li class="section-nav-item"><a href="#mobile" class="section-nav-link"><span>📱 Mobile Ready</span></a></li>
-        <li class="section-nav-item"><a href="#social" class="section-nav-link"><span>🌐 Social Meta</span> <span id="nav-badge-social" class="nav-count-badge">0</span></a></li>
-        <li class="section-nav-item"><a href="#structureddata" class="section-nav-link"><span>🧩 Structured Data</span> <span id="nav-badge-schema" class="nav-count-badge">0</span></a></li>
-        <li class="section-nav-item"><a href="#headings" class="section-nav-link"><span>📑 Headings Tree</span> <span id="nav-badge-headings" class="nav-count-badge">0</span></a></li>
-        <li class="section-nav-item"><a href="#links" class="section-nav-link"><span>⚓ Links Analysis</span> <span id="nav-badge-links" class="nav-count-badge">0</span></a></li>
-        <li class="section-nav-item"><a href="#rhints" class="section-nav-link"><span>⚡ Resource Hints</span> <span id="nav-badge-hints" class="nav-count-badge">0</span></a></li>
-        <li class="section-nav-item"><a href="#externalr" class="section-nav-link"><span>🏢 External 3rd Party</span> <span id="nav-badge-ext" class="nav-count-badge">0</span></a></li>
-        <li class="section-nav-item"><a href="#security" class="section-nav-link"><span>🛡️ Security Audit</span></a></li>
+        <li class="section-nav-item"><a href="#social" class="section-nav-link"><span>🌐 Social Meta</span> <span
+              id="nav-badge-social" class="nav-count-badge">0</span></a></li>
+        <li class="section-nav-item"><a href="#structureddata" class="section-nav-link"><span>🧩 Structured Data</span>
+            <span id="nav-badge-schema" class="nav-count-badge">0</span></a></li>
+        <li class="section-nav-item"><a href="#headings" class="section-nav-link"><span>📑 Headings Tree</span> <span
+              id="nav-badge-headings" class="nav-count-badge">0</span></a></li>
+        <li class="section-nav-item"><a href="#links" class="section-nav-link"><span>⚓ Links Analysis</span> <span
+              id="nav-badge-links" class="nav-count-badge">0</span></a></li>
+        <li class="section-nav-item"><a href="#rhints" class="section-nav-link"><span>⚡ Resource Hints</span> <span
+              id="nav-badge-hints" class="nav-count-badge">0</span></a></li>
+        <li class="section-nav-item"><a href="#externalr" class="section-nav-link"><span>🏢 External 3rd Party</span>
+            <span id="nav-badge-ext" class="nav-count-badge">0</span></a></li>
+        <li class="section-nav-item"><a href="#security" class="section-nav-link"><span>🛡️ Security Audit</span></a>
+        </li>
       </ul>
 
-      <div style="margin-top: 32px; padding-top: 18px; border-top: 1px solid var(--border-color); font-size: 11.5px; color: var(--text-dim); line-height: 1.5;">
-        <a href="https://github.com/mm1rza/ipvfoo" target="_blank" style="color:var(--accent-cyan); text-decoration:none; font-weight:700;">IPvFooKan v0.1</a><br>
+      <div
+        style="margin-top: 32px; padding-top: 18px; border-top: 1px solid var(--border-color); font-size: 11.5px; color: var(--text-dim); line-height: 1.5;">
+        <a href="https://github.com/mm1rza/ipvfoo" target="_blank"
+          style="color:var(--accent-cyan); text-decoration:none; font-weight:700;">IPvFooKan v0.1</a><br>
         In-Page Network &amp; SEO Audit Engine
       </div>
     </aside>
@@ -1020,4 +1186,5 @@
 
   <script src="scripts/seo.js"></script>
 </body>
+
 </html>

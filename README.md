@@ -133,12 +133,14 @@ ipvfoo/
     ├── options.js
     ├── popup.html             # Antarmuka popup toolbar browser
     ├── popup.js
-    └── seo.html               # Halaman dashboard audit META SEO modern
+    ├── seo.html               # Halaman dashboard audit META SEO modern
+    └── theme.css              # Master Design Tokens :root (shadcn/ui Cyber Obsidian)
 ```
 
 | File / Folder | Deskripsi / Peran |
 | :--- | :--- |
 | `src/manifest.json` | Konfigurasi ekstensi Chrome (Manifest V3), permissions, dan resource mappings. |
+| `src/theme.css` | Sentralisasi skema warna `:root` & `.dark` berbasis shadcn/ui. |
 | `src/background.js` | Service Worker penangkap trafik jaringan pasif via `chrome.webRequest`. |
 | `src/content.js` | Content script utama: merender In-Page Shadow DOM widget, live speed counter, traceroute modal, serta pengendali Link Grabber & SEO. |
 | `src/id_asn_default.js` | Basis data pemetaan ASN & provider ISP (offline & lokal). |
