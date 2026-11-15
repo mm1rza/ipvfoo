@@ -149,7 +149,7 @@
     return a[0].localeCompare(b[0]);
   }
 
-  // Klasifikasi Jalur Trafik: IIX, CDN, INTER.
+  // Klasifikasi Jalur Trafik: IIX, CDN, INTERN
   function classifyTraffic(addr, domain, asn, latency) {
     if (!addr || addr === "(x)" || addr === "(lost)" || addr.startsWith("(")) {
       return { code: "UNKNOWN", label: "-", class: "badge-unknown", desc: "No IP address" };
@@ -205,12 +205,12 @@
       };
     }
 
-    // 3. [INTER.]
+    // 3. [INTERN]
     // Trafik yang keluar lewat kabel laut ke Singapura / Hong Kong / AS
     if (country && country !== "ID") {
       return {
         code: "INTL",
-        label: "[INTER.]",
+        label: "[INTERN]",
         class: "badge-intl",
         desc: `Trafik keluar lewat kabel laut ke luar negeri (${country})`
       };
@@ -219,7 +219,7 @@
     if (lat > 40) {
       return {
         code: "INTL",
-        label: "[INTER.]",
+        label: "[INTERN]",
         class: "badge-intl",
         desc: "Trafik keluar lewat kabel laut ke Singapura / Hong Kong / AS"
       };
@@ -236,7 +236,7 @@
 
     return {
       code: "INTL",
-      label: "[INTER.]",
+      label: "[INTERN]",
       class: "badge-intl",
       desc: "Trafik keluar lewat kabel laut ke Singapura / Hong Kong / AS"
     };
@@ -860,9 +860,9 @@
           <tr>
             <th id="th-domain" style="cursor:pointer;" title="Sort Domain">Domain <span class="sort-icon"></span></th>
             <th id="th-ip" style="cursor:pointer;" title="Sort IP">IP Address <span class="sort-icon"></span></th>
-            <th id="th-route" style="text-align:center; cursor:pointer;" title="Sort Jalur Trafik (IIX / CDN / Intl)">Jalur <span class="sort-icon"></span></th>
-            <th id="th-status" style="text-align:center; cursor:pointer;" title="Sort HTTP Status Code">Status <span class="sort-icon"></span></th>
+            <th id="th-route" style="text-align:center; cursor:pointer;" title="Sort Jalur Trafik (IIX / CDN / INTERN)">Jalur <span class="sort-icon"></span></th>
             <th id="th-latency" style="text-align:right; cursor:pointer;" title="Sort Response Latency">Latency <span class="sort-icon"></span></th>
+            <th id="th-status" style="text-align:center; cursor:pointer;" title="Sort HTTP Status Code">Status <span class="sort-icon"></span></th>
             <th id="th-hits" style="text-align:center; cursor:pointer;" title="Sort Hits">Hits <span class="sort-icon"></span></th>
             <th id="th-size" style="text-align:right; cursor:pointer;" title="Sort Payload Size">Size <span class="sort-icon"></span></th>
             <th id="th-bgp" style="text-align:center; cursor:pointer;" title="Sort BGP">BGP <span class="sort-icon"></span></th>
@@ -901,7 +901,7 @@
   }
 
   function updateHeaderSortIndicators() {
-    const cols = ["domain", "ip", "route", "status", "latency", "hits", "size", "bgp"];
+    const cols = ["domain", "ip", "route", "latency", "status", "hits", "size", "bgp"];
     cols.forEach((c) => {
       const el = shadow.getElementById(`th-${c}`);
       if (el) {
@@ -996,7 +996,7 @@
       showCopyToast("Tidak ada data session untuk di-export");
       return;
     }
-    const header = ["Domain", "IP Address", "Jalur Trafik", "IP Version", "Protocol", "Status Code", "Latency (ms)", "Hits", "Bytes", "Size Formatted", "ASN"];
+    const header = ["Domain", "IP Address", "Jalur Trafik", "Latency (ms)", "Status Code", "Hits", "Bytes", "Size Formatted", "IP Version", "Protocol", "ASN"];
     const rows = [header.map(c => `"${c}"`).join(",")];
 
     tuples.forEach(t => {
@@ -1016,13 +1016,13 @@
         domain,
         addr,
         routeInfo.label,
-        ver,
-        proto,
-        status,
         latency,
+        status,
         hits,
         bytes,
         formatBytes(bytes),
+        ver,
+        proto,
         asn
       ];
 
@@ -1072,13 +1072,13 @@
     lines.push(
       pad("Domain", 30) + " " +
       pad("IP Address", 20) + " " +
-      pad("Jalur", 16) + " " +
-      pad("Ver", 4) + " " +
-      pad("Proto", 6) + " " +
-      pad("Status", 7) + " " +
+      pad("Jalur", 10) + " " +
       pad("Latency", 9, "right") + " " +
+      pad("Status", 7) + " " +
       pad("Hits", 6, "right") + " " +
-      pad("Size", 10, "right") + "  " +
+      pad("Size", 10, "right") + " " +
+      pad("Ver", 4) + " " +
+      pad("Proto", 6) + "  " +
       "ASN / Organization"
     );
     lines.push("-".repeat(128));
@@ -1091,21 +1091,22 @@
       const hits = t[4] !== undefined ? t[4] : 0;
       const bytes = t[5] !== undefined ? t[5] : 0;
       const status = t[6] !== undefined ? t[6] : 200;
-      const latency = t[7] !== undefined && t[7] > 0 ? `${t[7]} ms` : "-";
+      const rawLat = t[7] !== undefined ? t[7] : 0;
+      const latency = rawLat > 0 ? `${rawLat} ms` : "-";
       const asn = t[8] || "-";
       const proto = getExportProtocol(flags);
-      const routeInfo = classifyTraffic(addr, domain, asn, latency);
+      const routeInfo = classifyTraffic(addr, domain, asn, rawLat);
 
       lines.push(
         pad(domain, 30) + " " +
         pad(addr, 20) + " " +
-        pad(routeInfo.label, 16) + " " +
-        pad(ver, 4) + " " +
-        pad(proto, 6) + " " +
-        pad(status, 7) + " " +
+        pad(routeInfo.label, 10) + " " +
         pad(latency, 9, "right") + " " +
+        pad(status, 7) + " " +
         pad(hits, 6, "right") + " " +
-        pad(formatBytes(bytes), 10, "right") + "  " +
+        pad(formatBytes(bytes), 10, "right") + " " +
+        pad(ver, 4) + " " +
+        pad(proto, 6) + "  " +
         asn
       );
     });
@@ -1218,8 +1219,8 @@
       <td class="domain-cell" title="Klik untuk copy: ${domain}">${lockIcon}${domain}</td>
       <td class="ip-cell ${ipClass}" title="Klik untuk copy: ${addr || '(x)'}">${addr || "(x)"}</td>
       <td style="text-align:center;">${routeHtml}</td>
-      <td style="text-align:center;"><span class="status-badge ${statusClass}">${status}</span></td>
       <td class="lat-cell ${latClass}">${latText}</td>
+      <td style="text-align:center;"><span class="status-badge ${statusClass}">${status}</span></td>
       <td class="hits-cell ${hits > 0 ? '' : 'hits-zero'}">${hits}</td>
       <td class="size-cell ${bytes > 0 ? '' : 'size-zero'}">${speedHtml}${formatBytes(bytes)}</td>
       <td style="text-align:center;">${bgpHtml}</td>

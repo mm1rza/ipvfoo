@@ -236,7 +236,7 @@ function compareTuples(a, b) {
   return a[0].localeCompare(b[0]);
 }
 
-// Klasifikasi Jalur Trafik: IIX, CDN, Internasional
+// Klasifikasi Jalur Trafik: IIX, CDN, INTERN
 function classifyTraffic(addr, domain, asn, latency) {
   if (!addr || addr === "(x)" || addr === "(lost)" || addr.startsWith("(")) {
     return { code: "UNKNOWN", label: "-", class: "badge-unknown", desc: "No IP address" };
@@ -292,12 +292,12 @@ function classifyTraffic(addr, domain, asn, latency) {
     };
   }
 
-  // 3. [Internasional]
+  // 3. [INTERN]
   // Trafik yang keluar lewat kabel laut ke Singapura / Hong Kong / AS
   if (country && country !== "ID") {
     return {
       code: "INTL",
-      label: "[Internasional]",
+      label: "[INTERN]",
       class: "badge-intl",
       desc: `Trafik keluar lewat kabel laut ke luar negeri (${country})`
     };
@@ -306,7 +306,7 @@ function classifyTraffic(addr, domain, asn, latency) {
   if (lat > 40) {
     return {
       code: "INTL",
-      label: "[Internasional]",
+      label: "[INTERN]",
       class: "badge-intl",
       desc: "Trafik keluar lewat kabel laut ke Singapura / Hong Kong / AS"
     };
@@ -323,7 +323,7 @@ function classifyTraffic(addr, domain, asn, latency) {
 
   return {
     code: "INTL",
-    label: "[Internasional]",
+    label: "[INTERN]",
     class: "badge-intl",
     desc: "Trafik keluar lewat kabel laut ke Singapura / Hong Kong / AS"
   };
@@ -385,7 +385,7 @@ function exportCsvSession(tuples, mainDomain) {
     showPopupToast("Tidak ada data session");
     return;
   }
-  const header = ["Domain", "IP Address", "Jalur Trafik", "IP Version", "Protocol", "Status Code", "Latency (ms)", "Hits", "Bytes", "Size Formatted", "ASN"];
+  const header = ["Domain", "IP Address", "Jalur Trafik", "Latency (ms)", "Status Code", "Hits", "Bytes", "Size Formatted", "IP Version", "Protocol", "ASN"];
   const rows = [header.map(c => `"${c}"`).join(",")];
 
   tuples.forEach(t => {
@@ -405,13 +405,13 @@ function exportCsvSession(tuples, mainDomain) {
       domain,
       addr,
       routeInfo.label,
-      ver,
-      proto,
-      status,
       latency,
+      status,
       hits,
       bytes,
       formatBytes(bytes),
+      ver,
+      proto,
       asn
     ];
 
@@ -461,13 +461,13 @@ function exportTxtSession(tuples, mainDomain) {
   lines.push(
     pad("Domain", 30) + " " +
     pad("IP Address", 20) + " " +
-    pad("Jalur", 16) + " " +
-    pad("Ver", 4) + " " +
-    pad("Proto", 6) + " " +
-    pad("Status", 7) + " " +
+    pad("Jalur", 10) + " " +
     pad("Latency", 9, "right") + " " +
+    pad("Status", 7) + " " +
     pad("Hits", 6, "right") + " " +
-    pad("Size", 10, "right") + "  " +
+    pad("Size", 10, "right") + " " +
+    pad("Ver", 4) + " " +
+    pad("Proto", 6) + "  " +
     "ASN / Organization"
   );
   lines.push("-".repeat(128));
@@ -480,21 +480,22 @@ function exportTxtSession(tuples, mainDomain) {
     const hits = t[4] !== undefined ? t[4] : 0;
     const bytes = t[5] !== undefined ? t[5] : 0;
     const status = t[6] !== undefined ? t[6] : 200;
-    const latency = t[7] !== undefined && t[7] > 0 ? `${t[7]} ms` : "-";
+    const rawLat = t[7] !== undefined ? t[7] : 0;
+    const latency = rawLat > 0 ? `${rawLat} ms` : "-";
     const asn = t[8] || "-";
     const proto = getExportProtocol(flags);
-    const routeInfo = classifyTraffic(addr, domain, asn, latency);
+    const routeInfo = classifyTraffic(addr, domain, asn, rawLat);
 
     lines.push(
       pad(domain, 30) + " " +
       pad(addr, 20) + " " +
-      pad(routeInfo.label, 16) + " " +
-      pad(ver, 4) + " " +
-      pad(proto, 6) + " " +
-      pad(status, 7) + " " +
+      pad(routeInfo.label, 10) + " " +
       pad(latency, 9, "right") + " " +
+      pad(status, 7) + " " +
       pad(hits, 6, "right") + " " +
-      pad(formatBytes(bytes), 10, "right") + "  " +
+      pad(formatBytes(bytes), 10, "right") + " " +
+      pad(ver, 4) + " " +
+      pad(proto, 6) + "  " +
       asn
     );
   });
@@ -1022,8 +1023,8 @@ function makeRow(isFirst, tuple) {
   tr.appendChild(domainTd);
   tr.appendChild(addrTd);
   tr.appendChild(routeTd);
-  tr.appendChild(statusTd);
   tr.appendChild(latTd);
+  tr.appendChild(statusTd);
   tr.appendChild(hitsTd);
   tr.appendChild(sizeTd);
   tr.appendChild(bgpTd);
