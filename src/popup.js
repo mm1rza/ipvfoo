@@ -224,13 +224,6 @@ function compareTuples(a, b) {
   } else if (currentSort.column === 'domain') {
     const cmp = a[0].localeCompare(b[0]);
     return currentSort.order === 'asc' ? cmp : -cmp;
-  } else if (currentSort.column === 'route') {
-    const rA = classifyTraffic(a[1], a[0], a[8], a[7]).code;
-    const rB = classifyTraffic(b[1], b[0], b[8], b[7]).code;
-    const cmp = rA.localeCompare(rB);
-    if (cmp !== 0) {
-      return currentSort.order === 'asc' ? cmp : -cmp;
-    }
   }
 
   return a[0].localeCompare(b[0]);
@@ -258,17 +251,18 @@ function classifyTraffic(addr, domain, asn, latency) {
   const ccMatch = a.match(/\b([A-Z]{2})\b/);
   const country = ccMatch ? ccMatch[1] : "";
   const isIdCountry = country === "ID";
+  const isIdAsnListed = typeof isIndonesianAsn === "function" ? isIndonesianAsn(a) : false;
 
   // Known Global CDNs / Hyperscalers
   const cdnAsnRegex = /\b(AS15169|AS13335|AS20940|AS16625|AS32787|AS54113|AS32934|AS2906|AS16509|AS8075|AS7195|AS209242)\b/;
-  const cdnDomainRegex = /(googlevideo|googleusercontent|gvt1|fbcdn|cdninstagram|tiktokcdn|byteoversea|ibytedtos|fastly|cloudflare|cloudfront|akamaized|akamaihd|edgesuite|edgekey|nflxvideo|nflxso|nflxext|azureedge|msedge)\./;
+  const cdnDomainRegex = /(googlevideo|googleusercontent|gstatic|ggpht|gvt1|fbcdn|cdninstagram|tiktokcdn|byteoversea|ibytedtos|fastly|cloudflare|cloudfront|akamaized|akamaihd|edgesuite|edgekey|nflxvideo|nflxso|nflxext|azureedge|msedge)\./;
   const isCdnAsn = cdnAsnRegex.test(a) || /GOOGLE|CLOUDFLARE|AKAMAI|FASTLY|FACEBOOK|META|NETFLIX|AMAZON|CLOUDFRONT|MICROSOFT/i.test(a);
   const isCdnDomain = cdnDomainRegex.test(d);
 
   // 1. [CDN]
   // Trafik yang ditarik dari Google/Meta/Akamai/Cloudflare Edge server yang ada di dalam ISP / lokal
   if (isCdnAsn || isCdnDomain) {
-    if (isIdCountry || (lat > 0 && lat <= 32) || /googlevideo|fbcdn|tiktokcdn/i.test(d)) {
+    if ((lat > 0 && lat <= 32) || /googlevideo|fbcdn|tiktokcdn/i.test(d)) {
       return {
         code: "CDN",
         label: "[CDN]",
@@ -276,14 +270,32 @@ function classifyTraffic(addr, domain, asn, latency) {
         desc: "Trafik ditarik dari Google/Meta/Akamai/Cloudflare Edge server di ISP / lokal"
       };
     }
+    if (lat > 35) {
+      return {
+        code: "INTL",
+        label: "[INTERN]",
+        class: "badge-intl",
+        desc: `Trafik CDN ditarik dari origin internasional (${country || "Singapura/Global"})`
+      };
+    }
   }
 
   // 2. [IIX]
   // Trafik domestik Indonesia via OpenIXP/IIX/CDIX
-  const isIdDomain = /\.(id|co\.id|go\.id|ac\.id|my\.id|web\.id|biz\.id|sch\.id|net\.id|or\.id)$/i.test(d);
-  const isIdAsn = /INDONESIA|TELKOM|BIZNET|MORATEL|APJII|IDNIC|CBN|FIRSTMEDIA|LINKNET|INDOSAT|XL|SMARTFREN|HALLONET|IFORTE|FIBERSTAR/i.test(a);
+  // Menggunakan database resmi ASN Indonesia (id_asn) atau WHOIS ID
+  const isIdAsnRegex = /INDONESIA|TELKOM|BIZNET|MORATEL|APJII|IDNIC|CBN|FIRSTMEDIA|LINKNET|INDOSAT|XL|SMARTFREN|HALLONET|IFORTE|FIBERSTAR/i.test(a);
+  if (isIdAsnListed || isIdCountry || isIdAsnRegex) {
+    return {
+      code: "IIX",
+      label: "[IIX]",
+      class: "badge-iix",
+      desc: "Trafik domestik Indonesia via OpenIXP/IIX/CDIX"
+    };
+  }
 
-  if (isIdCountry || isIdDomain || isIdAsn) {
+  // Fallback: Indonesian domain TLD (.id) only if not confirmed foreign country
+  const isIdDomain = /\.(id|co\.id|go\.id|ac\.id|my\.id|web\.id|biz\.id|sch\.id|net\.id|or\.id)$/i.test(d);
+  if (isIdDomain && (!country || country === "ID")) {
     return {
       code: "IIX",
       label: "[IIX]",
@@ -385,7 +397,7 @@ function exportCsvSession(tuples, mainDomain) {
     showPopupToast("Tidak ada data session");
     return;
   }
-  const header = ["Domain", "IP Address", "Jalur Trafik", "Latency (ms)", "Status Code", "Hits", "Bytes", "Size Formatted", "IP Version", "Protocol", "ASN"];
+  const header = ["Domain", "IP Address", "Latency (ms)", "Status Code", "Hits", "Bytes", "Size Formatted", "IP Version", "Protocol", "BGP / ASN"];
   const rows = [header.map(c => `"${c}"`).join(",")];
 
   tuples.forEach(t => {
@@ -399,12 +411,10 @@ function exportCsvSession(tuples, mainDomain) {
     const latency = t[7] !== undefined ? t[7] : 0;
     const asn = t[8] || "";
     const proto = getExportProtocol(flags);
-    const routeInfo = classifyTraffic(addr, domain, asn, latency);
 
     const row = [
       domain,
       addr,
-      routeInfo.label,
       latency,
       status,
       hits,
@@ -461,14 +471,13 @@ function exportTxtSession(tuples, mainDomain) {
   lines.push(
     pad("Domain", 30) + " " +
     pad("IP Address", 20) + " " +
-    pad("Jalur", 10) + " " +
     pad("Latency", 9, "right") + " " +
     pad("Status", 7) + " " +
     pad("Hits", 6, "right") + " " +
     pad("Size", 10, "right") + " " +
     pad("Ver", 4) + " " +
     pad("Proto", 6) + "  " +
-    "ASN / Organization"
+    "BGP / ASN Organization"
   );
   lines.push("-".repeat(128));
 
@@ -484,12 +493,10 @@ function exportTxtSession(tuples, mainDomain) {
     const latency = rawLat > 0 ? `${rawLat} ms` : "-";
     const asn = t[8] || "-";
     const proto = getExportProtocol(flags);
-    const routeInfo = classifyTraffic(addr, domain, asn, rawLat);
 
     lines.push(
       pad(domain, 30) + " " +
       pad(addr, 20) + " " +
-      pad(routeInfo.label, 10) + " " +
       pad(latency, 9, "right") + " " +
       pad(status, 7) + " " +
       pad(hits, 6, "right") + " " +
@@ -973,27 +980,37 @@ function makeRow(isFirst, tuple) {
   const bgpTd = document.createElement("td");
   bgpTd.className = `bgpTd${connectedClass}`;
   const asn = tuple && tuple[8];
-  let bgpText = "bgp";
+  let bgpDisplay = "bgp";
+  let bgpFull = asn || "bgp";
   let bgpHref = `https://bgp.he.net/ip/${addr}`;
   if (asn) {
-    const cleanAsn = asn.split(" ")[0];
-    bgpText = cleanAsn;
-    if (cleanAsn.startsWith("AS")) {
-      bgpHref = `https://bgp.he.net/${cleanAsn}`;
+    const m = asn.match(/AS\d+/i);
+    if (m) {
+      bgpHref = `https://bgp.he.net/${m[0]}`;
     }
+    const maxLen = 22;
+    bgpDisplay = asn.length > maxLen ? asn.substring(0, maxLen - 2) + ".." : asn;
   }
   if (addr && addr !== "(x)" && !addr.startsWith("(")) {
     const bgpLink = document.createElement("a");
     bgpLink.href = bgpHref;
-    bgpLink.textContent = bgpText;
+    bgpLink.textContent = bgpDisplay;
+    bgpLink.title = `${bgpFull} (Klik untuk lookup HE BGP)`;
     bgpLink.target = "_blank";
     bgpLink.style.color = "#00d9ff";
     bgpLink.style.textDecoration = "none";
+    bgpLink.style.whiteSpace = "nowrap";
     bgpTd.appendChild(bgpLink);
   } else {
     bgpTd.appendChild(document.createTextNode("-"));
     bgpTd.style.color = "#999";
   }
+  bgpTd.style.maxWidth = "160px";
+  bgpTd.style.overflow = "hidden";
+  bgpTd.style.textOverflow = "ellipsis";
+  bgpTd.style.whiteSpace = "nowrap";
+  bgpTd.style.paddingLeft = "4pt";
+  bgpTd.style.paddingRight = "4pt";
 
   const cacheTd = document.createElement("td");
   cacheTd.className = `cacheTd${connectedClass}`;
@@ -1007,22 +1024,9 @@ function makeRow(isFirst, tuple) {
     cacheTd.style.paddingLeft = '0';
   }
 
-  const routeTd = document.createElement("td");
-  routeTd.className = `routeTd${connectedClass}`;
-  const routeInfo = classifyTraffic(addr, domain, asn, latency);
-  const routeSpan = document.createElement("span");
-  routeSpan.className = `route-badge ${routeInfo.class}`;
-  routeSpan.title = routeInfo.desc;
-  routeSpan.textContent = routeInfo.label;
-  routeTd.appendChild(routeSpan);
-  routeTd.style.textAlign = "center";
-  routeTd.style.paddingLeft = "4px";
-  routeTd.style.paddingRight = "4px";
-
   tr._domain = domain;
   tr.appendChild(domainTd);
   tr.appendChild(addrTd);
-  tr.appendChild(routeTd);
   tr.appendChild(latTd);
   tr.appendChild(statusTd);
   tr.appendChild(hitsTd);

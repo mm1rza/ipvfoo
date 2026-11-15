@@ -20,6 +20,7 @@
     "page": "options.html"
   },
   "permissions": [
+    "alarms",
     "contextMenus",
     "storage",
     "webNavigation",
@@ -29,7 +30,7 @@
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "js": ["content.js"],
+      "js": ["id_asn_default.js", "content.js"],
       "run_at": "document_idle"
     },
     {

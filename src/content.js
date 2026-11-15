@@ -134,13 +134,6 @@
       if (cmp !== 0) {
         return currentSort.order === 'asc' ? cmp : -cmp;
       }
-    } else if (currentSort.column === 'route') {
-      const rA = classifyTraffic(a[1], a[0], a[8], a[7]).code;
-      const rB = classifyTraffic(b[1], b[0], b[8], b[7]).code;
-      const cmp = rA.localeCompare(rB);
-      if (cmp !== 0) {
-        return currentSort.order === 'asc' ? cmp : -cmp;
-      }
     } else if (currentSort.column === 'domain') {
       const cmp = a[0].localeCompare(b[0]);
       return currentSort.order === 'asc' ? cmp : -cmp;
@@ -171,17 +164,18 @@
     const ccMatch = a.match(/\b([A-Z]{2})\b/);
     const country = ccMatch ? ccMatch[1] : "";
     const isIdCountry = country === "ID";
+    const isIdAsnListed = typeof isIndonesianAsn === "function" ? isIndonesianAsn(a) : false;
 
     // Known Global CDNs / Hyperscalers
     const cdnAsnRegex = /\b(AS15169|AS13335|AS20940|AS16625|AS32787|AS54113|AS32934|AS2906|AS16509|AS8075|AS7195|AS209242)\b/;
-    const cdnDomainRegex = /(googlevideo|googleusercontent|gvt1|fbcdn|cdninstagram|tiktokcdn|byteoversea|ibytedtos|fastly|cloudflare|cloudfront|akamaized|akamaihd|edgesuite|edgekey|nflxvideo|nflxso|nflxext|azureedge|msedge)\./;
+    const cdnDomainRegex = /(googlevideo|googleusercontent|gstatic|ggpht|gvt1|fbcdn|cdninstagram|tiktokcdn|byteoversea|ibytedtos|fastly|cloudflare|cloudfront|akamaized|akamaihd|edgesuite|edgekey|nflxvideo|nflxso|nflxext|azureedge|msedge)\./;
     const isCdnAsn = cdnAsnRegex.test(a) || /GOOGLE|CLOUDFLARE|AKAMAI|FASTLY|FACEBOOK|META|NETFLIX|AMAZON|CLOUDFRONT|MICROSOFT/i.test(a);
     const isCdnDomain = cdnDomainRegex.test(d);
 
     // 1. [CDN]
     // Trafik yang ditarik dari Google/Meta/Akamai/Cloudflare Edge server yang ada di dalam ISP / lokal
     if (isCdnAsn || isCdnDomain) {
-      if (isIdCountry || (lat > 0 && lat <= 32) || /googlevideo|fbcdn|tiktokcdn/i.test(d)) {
+      if ((lat > 0 && lat <= 32) || /googlevideo|fbcdn|tiktokcdn/i.test(d)) {
         return {
           code: "CDN",
           label: "[CDN]",
@@ -189,14 +183,32 @@
           desc: "Trafik ditarik dari Google/Meta/Akamai/Cloudflare Edge server di ISP / lokal"
         };
       }
+      if (lat > 35) {
+        return {
+          code: "INTL",
+          label: "[INTERN]",
+          class: "badge-intl",
+          desc: `Trafik CDN ditarik dari origin internasional (${country || "Singapura/Global"})`
+        };
+      }
     }
 
     // 2. [IIX]
     // Trafik domestik Indonesia via OpenIXP/IIX/CDIX
-    const isIdDomain = /\.(id|co\.id|go\.id|ac\.id|my\.id|web\.id|biz\.id|sch\.id|net\.id|or\.id)$/i.test(d);
-    const isIdAsn = /INDONESIA|TELKOM|BIZNET|MORATEL|APJII|IDNIC|CBN|FIRSTMEDIA|LINKNET|INDOSAT|XL|SMARTFREN|HALLONET|IFORTE|FIBERSTAR/i.test(a);
+    // Menggunakan database resmi ASN Indonesia (id_asn) atau WHOIS ID
+    const isIdAsnRegex = /INDONESIA|TELKOM|BIZNET|MORATEL|APJII|IDNIC|CBN|FIRSTMEDIA|LINKNET|INDOSAT|XL|SMARTFREN|HALLONET|IFORTE|FIBERSTAR/i.test(a);
+    if (isIdAsnListed || isIdCountry || isIdAsnRegex) {
+      return {
+        code: "IIX",
+        label: "[IIX]",
+        class: "badge-iix",
+        desc: "Trafik domestik Indonesia via OpenIXP/IIX/CDIX"
+      };
+    }
 
-    if (isIdCountry || isIdDomain || isIdAsn) {
+    // Fallback: Indonesian domain TLD (.id) only if not confirmed foreign country
+    const isIdDomain = /\.(id|co\.id|go\.id|ac\.id|my\.id|web\.id|biz\.id|sch\.id|net\.id|or\.id)$/i.test(d);
+    if (isIdDomain && (!country || country === "ID")) {
       return {
         code: "IIX",
         label: "[IIX]",
@@ -860,12 +872,11 @@
           <tr>
             <th id="th-domain" style="cursor:pointer;" title="Sort Domain">Domain <span class="sort-icon"></span></th>
             <th id="th-ip" style="cursor:pointer;" title="Sort IP">IP Address <span class="sort-icon"></span></th>
-            <th id="th-route" style="text-align:center; cursor:pointer;" title="Sort Jalur Trafik (IIX / CDN / INTERN)">Jalur <span class="sort-icon"></span></th>
             <th id="th-latency" style="text-align:right; cursor:pointer;" title="Sort Response Latency">Latency <span class="sort-icon"></span></th>
             <th id="th-status" style="text-align:center; cursor:pointer;" title="Sort HTTP Status Code">Status <span class="sort-icon"></span></th>
             <th id="th-hits" style="text-align:center; cursor:pointer;" title="Sort Hits">Hits <span class="sort-icon"></span></th>
             <th id="th-size" style="text-align:right; cursor:pointer;" title="Sort Payload Size">Size <span class="sort-icon"></span></th>
-            <th id="th-bgp" style="text-align:center; cursor:pointer;" title="Sort BGP">BGP <span class="sort-icon"></span></th>
+            <th id="th-bgp" style="text-align:left; cursor:pointer;" title="Sort BGP / ASN">BGP / ASN <span class="sort-icon"></span></th>
           </tr>
         </thead>
         <tbody id="addr_tbody"></tbody>
@@ -901,7 +912,7 @@
   }
 
   function updateHeaderSortIndicators() {
-    const cols = ["domain", "ip", "route", "latency", "status", "hits", "size", "bgp"];
+    const cols = ["domain", "ip", "latency", "status", "hits", "size", "bgp"];
     cols.forEach((c) => {
       const el = shadow.getElementById(`th-${c}`);
       if (el) {
@@ -921,7 +932,6 @@
 
   shadow.getElementById("th-domain").onclick = () => setSort("domain");
   shadow.getElementById("th-ip").onclick = () => setSort("ip");
-  shadow.getElementById("th-route").onclick = () => setSort("route");
   shadow.getElementById("th-status").onclick = () => setSort("status");
   shadow.getElementById("th-latency").onclick = () => setSort("latency");
   shadow.getElementById("th-hits").onclick = () => setSort("hits");
@@ -996,7 +1006,7 @@
       showCopyToast("Tidak ada data session untuk di-export");
       return;
     }
-    const header = ["Domain", "IP Address", "Jalur Trafik", "Latency (ms)", "Status Code", "Hits", "Bytes", "Size Formatted", "IP Version", "Protocol", "ASN"];
+    const header = ["Domain", "IP Address", "Latency (ms)", "Status Code", "Hits", "Bytes", "Size Formatted", "IP Version", "Protocol", "BGP / ASN"];
     const rows = [header.map(c => `"${c}"`).join(",")];
 
     tuples.forEach(t => {
@@ -1010,12 +1020,10 @@
       const latency = t[7] !== undefined ? t[7] : 0;
       const asn = t[8] || "";
       const proto = getExportProtocol(flags);
-      const routeInfo = classifyTraffic(addr, domain, asn, latency);
 
       const row = [
         domain,
         addr,
-        routeInfo.label,
         latency,
         status,
         hits,
@@ -1072,14 +1080,13 @@
     lines.push(
       pad("Domain", 30) + " " +
       pad("IP Address", 20) + " " +
-      pad("Jalur", 10) + " " +
       pad("Latency", 9, "right") + " " +
       pad("Status", 7) + " " +
       pad("Hits", 6, "right") + " " +
       pad("Size", 10, "right") + " " +
       pad("Ver", 4) + " " +
       pad("Proto", 6) + "  " +
-      "ASN / Organization"
+      "BGP / ASN Organization"
     );
     lines.push("-".repeat(128));
 
@@ -1095,12 +1102,10 @@
       const latency = rawLat > 0 ? `${rawLat} ms` : "-";
       const asn = t[8] || "-";
       const proto = getExportProtocol(flags);
-      const routeInfo = classifyTraffic(addr, domain, asn, rawLat);
 
       lines.push(
         pad(domain, 30) + " " +
         pad(addr, 20) + " " +
-        pad(routeInfo.label, 10) + " " +
         pad(latency, 9, "right") + " " +
         pad(status, 7) + " " +
         pad(hits, 6, "right") + " " +
@@ -1196,34 +1201,33 @@
       latClass = "lat-med";
     }
 
-    let bgpText = "bgp";
+    let bgpDisplay = "bgp";
+    let bgpFull = asn || "bgp";
     let bgpHref = `https://bgp.he.net/ip/${addr}`;
     if (asn) {
-      const cleanAsn = asn.split(" ")[0];
-      bgpText = cleanAsn;
-      if (cleanAsn.startsWith("AS")) {
-        bgpHref = `https://bgp.he.net/${cleanAsn}`;
+      const m = asn.match(/AS\d+/i);
+      if (m) {
+        bgpHref = `https://bgp.he.net/${m[0]}`;
       }
+      const maxLen = 22;
+      bgpDisplay = asn.length > maxLen ? asn.substring(0, maxLen - 2) + ".." : asn;
     }
 
     const bgpHtml = (addr && addr !== "(x)" && !addr.startsWith("("))
-      ? `<a href="${bgpHref}" target="_blank" class="bgp-link" title="Lookup ${bgpText} di HE BGP">${bgpText}</a>`
+      ? `<a href="${bgpHref}" target="_blank" class="bgp-link" title="${bgpFull} (Klik untuk lookup HE BGP)">${bgpDisplay}</a>`
       : `<span style="color:#666;">-</span>`;
 
     const dSpeed = domainSpeedMap[domain] || 0;
     const speedHtml = dSpeed >= 200 ? `<span class="speed-tag">⚡${formatSpeed(dSpeed)}</span> ` : "";
-    const routeInfo = classifyTraffic(addr, domain, asn, latency);
-    const routeHtml = `<span class="route-badge ${routeInfo.class}" title="${routeInfo.desc}">${routeInfo.label}</span>`;
 
     tr.innerHTML = `
       <td class="domain-cell" title="Klik untuk copy: ${domain}">${lockIcon}${domain}</td>
       <td class="ip-cell ${ipClass}" title="Klik untuk copy: ${addr || '(x)'}">${addr || "(x)"}</td>
-      <td style="text-align:center;">${routeHtml}</td>
       <td class="lat-cell ${latClass}">${latText}</td>
       <td style="text-align:center;"><span class="status-badge ${statusClass}">${status}</span></td>
       <td class="hits-cell ${hits > 0 ? '' : 'hits-zero'}">${hits}</td>
       <td class="size-cell ${bytes > 0 ? '' : 'size-zero'}">${speedHtml}${formatBytes(bytes)}</td>
-      <td style="text-align:center;">${bgpHtml}</td>
+      <td class="bgp-cell" style="text-align:left;">${bgpHtml}</td>
     `;
 
     const domainTd = tr.querySelector(".domain-cell");
@@ -1309,7 +1313,6 @@
     const mainAddr = main[1] || "(x)";
     const mainStatus = main[6] || 200;
     const mainLat = main[7] ? ` (${main[7]}ms)` : "";
-    const mainRoute = classifyTraffic(main[1], main[0], main[8], main[7]).label;
     let totalHits = 0;
     let totalBytes = 0;
     tuples.forEach((t) => {
@@ -1319,7 +1322,7 @@
     const speedStr = currentSpeedBps >= 200 ? ` | ⚡ ${formatSpeed(currentSpeedBps)}` : "";
     const miniText = shadow.getElementById("mini-text");
     if (miniText) {
-      miniText.textContent = `${mainAddr} ${mainRoute} | ${mainStatus}${mainLat} | ${totalHits} req | ${formatBytes(totalBytes)}${speedStr}`;
+      miniText.textContent = `${mainAddr} | ${mainStatus}${mainLat} | ${totalHits} req | ${formatBytes(totalBytes)}${speedStr}`;
     }
   }
 
@@ -1574,7 +1577,6 @@
     const cleanAsn = (targetAsn.split(" ")[0] || "").replace(/[^A-Z0-9]/g, "");
     const heUrl = cleanAsn.startsWith("AS") ? `https://bgp.he.net/${cleanAsn}` : `https://bgp.he.net/ip/${addr}`;
     const lgUrl = `https://lg.hallonet.id/?cmd=traceroute&target=${encodeURIComponent(addr)}`;
-    const routeInfo = classifyTraffic(addr, domain, asn, lastHop.rtt || 0);
 
     body.innerHTML = `
       <div class="bgp-summary-grid">
@@ -1587,11 +1589,6 @@
           <div class="bgp-card-label">⚡ Traceroute Latency (RTT)</div>
           <div class="bgp-card-val" style="color:#48ff00;">${targetRtt}</div>
           <div class="bgp-card-sub">${data.hops_count || hops.length} Hops Total (${data.timestamp || 'Real-time'})</div>
-        </div>
-        <div class="bgp-card">
-          <div class="bgp-card-label">🛣️ Jalur Routing Klasifikasi</div>
-          <div class="bgp-card-val"><span class="route-badge ${routeInfo.class}">${routeInfo.label}</span></div>
-          <div class="bgp-card-sub">${routeInfo.desc}</div>
         </div>
         <div class="bgp-card">
           <div class="bgp-card-label">🏢 Destination AS & ISP</div>

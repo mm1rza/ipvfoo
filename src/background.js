@@ -40,7 +40,7 @@ user can demand a popup before any IP addresses are available.
 if (chrome.runtime.getManifest().background.service_worker) {
   // This only runs on Chrome.
   // Firefox uses manifest.json/background/scripts instead.
-  importScripts("iputil.js", "common.js");
+  importScripts("iputil.js", "common.js", "id_asn_default.js");
 }
 
 // Possible states for an instance of TabInfo.
@@ -851,8 +851,8 @@ function getAsnInfo(addr) {
   }
 
   if (ipAsnCache[addr]) {
-    // If it was wrongly cached as LAN before, discard
-    if (ipAsnCache[addr] === "LAN") {
+    // If it was wrongly cached as LAN before or is old format without org, re-fetch
+    if (ipAsnCache[addr] === "LAN" || /^AS\d+\s+[A-Z]{2}$/.test(ipAsnCache[addr])) {
       delete ipAsnCache[addr];
     } else {
       return ipAsnCache[addr];
@@ -873,9 +873,11 @@ async function fetchAsnInfo(addr) {
     const res = await fetch(`https://ipwhois.app/json/${addr}?objects=asn,org,country_code`);
     if (res.ok) {
       const data = await res.json();
-      if (data.asn || data.country_code) {
-        const asnStr = `${data.asn || ""} ${data.country_code || ""}`.trim();
-        ipAsnCache[addr] = asnStr;
+      if (data.asn || data.org || data.country_code) {
+        const asn = data.asn || "";
+        const org = data.org || "";
+        const asnStr = asn ? (org ? `${asn} ${org}` : asn) : (org || data.country_code || "");
+        ipAsnCache[addr] = asnStr.trim();
         chrome.storage.local.set({ ipAsnCache });
         for (const tabInfo of Object.values(tabMap)) {
           for (const [domain, di] of Object.entries(tabInfo.domains)) {
@@ -888,6 +890,62 @@ async function fetchAsnInfo(addr) {
     }
   } catch (e) { }
 }
+
+// --- Daily Auto-Updater for Indonesian ASN List (1x per 24 hours) ---
+const ID_ASN_UPDATE_URL = "https://raw.githubusercontent.com/justillusion/cloud-ranges/refs/heads/master/index/id.json";
+const ONE_DAY_MS = 24 * 60 * 60 * 1000;
+
+async function checkAutoUpdateIdAsn(force = false) {
+  try {
+    const res = await chrome.storage.local.get(["idAsnLastUpdate"]);
+    const lastUpdate = res.idAsnLastUpdate || 0;
+    const now = Date.now();
+    if (!force && (now - lastUpdate) < ONE_DAY_MS) {
+      return; // Already up-to-date within 24 hours
+    }
+
+    const resp = await fetch(ID_ASN_UPDATE_URL, { cache: "no-cache" });
+    if (!resp.ok) return;
+    const data = await resp.json();
+    if (!Array.isArray(data)) return;
+
+    const newAsns = [];
+    for (const item of data) {
+      if (item && item.asn) {
+        const m = String(item.asn).match(/\d+/);
+        if (m) {
+          const num = parseInt(m[0], 10);
+          if (num > 0) newAsns.push(num);
+        }
+      }
+    }
+
+    if (newAsns.length > 500) {
+      const unique = Array.from(new Set(newAsns)).sort((a, b) => a - b);
+      await chrome.storage.local.set({
+        idAsnList: unique,
+        idAsnLastUpdate: now,
+        idAsnCount: unique.length
+      });
+      console.log(`[IPvFoo] Indonesian ASN list auto-updated: ${unique.length} ASNs.`);
+    }
+  } catch (err) {
+    // Fails silently if offline, zero impact on browser
+  }
+}
+
+// 24-hour alarm
+try {
+  chrome.alarms.create("update_id_asn", { periodInMinutes: 1440 });
+  chrome.alarms.onAlarm.addListener((alarm) => {
+    if (alarm.name === "update_id_asn") {
+      checkAutoUpdateIdAsn(true);
+    }
+  });
+} catch (e) { }
+
+// Check on startup silently
+checkAutoUpdateIdAsn(false);
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.hasOwnProperty("darkModeOffscreen")) {
