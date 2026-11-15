@@ -284,7 +284,17 @@
             const cleanOrgName = orgName.replace(/\s+/g, "").replace(/[^a-zA-Z0-9_-]/g, "") || (asnDigits ? `AS${asnDigits}` : "Target");
 
             // 1. IP Only (CIDR)
-            generatedData.ipOnly = ipArr.length > 0 ? ipArr.join("\n") : "# Tidak ada IPv4 Prefix di tabel halaman ini.";
+            let ipOnlyLines = [
+              `# AS Info: ${asNumber} ${orgName}`
+            ];
+            if (ipArr.length > 0) {
+              ipOnlyLines.push(...ipArr);
+              ipOnlyLines.push(`# Total IPv4 Prefix: ${ipArr.length}`);
+            } else {
+              ipOnlyLines.push(`# Tidak ada IPv4 Prefix di tabel halaman ini.`);
+              ipOnlyLines.push(`# Total IPv4 Prefix: 0`);
+            }
+            generatedData.ipOnly = ipOnlyLines.join("\n");
 
             // 2. Address List
             let addrListLines = [
@@ -333,6 +343,8 @@
             // 5. BGP Local-Preference (Juniper)
             const asPathName = `ALLOW-${cleanOrgName}`;
             let bgpJuniperLines = [
+              `# AS Info: ${asNumber} ${orgName}`,
+              ``,
               `#localpref`,
               `set policy-options as-path ${asPathName} ".* ${asnDigits}$"`,
               `set policy-options policy-statement from_XXXXXXX term ${asPathName} from as-path ${asPathName}`,
@@ -343,13 +355,17 @@
               ``,
               `#delete`,
               `delete policy-options policy-statement from_XXXXXXX term ${asPathName}`,
-              `delete policy-options as-path ${asPathName} ".* ${asnDigits}$"`
+              `delete policy-options as-path ${asPathName} ".* ${asnDigits}$"`,
+              ``,
+              `# Total IPv4 Prefix: ${ipArr.length}`
             ];
             generatedData.bgpJuniper = bgpJuniperLines.join("\n");
 
             // 6. BGP Block IP (Juniper)
             const rejectTermName = `reject-${cleanOrgName}`;
             let bgpBlockLines = [
+              `# AS Info: ${asNumber} ${orgName}`,
+              ``,
               `#block`
             ];
             if (ipArr.length > 0) {
@@ -365,6 +381,8 @@
             bgpBlockLines.push(``);
             bgpBlockLines.push(`#delete`);
             bgpBlockLines.push(`delete policy-options policy-statement from_XXXXXXX term ${rejectTermName}`);
+            bgpBlockLines.push(``);
+            bgpBlockLines.push(`# Total IPv4 Prefix: ${ipArr.length}`);
             generatedData.bgpJuniperBlock = bgpBlockLines.join("\n");
 
             // Display
