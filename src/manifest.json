@@ -6,15 +6,15 @@
   "description": "Realtime server IP (IPv4/IPv6, HTTP/3, TLS), BGP AS-Path traceroute, Link & Asset Grabber, and In-Page META SEO Diagnostics.",
   "homepage_url": "https://github.com/mm1rza/ipvfoo",
   "icons": {
-    "16": "icon16.png",
-    "128": "icon128.png"
+    "16": "icons/icon16.png",
+    "128": "icons/icon128.png"
   },
   "background": {
     "service_worker": "background.js"
   },
   "action": {
     "default_icon": {
-      "16": "icon16_transparent.png"
+      "16": "icons/icon16_transparent.png"
     }
   },
   "options_ui": {
@@ -37,7 +37,7 @@
         "scripts/url2service.js",
         "scripts/extractors.js",
         "scripts/extractors3.js",
-        "scripts/content-script.js",
+        "scripts/seo-extractor.js",
         "id_asn_default.js",
         "content.js"
       ],
@@ -56,8 +56,8 @@
     {
       "resources": [
         "seo.html",
-        "scripts/print.js",
-        "icon128.png"
+        "scripts/seo.js",
+        "icons/icon128.png"
       ],
       "matches": ["<all_urls>"]
     }

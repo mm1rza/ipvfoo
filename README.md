@@ -89,13 +89,54 @@ Berikut adalah bagan alur kerja sistem di balik **IPvFooKan**:
 +---------------------------------------------------+ +-----------------------------------------------+
 |             openGrabberInNewTab()                 | |            openSeoInNewTab()                  |
 | - Ekstraksi link & DOM assets (img, a, doc, media)| | - Parsing meta tags, OG, Twitter, Schema      |
-| - Render tab mandiri via Blob URL                 | | - Render dashboard via seo.html / print.js    |
+| - Render tab mandiri via Blob URL                 | | - Render dashboard via seo.html / seo.js      |
 | - Galeri Grid & konversi Base64                   | | - Diagnostic Scoring, Social Preview, Outline |
 +---------------------------------------------------+ +-----------------------------------------------+
 ```
 
-### Rincian Modul File Utama
-| File | Deskripsi / Peran |
+### Rincian Modul File & Struktur Direktori Bersih
+```text
+ipvfoo/
+├── LICENSE                    # Apache License 2.0
+├── Makefile                   # Multi-browser build script (Chrome / Firefox)
+├── README.md                  # Dokumentasi & panduan teknis
+└── src/
+    ├── _locales/              # Lokalisasi bahasa (en)
+    │   └── en/messages.json
+    ├── icons/                 # Direktori terpadu ikon & badge ekstensi
+    │   ├── badges/            # 48 badge angka IP/protokol status bar
+    │   ├── icon16.png
+    │   ├── icon16_transparent.png
+    │   ├── icon128.png
+    │   └── *.png              # UI icons (arrows, lock, h1-h3, snip, websocket)
+    ├── manifest/              # Manifest alternatif untuk build spesifik browser
+    │   ├── chrome-manifest.json
+    │   └── firefox-manifest.json
+    ├── scripts/               # Engine ekstraktor metadata & SEO
+    │   ├── defines.js         # Konstanta & dictionary data SEO
+    │   ├── extractors.js      # Parser metadata & DOM tags
+    │   ├── extractors3.js     # Parser visual & outline headings
+    │   ├── seo-extractor.js   # Content script extractor SEO
+    │   ├── seo.js             # Controller visual dashboard SEO (seo.html)
+    │   ├── service.js         # Service helper & download generator
+    │   └── url2service.js     # URL categorization service
+    ├── background.js          # Service Worker: pemantau pasif webRequest
+    ├── bgp_he.js              # Script pembantu rute BGP Hurricane Electric
+    ├── common.js              # Fungsi utilitas bersama & status badge resolver
+    ├── content.js             # In-Page Shadow DOM widget, speed meter, traceroute
+    ├── detectdarkmode.html    # Offscreen Dark Mode detector
+    ├── detectdarkmode.js
+    ├── id_asn_default.js      # Basis data offline pemetaan ASN & ISP
+    ├── iputil.js              # Utilitas parsing & validasi IPv4/IPv6
+    ├── manifest.json          # Master Manifest V3
+    ├── options.html           # Pengaturan ekstensi
+    ├── options.js
+    ├── popup.html             # Antarmuka popup toolbar browser
+    ├── popup.js
+    └── seo.html               # Halaman dashboard audit META SEO modern
+```
+
+| File / Folder | Deskripsi / Peran |
 | :--- | :--- |
 | `src/manifest.json` | Konfigurasi ekstensi Chrome (Manifest V3), permissions, dan resource mappings. |
 | `src/background.js` | Service Worker penangkap trafik jaringan pasif via `chrome.webRequest`. |
@@ -103,7 +144,9 @@ Berikut adalah bagan alur kerja sistem di balik **IPvFooKan**:
 | `src/id_asn_default.js` | Basis data pemetaan ASN & provider ISP (offline & lokal). |
 | `src/bgp_he.js` | Content script pembantu untuk lookup rute BGP. |
 | `src/popup.html` & `src/popup.js` | Antarmuka popup default saat ikon ekstensi di-klik pada toolbar. |
-| `src/seo.html` & `src/scripts/print.js` | Antarmuka dan engine visualisasi dashboard SEO audit modern. |
+| `src/seo.html` & `src/scripts/seo.js` | Antarmuka dan engine visualisasi dashboard SEO audit modern. |
+| `src/scripts/seo-extractor.js` | Injeksi content script untuk ekstraksi tag meta, JSON-LD, dan outline. |
+| `src/icons/` & `src/icons/badges/` | Ikon resolusi tinggi, asset UI, serta badge dinamis status IPv4/IPv6. |
 | `src/options.html` & `src/options.js` | Halaman pengaturan ekstensi (disediakan untuk rilis mendatang). |
 
 ---

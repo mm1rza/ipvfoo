@@ -870,7 +870,8 @@ function minimalCopy(src, dst) {
 
 function makeImg(src, title) {
   const img = document.createElement("img");
-  img.src = src; img.title = title;
+  img.src = src.startsWith("icons/") ? src : `icons/${src}`;
+  img.title = title;
   return img;
 }
 

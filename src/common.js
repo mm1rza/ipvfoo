@@ -66,7 +66,7 @@ function iconPath(pattern, size, color) {
   if (!/^(lightfg|darkfg)(16|32)_[46q](|4|6|46)$/.test(filebase)) {
     throw new Error(`Unexpected icon format: ${filebase}`);
   }
-  return `generated_icons/${filebase}.png`;
+  return `icons/badges/${filebase}.png`;
 }
 
 const REGULAR_COLOR = "regularColorScheme";
