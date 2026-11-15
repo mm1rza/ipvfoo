@@ -955,216 +955,6 @@
       font-weight: 600;
       font-size: 13px;
     }
-
-    /* Link Grabber Modal Styles */
-    #lg-modal-backdrop {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      background: rgba(0, 0, 0, 0.78);
-      backdrop-filter: blur(4px);
-      z-index: 2147483647 !important;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      user-select: none;
-    }
-    #lg-modal {
-      width: 820px;
-      max-width: 94vw;
-      max-height: 88vh;
-      background: #141724;
-      border: 1px solid #7c3aed;
-      border-radius: 12px;
-      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.85), 0 0 25px rgba(124, 58, 237, 0.3);
-      color: #eee;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      animation: modalPop 0.22s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    }
-    #lg-modal-header {
-      background: #1c1d30;
-      padding: 12px 18px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 1px solid #2d2f4a;
-    }
-    #lg-modal-header .title {
-      font-size: 14px;
-      font-weight: 700;
-      color: #c084fc;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .lg-badge {
-      background: rgba(124, 58, 237, 0.3);
-      color: #e9d5ff;
-      border: 1px solid rgba(124, 58, 237, 0.5);
-      font-size: 11px;
-      font-weight: 600;
-      padding: 1px 7px;
-      border-radius: 10px;
-    }
-    #lg-modal-close {
-      background: none;
-      border: none;
-      color: #aaa;
-      font-size: 18px;
-      font-weight: 700;
-      cursor: pointer;
-      line-height: 1;
-      padding: 2px 6px;
-      border-radius: 4px;
-    }
-    #lg-modal-close:hover {
-      color: #ff5252;
-      background: rgba(255, 82, 82, 0.15);
-    }
-    #lg-toolbar {
-      padding: 12px 18px;
-      background: #18192c;
-      border-bottom: 1px solid #282a45;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-    .lg-search-row {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-    }
-    #lg-search-input {
-      flex: 1;
-      background: #0f101d;
-      border: 1px solid #3c3f66;
-      border-radius: 6px;
-      padding: 6px 12px;
-      color: #fff;
-      font-size: 12px;
-      outline: none;
-      transition: border-color 0.2s;
-    }
-    #lg-search-input:focus {
-      border-color: #7c3aed;
-      box-shadow: 0 0 6px rgba(124, 58, 237, 0.4);
-    }
-    .lg-options-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 16px;
-      font-size: 11.5px;
-      color: #bbb;
-      align-items: center;
-    }
-    .lg-checkbox {
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      cursor: pointer;
-      user-select: none;
-    }
-    .lg-checkbox input {
-      cursor: pointer;
-      accent-color: #7c3aed;
-    }
-    #lg-list-container {
-      flex: 1;
-      overflow-y: auto;
-      max-height: calc(85vh - 200px);
-      min-height: 200px;
-      padding: 6px 14px;
-    }
-    #lg-link-list {
-      list-style: none;
-      margin: 0;
-      padding: 0;
-      font-family: Consolas, Monaco, monospace;
-      font-size: 11px;
-    }
-    .lg-item {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 6px 8px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-      transition: background 0.15s;
-    }
-    .lg-item:hover {
-      background: rgba(124, 58, 237, 0.1);
-    }
-    .lg-item-num {
-      color: #666;
-      font-size: 10px;
-      min-width: 28px;
-      text-align: right;
-    }
-    .lg-item-host {
-      background: rgba(0, 217, 255, 0.15);
-      color: #00d9ff;
-      border-radius: 3px;
-      padding: 1px 5px;
-      font-size: 10px;
-      font-weight: 600;
-      white-space: nowrap;
-    }
-    .lg-item-text {
-      color: #aaa;
-      font-size: 11px;
-      max-width: 160px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    }
-    .lg-item-url {
-      flex: 1;
-      color: #c084fc;
-      text-decoration: none;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      word-break: break-all;
-    }
-    .lg-item-url:hover {
-      text-decoration: underline;
-      color: #e9d5ff;
-    }
-    .lg-item-copy {
-      background: transparent;
-      border: 1px solid #3c3f66;
-      color: #888;
-      border-radius: 4px;
-      padding: 2px 6px;
-      cursor: pointer;
-      font-size: 10px;
-      transition: all 0.15s;
-    }
-    .lg-item-copy:hover {
-      border-color: #7c3aed;
-      color: #fff;
-    }
-    .lg-empty {
-      padding: 40px;
-      text-align: center;
-      color: #888;
-      font-size: 13px;
-    }
-    #lg-footer {
-      padding: 8px 18px;
-      background: #111220;
-      border-top: 1px solid #282a45;
-      font-size: 10.5px;
-      color: #666;
-      display: flex;
-      justify-content: space-between;
-    }
-
   `;
   shadow.appendChild(style);
 
@@ -1461,7 +1251,7 @@
   };
 
   shadow.getElementById("btn-linkgrabber").onclick = () => {
-    openLinkGrabberModal();
+    openGrabberInNewTab();
   };
 
   shadow.getElementById("btn-min").onclick = () => {
@@ -2112,251 +1902,1039 @@
       .replace(/'/g, "&#039;");
   }
 
-  // Link Grabber Modal DOM
-  const lgBackdrop = document.createElement("div");
-  lgBackdrop.id = "lg-modal-backdrop";
-  lgBackdrop.innerHTML = `
-    <div id="lg-modal">
-      <div id="lg-modal-header">
-        <div class="title">
-          <span>🔗 Link Grabber</span>
-          <span id="lg-count-badge" class="lg-badge">0 links</span>
-        </div>
-        <button id="lg-modal-close" title="Tutup Modal">✕</button>
-      </div>
-      <div id="lg-toolbar">
-        <div class="lg-search-row">
-          <input type="text" id="lg-search-input" placeholder="Filter links (misal: domain, kata kunci, ekstensi .pdf/.jpg)..." />
-          <button id="lg-btn-copy" class="btn btn-export" title="Copy semua link yang terfilter ke clipboard">📋 Copy (<span id="lg-copy-count">0</span>)</button>
-          <button id="lg-btn-export" class="btn btn-export" title="Download teks file semua link">📥 Export TXT</button>
-          <button id="lg-btn-newtab" class="btn btn-export" title="Buka daftar link di Tab Baru">🌐 Tab Baru</button>
-        </div>
-        <div class="lg-options-row">
-          <label class="lg-checkbox"><input type="checkbox" id="lg-opt-dedup" checked /> Hide duplicate links</label>
-          <label class="lg-checkbox"><input type="checkbox" id="lg-opt-diff-origin" /> Hide same origin (<span id="lg-curr-origin">domain</span>)</label>
-          <label class="lg-checkbox"><input type="checkbox" id="lg-opt-group" /> Group by domain</label>
-        </div>
-      </div>
-      <div id="lg-list-container">
-        <ul id="lg-link-list"></ul>
-      </div>
-      <div id="lg-footer">
-        <span id="lg-source-url">Sumber: ${window.location.href}</span>
-        <span style="color:#888;">Tip: Klik icon 📋 di baris link untuk copy satu link</span>
-      </div>
-    </div>
-  `;
-  shadow.appendChild(lgBackdrop);
+  function extractAllPageAssets() {
+    const assets = [];
+    const seenUrls = new Set();
 
-  let rawExtractedLinks = [];
-  let currentFilteredLinks = [];
+    function addAsset(type, url, title, extra = {}) {
+      if (!url) return;
+      url = String(url).trim();
+      if (!url || url.startsWith("javascript:") || url.startsWith("mailto:") || url.startsWith("tel:") || url === "#") return;
 
-  function extractPageLinks() {
-    const elements = document.querySelectorAll('a[href]:not([href^="javascript:"]):not([href=""]):not([href^="#"])');
-    const links = [];
-    for (let i = 0; i < elements.length; i++) {
-      const el = elements[i];
+      let fullUrl = url;
+      let isBase64 = url.startsWith("data:");
+      if (!isBase64) {
+        try {
+          fullUrl = new URL(url, window.location.href).href;
+        } catch (e) {
+          return;
+        }
+      }
+
+      if (seenUrls.has(fullUrl)) return;
+      seenUrls.add(fullUrl);
+
+      let hostname = "";
+      let ext = "";
+
+      if (isBase64) {
+        const m = fullUrl.match(/^data:([^;]+);/);
+        ext = m ? m[1].replace("image/", "") : "base64";
+        hostname = "inline:base64";
+      } else {
+        try {
+          const u = new URL(fullUrl);
+          hostname = u.hostname;
+          const pathname = u.pathname;
+          const dotIdx = pathname.lastIndexOf(".");
+          if (dotIdx !== -1) {
+            ext = pathname.substring(dotIdx + 1).toLowerCase().split(/[\?#]/)[0];
+          }
+        } catch (e) {}
+      }
+
+      let category = type;
+      if (category === "auto") {
+        if (isBase64 || ["png", "jpg", "jpeg", "webp", "gif", "svg", "ico", "bmp", "avif"].includes(ext)) {
+          category = "image";
+        } else if (["mp4", "webm", "ogg", "mp3", "wav", "m4a", "flac"].includes(ext)) {
+          category = "media";
+        } else if (["pdf", "doc", "docx", "xls", "xlsx", "zip", "rar", "7z", "tar", "gz", "txt", "csv"].includes(ext)) {
+          category = "doc";
+        } else if (["js", "mjs", "css"].includes(ext)) {
+          category = "code";
+        } else {
+          category = "link";
+        }
+      }
+
+      assets.push({
+        category: category,
+        url: fullUrl,
+        title: title || ext || hostname,
+        hostname: hostname,
+        ext: ext || (category === "image" ? "img" : "url"),
+        isBase64: isBase64,
+        ...extra
+      });
+    }
+
+    // 1. Hyperlinks <a href>
+    document.querySelectorAll('a[href]').forEach(el => {
+      const text = (el.textContent || el.title || el.getAttribute("aria-label") || "").trim().replace(/\s+/g, " ");
+      addAsset("auto", el.href, text);
+    });
+
+    // 2. Images <img>
+    document.querySelectorAll('img').forEach(img => {
+      const src = img.currentSrc || img.src || img.getAttribute("data-src") || img.getAttribute("srcset");
+      if (!src) return;
+      const alt = (img.alt || img.title || "").trim();
+      const w = img.naturalWidth || img.width || 0;
+      const h = img.naturalHeight || img.height || 0;
+      addAsset("image", src, alt || `Image ${w ? w + 'x' + h : ''}`, {
+        width: w,
+        height: h
+      });
+    });
+
+    // 3. Picture source <source srcset>
+    document.querySelectorAll('picture source, video source, audio source').forEach(s => {
+      const src = s.srcset || s.src;
+      if (src) {
+        const firstSrc = src.split(",")[0].trim().split(" ")[0];
+        const isMedia = s.parentElement && (s.parentElement.tagName === "VIDEO" || s.parentElement.tagName === "AUDIO");
+        addAsset(isMedia ? "media" : "image", firstSrc, "Source Asset");
+      }
+    });
+
+    // 4. Video & Audio tags
+    document.querySelectorAll('video, audio').forEach(m => {
+      if (m.src) {
+        addAsset("media", m.src, `${m.tagName.toLowerCase()} player`);
+      }
+    });
+
+    // 5. CSS Background Images
+    document.querySelectorAll('*').forEach(el => {
       try {
-        const href = el.href;
-        if (!href || href.startsWith("javascript:") || href.startsWith("mailto:") || href.startsWith("tel:")) {
-          continue;
+        const bg = window.getComputedStyle(el).backgroundImage;
+        if (bg && bg !== "none" && bg.includes("url(")) {
+          const matches = bg.match(/url\(['"]?([^'"]+)['"]?\)/g);
+          if (matches) {
+            matches.forEach(m => {
+              const clean = m.replace(/^url\(['"]?/, "").replace(/['"]?\)$/, "");
+              addAsset("image", clean, "CSS Background");
+            });
+          }
         }
-        const u = new URL(href, window.location.href);
-        if (u.protocol !== "http:" && u.protocol !== "https:" && u.protocol !== "ftp:") {
-          continue;
-        }
-        const text = (el.textContent || el.title || el.getAttribute("aria-label") || "").trim().replace(/\s+/g, " ");
-        links.push({
-          href: u.href,
-          origin: u.origin,
-          hostname: u.hostname,
-          pathname: u.pathname,
-          search: u.search,
-          hash: u.hash,
-          text: text
-        });
       } catch (e) {}
-    }
-    return links;
-  }
-
-  function groupLinksByDomain(links) {
-    const indexes = new Array(links.length);
-    const rh = new Array(links.length);
-    for (let i = 0; i < links.length; i++) {
-      indexes[i] = i;
-      rh[i] = links[i].hostname.toLowerCase().split('.').reverse().join('.');
-    }
-    indexes.sort((i, j) => {
-      if (rh[i] < rh[j]) return -1;
-      if (rh[i] > rh[j]) return 1;
-      return i - j;
     });
-    return indexes.map(i => links[i]);
-  }
 
-  function renderLinkGrabberList() {
-    const searchVal = lgBackdrop.querySelector("#lg-search-input").value.trim().toLowerCase();
-    const hideDuplicates = lgBackdrop.querySelector("#lg-opt-dedup").checked;
-    const hideSameOrigin = lgBackdrop.querySelector("#lg-opt-diff-origin").checked;
-    const groupByDomain = lgBackdrop.querySelector("#lg-opt-group").checked;
-    const listEl = lgBackdrop.querySelector("#lg-link-list");
-    const countBadge = lgBackdrop.querySelector("#lg-count-badge");
-    const copyCountSpan = lgBackdrop.querySelector("#lg-copy-count");
-
-    let links = rawExtractedLinks.slice(0);
-    const currOrigin = window.location.origin;
-
-    if (hideSameOrigin) {
-      links = links.filter(l => l.origin !== currOrigin);
-    }
-    if (groupByDomain) {
-      links = groupLinksByDomain(links);
-    }
-
-    const seenHrefs = new Set();
-    const filtered = [];
-
-    for (const link of links) {
-      if (hideDuplicates) {
-        if (seenHrefs.has(link.href)) continue;
-        seenHrefs.add(link.href);
-      }
-      if (searchVal) {
-        const matchHref = link.href.toLowerCase().includes(searchVal);
-        const matchText = link.text.toLowerCase().includes(searchVal);
-        const matchHost = link.hostname.toLowerCase().includes(searchVal);
-        if (!matchHref && !matchText && !matchHost) continue;
-      }
-      filtered.push(link);
-    }
-
-    currentFilteredLinks = filtered;
-    countBadge.textContent = `${filtered.length} / ${rawExtractedLinks.length} links`;
-    copyCountSpan.textContent = filtered.length;
-
-    if (filtered.length === 0) {
-      listEl.innerHTML = `<li class="lg-empty">🔍 Tidak ada link yang cocok dengan filter "${escapeHtml(searchVal)}"</li>`;
-      return;
-    }
-
-    listEl.innerHTML = filtered.map((l, idx) => `
-      <li class="lg-item">
-        <span class="lg-item-num">${idx + 1}.</span>
-        <span class="lg-item-host" title="Host: ${escapeHtml(l.hostname)}">${escapeHtml(l.hostname)}</span>
-        ${l.text ? `<span class="lg-item-text" title="${escapeHtml(l.text)}">${escapeHtml(l.text)}</span>` : ''}
-        <a href="${escapeHtml(l.href)}" target="_blank" class="lg-item-url" title="${escapeHtml(l.href)}">${escapeHtml(l.href)}</a>
-        <button class="lg-item-copy" data-url="${escapeHtml(l.href)}" title="Copy link ini">📋</button>
-      </li>
-    `).join("");
-
-    listEl.querySelectorAll(".lg-item-copy").forEach(btn => {
-      btn.onclick = (e) => {
-        e.stopPropagation();
-        const urlToCopy = btn.getAttribute("data-url");
-        if (urlToCopy) {
-          copyToClipboard(urlToCopy, "Link");
-        }
-      };
+    // 6. Favicon & Icons
+    document.querySelectorAll('link[rel*="icon"]').forEach(l => {
+      if (l.href) addAsset("image", l.href, `Favicon (${l.rel})`);
     });
+
+    // 7. Stylesheets <link rel="stylesheet">
+    document.querySelectorAll('link[rel="stylesheet"]').forEach(l => {
+      if (l.href) addAsset("code", l.href, "Stylesheet CSS");
+    });
+
+    // 8. Scripts <script src>
+    document.querySelectorAll('script[src]').forEach(s => {
+      if (s.src) addAsset("code", s.src, "JavaScript");
+    });
+
+    return assets;
   }
 
-  function openLinkGrabberModal() {
-    rawExtractedLinks = extractPageLinks();
-    const originEl = lgBackdrop.querySelector("#lg-curr-origin");
-    if (originEl) originEl.textContent = window.location.hostname;
-    const sourceEl = lgBackdrop.querySelector("#lg-source-url");
-    if (sourceEl) sourceEl.textContent = `Sumber: ${window.location.href}`;
+  function openGrabberInNewTab() {
+    const assets = extractAllPageAssets();
+    const sourceUrl = window.location.href;
+    const sourceHost = window.location.hostname;
 
-    lgBackdrop.style.display = "flex";
-    renderLinkGrabberList();
+    showCopyToast(`🚀 Membuka Grabber (${assets.length} aset) di Tab Baru...`);
 
-    const searchInput = lgBackdrop.querySelector("#lg-search-input");
-    if (searchInput) {
-      setTimeout(() => searchInput.focus(), 50);
-    }
-  }
-
-  window.__ipvfoo_open_linkgrabber = openLinkGrabberModal;
-
-  // Listen for message from popup
-  chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
-    if (msg && msg.action === "open_linkgrabber") {
-      openLinkGrabberModal();
-      sendResponse({ ok: true });
-    }
-  });
-
-  // Modal close handlers
-  const lgCloseBtn = lgBackdrop.querySelector("#lg-modal-close");
-  lgCloseBtn.onclick = () => { lgBackdrop.style.display = "none"; };
-  lgBackdrop.onclick = (e) => {
-    if (e.target === lgBackdrop) lgBackdrop.style.display = "none";
-  };
-
-  // Search input & options change handlers
-  const lgSearchInput = lgBackdrop.querySelector("#lg-search-input");
-  lgSearchInput.oninput = () => renderLinkGrabberList();
-  lgBackdrop.querySelector("#lg-opt-dedup").onchange = () => renderLinkGrabberList();
-  lgBackdrop.querySelector("#lg-opt-diff-origin").onchange = () => renderLinkGrabberList();
-  lgBackdrop.querySelector("#lg-opt-group").onchange = () => renderLinkGrabberList();
-
-  // Copy button
-  lgBackdrop.querySelector("#lg-btn-copy").onclick = () => {
-    if (!currentFilteredLinks.length) {
-      showCopyToast("Tidak ada link untuk di-copy");
-      return;
-    }
-    const text = currentFilteredLinks.map(l => l.href).join("\r\n");
-    copyToClipboard(text, `${currentFilteredLinks.length} Links`);
-  };
-
-  // Export TXT button
-  lgBackdrop.querySelector("#lg-btn-export").onclick = () => {
-    if (!currentFilteredLinks.length) {
-      showCopyToast("Tidak ada link untuk di-export");
-      return;
-    }
-    const text = currentFilteredLinks.map(l => l.href).join("\r\n");
-    triggerDownload(text, `links_${window.location.hostname}_${Date.now()}.txt`, "text/plain;charset=utf-8;");
-    showCopyToast(`Exported ${currentFilteredLinks.length} links!`);
-  };
-
-  // New Tab button
-  lgBackdrop.querySelector("#lg-btn-newtab").onclick = () => {
-    if (!currentFilteredLinks.length) {
-      showCopyToast("Tidak ada link untuk dibuka");
-      return;
-    }
     const html = `<!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
   <meta charset="utf-8">
-  <title>Extracted Links - ${escapeHtml(window.location.hostname)}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Asset & Link Grabber - ${escapeHtml(sourceHost)}</title>
   <style>
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #0f101d; color: #eee; margin: 0; padding: 24px; }
-    h1 { font-size: 20px; color: #c084fc; margin-bottom: 4px; }
-    .sub { font-size: 13px; color: #888; margin-bottom: 20px; }
-    .sub a { color: #00d9ff; text-decoration: none; }
-    ol { font-family: Consolas, Monaco, monospace; font-size: 12px; padding-left: 24px; line-height: 1.6; }
-    li { margin-bottom: 6px; }
-    a { color: #38bdf8; text-decoration: none; word-break: break-all; }
-    a:hover { text-decoration: underline; color: #7dd3fc; }
-    .host { color: #c084fc; font-weight: bold; margin-right: 8px; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+      background: #0d0f17;
+      color: #e2e8f0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    header {
+      background: #151824;
+      border-bottom: 1px solid #232738;
+      padding: 14px 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .brand h1 {
+      font-size: 18px;
+      font-weight: 700;
+      color: #c084fc;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .brand .source-link {
+      font-size: 12px;
+      color: #00d9ff;
+      text-decoration: none;
+      max-width: 450px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      display: block;
+    }
+    .brand .source-link:hover { text-decoration: underline; }
+    .header-badge {
+      background: rgba(124, 58, 237, 0.25);
+      border: 1px solid rgba(124, 58, 237, 0.45);
+      color: #e9d5ff;
+      padding: 3px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .main-wrap {
+      flex: 1;
+      max-width: 1400px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 20px 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .toolbar-card {
+      background: #151824;
+      border: 1px solid #232738;
+      border-radius: 10px;
+      padding: 16px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .tabs-row {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+    .tab-btn {
+      background: #0d0f17;
+      border: 1px solid #282d42;
+      color: #94a3b8;
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+    }
+    .tab-btn:hover {
+      background: #1e2337;
+      color: #fff;
+      border-color: #7c3aed;
+    }
+    .tab-btn.active {
+      background: #7c3aed;
+      color: #fff;
+      border-color: #9333ea;
+      box-shadow: 0 0 12px rgba(124, 58, 237, 0.45);
+    }
+    .tab-badge {
+      background: rgba(0, 0, 0, 0.35);
+      padding: 1px 7px;
+      border-radius: 10px;
+      font-size: 11px;
+    }
+
+    .filter-actions-row {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .search-input {
+      flex: 1;
+      min-width: 250px;
+      background: #0d0f17;
+      border: 1px solid #282d42;
+      border-radius: 8px;
+      padding: 8px 14px;
+      color: #fff;
+      font-size: 13px;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .search-input:focus {
+      border-color: #7c3aed;
+      box-shadow: 0 0 8px rgba(124, 58, 237, 0.3);
+    }
+
+    .btn {
+      font-size: 12px;
+      font-weight: 600;
+      padding: 8px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      border: 1px solid transparent;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+      text-decoration: none;
+    }
+    .btn-primary {
+      background: #0284c7;
+      color: #fff;
+      border-color: #0369a1;
+    }
+    .btn-primary:hover { background: #0369a1; }
+    .btn-purple {
+      background: #7c3aed;
+      color: #fff;
+      border-color: #6d28d9;
+    }
+    .btn-purple:hover { background: #6d28d9; }
+    .btn-pink {
+      background: #db2777;
+      color: #fff;
+      border-color: #be185d;
+    }
+    .btn-pink:hover { background: #be185d; }
+    .btn-outline {
+      background: #0d0f17;
+      color: #cbd5e1;
+      border-color: #282d42;
+    }
+    .btn-outline:hover {
+      background: #1e2337;
+      color: #fff;
+      border-color: #7c3aed;
+    }
+
+    .options-row {
+      display: flex;
+      gap: 20px;
+      font-size: 12.5px;
+      color: #94a3b8;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .checkbox-label input {
+      cursor: pointer;
+      accent-color: #7c3aed;
+      width: 15px;
+      height: 15px;
+    }
+
+    .view-toggle {
+      margin-left: auto;
+      display: flex;
+      gap: 4px;
+    }
+    .view-btn {
+      background: #0d0f17;
+      border: 1px solid #282d42;
+      color: #888;
+      padding: 5px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 11px;
+    }
+    .view-btn.active {
+      background: #7c3aed;
+      color: #fff;
+      border-color: #7c3aed;
+    }
+
+    .content-container {
+      background: #151824;
+      border: 1px solid #232738;
+      border-radius: 10px;
+      overflow: hidden;
+      padding: 12px;
+    }
+
+    .asset-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .asset-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 12px;
+      border-radius: 8px;
+      background: #0d0f17;
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .asset-item:hover {
+      background: #161a29;
+      border-color: rgba(124, 58, 237, 0.4);
+    }
+    .item-num {
+      color: #64748b;
+      font-size: 11px;
+      font-family: monospace;
+      min-width: 32px;
+      text-align: right;
+    }
+    .item-thumb {
+      width: 46px;
+      height: 46px;
+      border-radius: 6px;
+      background: #000;
+      border: 1px solid #282d42;
+      object-fit: contain;
+      flex-shrink: 0;
+      cursor: pointer;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .item-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .item-badge {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      font-family: monospace;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .badge-image { background: rgba(236, 72, 153, 0.2); color: #f472b6; border: 1px solid rgba(236, 72, 153, 0.4); }
+    .badge-link { background: rgba(56, 189, 248, 0.2); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.4); }
+    .badge-media { background: rgba(234, 179, 8, 0.2); color: #facc15; border: 1px solid rgba(234, 179, 8, 0.4); }
+    .badge-doc { background: rgba(34, 197, 94, 0.2); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.4); }
+    .badge-code { background: rgba(168, 85, 247, 0.2); color: #c084fc; border: 1px solid rgba(168, 85, 247, 0.4); }
+    .badge-base64 { background: rgba(249, 115, 22, 0.2); color: #fb923c; border: 1px solid rgba(249, 115, 22, 0.4); }
+
+    .item-dim {
+      font-size: 10px;
+      color: #94a3b8;
+      font-family: monospace;
+      white-space: nowrap;
+    }
+    .item-host {
+      background: rgba(0, 217, 255, 0.12);
+      color: #38bdf8;
+      border-radius: 4px;
+      padding: 2px 6px;
+      font-size: 11px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .item-title {
+      color: #cbd5e1;
+      font-size: 12px;
+      max-width: 180px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .item-url {
+      flex: 1;
+      color: #c084fc;
+      text-decoration: none;
+      font-family: monospace;
+      font-size: 12px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      word-break: break-all;
+    }
+    .item-url:hover {
+      text-decoration: underline;
+      color: #e9d5ff;
+    }
+    .item-actions {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      flex-shrink: 0;
+    }
+    .btn-action {
+      background: #1e2337;
+      border: 1px solid #333952;
+      color: #cbd5e1;
+      border-radius: 6px;
+      padding: 4px 9px;
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: 600;
+      transition: all 0.15s;
+      white-space: nowrap;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .btn-action:hover {
+      background: #7c3aed;
+      color: #fff;
+      border-color: #7c3aed;
+    }
+    .btn-action-b64 {
+      border-color: rgba(236, 72, 153, 0.45);
+      color: #f472b6;
+    }
+    .btn-action-b64:hover {
+      background: #ec4899;
+      color: #fff;
+      border-color: #ec4899;
+    }
+
+    .asset-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 16px;
+      padding: 8px;
+    }
+    .grid-card {
+      background: #0d0f17;
+      border: 1px solid #282d42;
+      border-radius: 10px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+    .grid-card:hover {
+      transform: translateY(-3px);
+      border-color: #7c3aed;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+    }
+    .grid-img-wrap {
+      height: 150px;
+      background: #05060a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    .grid-img-wrap img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
+    .grid-body {
+      padding: 10px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      flex: 1;
+    }
+    .grid-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 10px;
+      font-family: monospace;
+      color: #94a3b8;
+    }
+    .grid-title {
+      font-size: 11.5px;
+      color: #cbd5e1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .grid-actions {
+      display: flex;
+      gap: 4px;
+      margin-top: auto;
+    }
+    .grid-actions .btn-action {
+      flex: 1;
+      justify-content: center;
+      font-size: 10.5px;
+      padding: 5px 4px;
+    }
+
+    .empty-state {
+      padding: 60px 20px;
+      text-align: center;
+      color: #64748b;
+      font-size: 14px;
+    }
+
+    #toast {
+      position: fixed;
+      bottom: 24px;
+      right: 28px;
+      background: #1e1b4b;
+      color: #c084fc;
+      border: 1px solid #7c3aed;
+      padding: 10px 18px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+      opacity: 0;
+      transform: translateY(10px);
+      transition: all 0.25s ease;
+      pointer-events: none;
+      z-index: 1000;
+    }
+    #toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
   </style>
 </head>
 <body>
-  <h1>🔗 Extracted Links (${currentFilteredLinks.length})</h1>
-  <div class="sub">Source: <a href="${escapeHtml(window.location.href)}" target="_blank">${escapeHtml(window.location.href)}</a></div>
-  <ol>
-    ${currentFilteredLinks.map(l => `<li><span class="host">[${escapeHtml(l.hostname)}]</span><a href="${escapeHtml(l.href)}" target="_blank">${escapeHtml(l.href)}</a></li>`).join("")}
-  </ol>
+  <header>
+    <div class="brand">
+      <h1>📦 Content & Asset Grabber</h1>
+      <span class="header-badge" id="header-total-count">0 items</span>
+      <a href="${escapeHtml(sourceUrl)}" target="_blank" class="source-link" title="Buka website asli">🌐 ${escapeHtml(sourceUrl)}</a>
+    </div>
+  </header>
+
+  <div class="main-wrap">
+    <div class="toolbar-card">
+      <div class="tabs-row" id="tabs-bar">
+        <button class="tab-btn active" data-tab="all">🌟 Semua <span class="tab-badge" id="count-all">0</span></button>
+        <button class="tab-btn" data-tab="image">🖼️ Gambar (PNG/B64) <span class="tab-badge" id="count-image">0</span></button>
+        <button class="tab-btn" data-tab="link">🔗 Links <span class="tab-badge" id="count-link">0</span></button>
+        <button class="tab-btn" data-tab="media">🎬 Media <span class="tab-badge" id="count-media">0</span></button>
+        <button class="tab-btn" data-tab="doc">📄 Dokumen <span class="tab-badge" id="count-doc">0</span></button>
+        <button class="tab-btn" data-tab="code">⚡ Scripts & CSS <span class="tab-badge" id="count-code">0</span></button>
+      </div>
+
+      <div class="filter-actions-row">
+        <input type="text" id="search-input" class="search-input" placeholder="Ketik untuk filter: nama file, domain, ekstensi .png, base64, dll..." autofocus />
+        <button id="btn-copy-urls" class="btn btn-primary" title="Copy semua URL yang tampil">📋 Copy URLs (<span id="copy-count">0</span>)</button>
+        <button id="btn-copy-b64-all" class="btn btn-pink" style="display:none;" title="Convert & Copy semua gambar di daftar sebagai Base64 PNG">🧬 Copy All Base64</button>
+        <button id="btn-export-txt" class="btn btn-purple" title="Download daftar URL sebagai file teks">📥 Export TXT</button>
+        
+        <div class="view-toggle">
+          <button id="btn-view-list" class="view-btn active" title="Tampilan List">☰ List</button>
+          <button id="btn-view-grid" class="view-btn" title="Tampilan Grid Galeri">⊞ Grid</button>
+        </div>
+      </div>
+
+      <div class="options-row">
+        <label class="checkbox-label"><input type="checkbox" id="opt-dedup" checked /> Hide duplicate URLs</label>
+        <label class="checkbox-label"><input type="checkbox" id="opt-diff-origin" /> Hide same origin (<span id="curr-origin">${escapeHtml(sourceHost)}</span>)</label>
+        <label class="checkbox-label"><input type="checkbox" id="opt-group" /> Group by domain</label>
+      </div>
+    </div>
+
+    <div class="content-container">
+      <div id="content-area"></div>
+    </div>
+  </div>
+
+  <div id="toast"></div>
+
+  <script>
+    const RAW_ASSETS = ${JSON.stringify(assets)};
+    const SOURCE_URL = ${JSON.stringify(sourceUrl)};
+    const SOURCE_HOST = ${JSON.stringify(sourceHost)};
+
+    let activeCategory = "all";
+    let currentViewMode = "list";
+    let currentFiltered = [];
+
+    function showToast(msg) {
+      const toast = document.getElementById("toast");
+      toast.textContent = msg;
+      toast.className = "show";
+      setTimeout(() => { toast.className = ""; }, 2200);
+    }
+
+    function copyToClipboard(text, label) {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(() => {
+          showToast("✅ Berhasil copy " + (label || "teks") + "!");
+        }).catch(() => fallbackCopy(text, label));
+      } else {
+        fallbackCopy(text, label);
+      }
+    }
+
+    function fallbackCopy(text, label) {
+      const ta = document.createElement("textarea");
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand("copy");
+      document.body.removeChild(ta);
+      showToast("✅ Berhasil copy " + (label || "teks") + "!");
+    }
+
+    function downloadFile(url, filename) {
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename || "download";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+
+    async function convertImgToBase64(url) {
+      if (url && url.startsWith("data:")) return url;
+      try {
+        const res = await fetch(url, { mode: "cors" });
+        const blob = await res.blob();
+        return new Promise((resolve) => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(reader.result);
+          reader.onerror = () => resolve(null);
+          reader.readAsDataURL(blob);
+        });
+      } catch (e) {
+        return new Promise((resolve) => {
+          const img = new Image();
+          img.crossOrigin = "anonymous";
+          img.onload = () => {
+            try {
+              const canvas = document.createElement("canvas");
+              canvas.width = img.naturalWidth || 100;
+              canvas.height = img.naturalHeight || 100;
+              const ctx = canvas.getContext("2d");
+              ctx.drawImage(img, 0, 0);
+              resolve(canvas.toDataURL("image/png"));
+            } catch (err) {
+              resolve(null);
+            }
+          };
+          img.onerror = () => resolve(null);
+          img.src = url;
+        });
+      }
+    }
+
+    function groupAssetsByDomain(items) {
+      const indexes = new Array(items.length);
+      const rh = new Array(items.length);
+      for (let i = 0; i < items.length; i++) {
+        indexes[i] = i;
+        rh[i] = (items[i].hostname || "").toLowerCase().split('.').reverse().join('.');
+      }
+      indexes.sort((i, j) => {
+        if (rh[i] < rh[j]) return -1;
+        if (rh[i] > rh[j]) return 1;
+        return i - j;
+      });
+      return indexes.map(i => items[i]);
+    }
+
+    function updateTabCounts() {
+      const counts = { all: RAW_ASSETS.length, image: 0, link: 0, media: 0, doc: 0, code: 0 };
+      for (const a of RAW_ASSETS) {
+        if (counts[a.category] !== undefined) counts[a.category]++;
+      }
+      for (const [k, v] of Object.entries(counts)) {
+        const el = document.getElementById("count-" + k);
+        if (el) el.textContent = v;
+      }
+      const totalBadge = document.getElementById("header-total-count");
+      if (totalBadge) totalBadge.textContent = RAW_ASSETS.length + " items";
+    }
+
+    function renderContent() {
+      const searchVal = document.getElementById("search-input").value.trim().toLowerCase();
+      const hideDuplicates = document.getElementById("opt-dedup").checked;
+      const hideSameOrigin = document.getElementById("opt-diff-origin").checked;
+      const groupByDomain = document.getElementById("opt-group").checked;
+      const contentArea = document.getElementById("content-area");
+      const copyCountSpan = document.getElementById("copy-count");
+      const copyB64AllBtn = document.getElementById("btn-copy-b64-all");
+
+      let items = RAW_ASSETS.slice(0);
+
+      if (activeCategory !== "all") {
+        items = items.filter(a => a.category === activeCategory);
+      }
+      if (hideSameOrigin) {
+        items = items.filter(a => a.hostname !== SOURCE_HOST && !a.isBase64);
+      }
+      if (groupByDomain) {
+        items = groupAssetsByDomain(items);
+      }
+
+      const seen = new Set();
+      const filtered = [];
+
+      for (const item of items) {
+        if (hideDuplicates) {
+          if (seen.has(item.url)) continue;
+          seen.add(item.url);
+        }
+        if (searchVal) {
+          const matchUrl = item.url.toLowerCase().includes(searchVal);
+          const matchTitle = item.title && item.title.toLowerCase().includes(searchVal);
+          const matchHost = item.hostname && item.hostname.toLowerCase().includes(searchVal);
+          const matchExt = item.ext && item.ext.toLowerCase().includes(searchVal);
+          if (!matchUrl && !matchTitle && !matchHost && !matchExt) continue;
+        }
+        filtered.push(item);
+      }
+
+      currentFiltered = filtered;
+      copyCountSpan.textContent = filtered.length;
+
+      const hasImages = activeCategory === "image" || filtered.some(f => f.category === "image");
+      copyB64AllBtn.style.display = hasImages ? "inline-flex" : "none";
+
+      if (filtered.length === 0) {
+        contentArea.innerHTML = '<div class="empty-state">🔍 Tidak ada aset yang cocok dengan filter "' + escapeHtml(searchVal) + '"</div>';
+        return;
+      }
+
+      if (currentViewMode === "grid" && hasImages) {
+        renderGridView(filtered, contentArea);
+      } else {
+        renderListView(filtered, contentArea);
+      }
+    }
+
+    function renderListView(items, container) {
+      let html = '<ul class="asset-list">';
+      items.forEach((item, idx) => {
+        const isImg = item.category === "image";
+        const isB64 = item.isBase64;
+        const typeLabel = isB64 ? "BASE64" : (item.ext || item.category);
+        const typeClass = isB64 ? "badge-base64" : "badge-" + item.category;
+
+        let thumbHtml = "";
+        if (isImg) {
+          thumbHtml = '<div class="item-thumb" title="Lihat gambar"><img src="' + escapeHtml(item.url) + '" loading="lazy" onerror="this.style.display=\\'none\\'" /></div>';
+        }
+
+        let dimHtml = "";
+        if (item.width && item.height) {
+          dimHtml = '<span class="item-dim">' + item.width + '×' + item.height + '</span>';
+        }
+
+        const displayUrl = isB64 ? item.url.substring(0, 85) + "..." : item.url;
+
+        html += '<li class="asset-item">' +
+          '<span class="item-num">' + (idx + 1) + '.</span>' +
+          thumbHtml +
+          '<span class="item-badge ' + typeClass + '">' + escapeHtml(typeLabel) + '</span>' +
+          dimHtml +
+          '<span class="item-host">' + escapeHtml(item.hostname) + '</span>' +
+          (item.title && item.title !== item.url ? '<span class="item-title" title="' + escapeHtml(item.title) + '">' + escapeHtml(item.title) + '</span>' : '') +
+          '<a href="' + escapeHtml(item.url) + '" target="_blank" class="item-url" title="' + escapeHtml(item.url) + '">' + escapeHtml(displayUrl) + '</a>' +
+          '<div class="item-actions">' +
+            '<button class="btn-action btn-copy-url" data-idx="' + idx + '">📋 URL</button>' +
+            (isImg ? '<button class="btn-action btn-action-b64 btn-copy-b64" data-idx="' + idx + '">🧬 Base64</button>' : '') +
+            '<button class="btn-action btn-download" data-idx="' + idx + '">⬇️</button>' +
+          '</div>' +
+        '</li>';
+      });
+      html += '</ul>';
+      container.innerHTML = html;
+      bindItemButtons(container, items);
+    }
+
+    function renderGridView(items, container) {
+      let html = '<div class="asset-grid">';
+      items.forEach((item, idx) => {
+        const isImg = item.category === "image";
+        const isB64 = item.isBase64;
+        const typeLabel = isB64 ? "BASE64" : (item.ext || item.category);
+
+        html += '<div class="grid-card">' +
+          '<div class="grid-img-wrap">' +
+            (isImg ? '<a href="' + escapeHtml(item.url) + '" target="_blank"><img src="' + escapeHtml(item.url) + '" loading="lazy" alt="asset" /></a>' : '<div style="font-size:32px;">📄</div>') +
+          '</div>' +
+          '<div class="grid-body">' +
+            '<div class="grid-meta">' +
+              '<span class="item-badge badge-' + item.category + '">' + escapeHtml(typeLabel) + '</span>' +
+              (item.width ? '<span>' + item.width + '×' + item.height + '</span>' : '') +
+            '</div>' +
+            '<div class="grid-title" title="' + escapeHtml(item.title || item.url) + '">' + escapeHtml(item.title || item.hostname) + '</div>' +
+            '<div class="grid-actions">' +
+              '<button class="btn-action btn-copy-url" data-idx="' + idx + '" title="Copy URL">📋 URL</button>' +
+              (isImg ? '<button class="btn-action btn-action-b64 btn-copy-b64" data-idx="' + idx + '" title="Copy Base64">🧬 B64</button>' : '') +
+              '<button class="btn-action btn-download" data-idx="' + idx + '" title="Download">⬇️</button>' +
+            '</div>' +
+          '</div>' +
+        '</div>';
+      });
+      html += '</div>';
+      container.innerHTML = html;
+      bindItemButtons(container, items);
+    }
+
+    function bindItemButtons(container, items) {
+      container.querySelectorAll(".btn-copy-url").forEach(btn => {
+        btn.onclick = (e) => {
+          e.stopPropagation();
+          const item = items[parseInt(btn.getAttribute("data-idx"), 10)];
+          if (item) copyToClipboard(item.url, "URL");
+        };
+      });
+
+      container.querySelectorAll(".btn-copy-b64").forEach(btn => {
+        btn.onclick = async (e) => {
+          e.stopPropagation();
+          const item = items[parseInt(btn.getAttribute("data-idx"), 10)];
+          if (!item) return;
+          btn.textContent = "⏳...";
+          const b64 = await convertImgToBase64(item.url);
+          if (b64) {
+            copyToClipboard(b64, "Base64 Image");
+            btn.textContent = "✅ Copied!";
+          } else {
+            showToast("❌ Gagal convert Base64 (CORS)");
+            btn.textContent = "❌ Gagal";
+          }
+          setTimeout(() => { btn.textContent = currentViewMode === "grid" ? "🧬 B64" : "🧬 Base64"; }, 1500);
+        };
+      });
+
+      container.querySelectorAll(".btn-download").forEach(btn => {
+        btn.onclick = (e) => {
+          e.stopPropagation();
+          const item = items[parseInt(btn.getAttribute("data-idx"), 10)];
+          if (item) downloadFile(item.url, (item.title || "asset") + "." + (item.ext || "png"));
+        };
+      });
+    }
+
+    function escapeHtml(str) {
+      if (!str) return "";
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    // Tabs
+    document.querySelectorAll(".tab-btn").forEach(btn => {
+      btn.onclick = () => {
+        document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        activeCategory = btn.getAttribute("data-tab");
+        renderContent();
+      };
+    });
+
+    // View Toggle
+    document.getElementById("btn-view-list").onclick = function() {
+      currentViewMode = "list";
+      this.classList.add("active");
+      document.getElementById("btn-view-grid").classList.remove("active");
+      renderContent();
+    };
+    document.getElementById("btn-view-grid").onclick = function() {
+      currentViewMode = "grid";
+      this.classList.add("active");
+      document.getElementById("btn-view-list").classList.remove("active");
+      renderContent();
+    };
+
+    // Filters
+    document.getElementById("search-input").oninput = renderContent;
+    document.getElementById("opt-dedup").onchange = renderContent;
+    document.getElementById("opt-diff-origin").onchange = renderContent;
+    document.getElementById("opt-group").onchange = renderContent;
+
+    // Copy All URLs
+    document.getElementById("btn-copy-urls").onclick = () => {
+      if (!currentFiltered.length) return showToast("Tidak ada item untuk di-copy");
+      const text = currentFiltered.map(i => i.url).join("\\r\\n");
+      copyToClipboard(text, currentFiltered.length + " URLs");
+    };
+
+    // Copy All Base64
+    document.getElementById("btn-copy-b64-all").onclick = async function() {
+      const imgItems = currentFiltered.filter(i => i.category === "image");
+      if (!imgItems.length) return showToast("Tidak ada gambar untuk di-convert");
+      this.textContent = "⏳ Converting (" + imgItems.length + ")...";
+      const b64List = [];
+      for (const item of imgItems) {
+        try {
+          const b64 = await convertImgToBase64(item.url);
+          if (b64) b64List.push(b64);
+        } catch (e) {}
+      }
+      if (b64List.length > 0) {
+        copyToClipboard(b64List.join("\\r\\n"), b64List.length + " Base64 Images");
+        this.textContent = "✅ Copied (" + b64List.length + ")!";
+      } else {
+        showToast("Gagal convert Base64 (CORS protection)");
+        this.textContent = "❌ Gagal";
+      }
+      setTimeout(() => { this.textContent = "🧬 Copy All Base64"; }, 2000);
+    };
+
+    // Export TXT
+    document.getElementById("btn-export-txt").onclick = () => {
+      if (!currentFiltered.length) return showToast("Tidak ada aset untuk di-export");
+      const text = currentFiltered.map(i => i.category.toUpperCase() + "\\t" + (i.hostname || "") + "\\t" + i.url).join("\\r\\n");
+      const blob = new Blob([text], { type: "text/plain;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      downloadFile(url, "assets_" + SOURCE_HOST + "_" + Date.now() + ".txt");
+      URL.revokeObjectURL(url);
+      showToast("✅ Exported " + currentFiltered.length + " assets!");
+    };
+
+    // Init
+    updateTabCounts();
+    renderContent();
+  </script>
 </body>
 </html>`;
+
     const blob = new Blob([html], { type: "text/html;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    window.open(url, "_blank");
-  };
+    const blobUrl = URL.createObjectURL(blob);
+    window.open(blobUrl, "_blank");
+  }
+
+  window.__ipvfoo_open_linkgrabber = openGrabberInNewTab;
+
+  chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+    if (msg && msg.action === "open_linkgrabber") {
+      openGrabberInNewTab();
+      sendResponse({ ok: true });
+    }
+  });
 
   let activePort = null;
   let isPageHidden = false;
