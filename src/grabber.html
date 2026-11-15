@@ -1,302 +1,92 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="id" class="dark">
+
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>IPvFooKan - Link &amp; Asset Grabber</title>
   <link rel="icon" type="image/png" href="icons/icon128.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
+    rel="stylesheet">
   <link rel="stylesheet" href="theme.css">
   <style>
     /* ========================================================================
-       SHADCN UI THEME VARIABLES (Cyber Obsidian & Neon Amber)
-       Diambil dari themes/SHADCN_THEME.md & COLOR_PALETTE.md
+       PAGE-SPECIFIC STYLES: CONTENT & ASSET GRABBER
+       Mengikuti Desain Sistem Cyber Obsidian & Neon Amber (themes/SHADCN_THEME.md)
        ======================================================================== */
-    :root {
-      --background: #07090D;
-      --foreground: #FFFFFF;
-      --card: #0D1016;
-      --card-header: #161A22;
-      --popover: #161A22;
-      --secondary: #1D222D;
-      --muted: #161A22;
-      --muted-foreground: #98A1B3;
-      --border: rgba(61, 71, 92, 0.45);
-      --border-light: rgba(82, 95, 122, 0.25);
-      --input: rgba(61, 71, 92, 0.55);
-      
-      --primary: #FA9C1B;
-      --primary-glow: #FFB03A;
-      --primary-foreground: #07090D;
-      --destructive: #F04242;
-      
-      --cyber-cyan: #00EAFF;
-      --cyber-green: #1AE680;
-      --cyber-blue: #1A79FF;
-      --glow-orange: 0 0 25px rgba(250, 156, 27, 0.35);
-      --glow-cyan: 0 0 25px rgba(0, 234, 255, 0.25);
-      
-      --radius: 8px;
-      --radius-sm: 4px;
-    }
-
-    body.light-theme {
-      --background: #F5F7FA;
-      --foreground: #111827;
-      --card: #FFFFFF;
-      --card-header: #EEF2F6;
-      --popover: #FFFFFF;
-      --secondary: #EEF2F6;
-      --muted: #EEF2F6;
-      --muted-foreground: #6B7280;
-      --border: rgba(209, 213, 219, 0.85);
-      --border-light: rgba(229, 231, 235, 0.9);
-      --primary: #E0870E;
-      --primary-glow: #FA9C1B;
-      --primary-foreground: #FFFFFF;
-      --cyber-cyan: #00BBD4;
-      --cyber-green: #10B981;
-      --glow-orange: 0 0 20px rgba(224, 135, 14, 0.25);
-    }
-
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
-      background: var(--background);
-      color: var(--foreground);
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
-    header {
-      background: var(--card-header);
-      border-bottom: 1px solid var(--border);
-      padding: 12px 24px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
-    }
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-    .brand-logo-img {
-      width: 26px;
-      height: 26px;
-      border-radius: 4px;
-    }
-    .brand h1 {
-      font-size: 17px;
-      font-weight: 700;
-      color: var(--primary);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .brand .source-link {
-      font-size: 12px;
-      color: var(--cyber-cyan);
-      text-decoration: none;
-      max-width: 450px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      display: block;
-    }
-    .brand .source-link:hover { text-decoration: underline; }
-    .header-badge {
-      background: rgba(250, 156, 27, 0.15);
-      border: 1px solid rgba(250, 156, 27, 0.4);
-      color: var(--primary);
-      padding: 3px 10px;
-      border-radius: 12px;
-      font-size: 11.5px;
-      font-weight: 600;
-    }
 
     .main-wrap {
-      flex: 1;
-      max-width: 1400px;
-      width: 100%;
-      margin: 0 auto;
-      padding: 18px 24px;
+      padding-top: 1.5rem;
+      padding-bottom: 2.5rem;
       display: flex;
       flex-direction: column;
-      gap: 14px;
+      gap: 1.25rem;
     }
 
     .toolbar-card {
       background: var(--card);
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      padding: 14px 18px;
+      padding: 1.25rem 1.5rem;
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 1rem;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
     }
 
     .tabs-row {
       display: flex;
-      gap: 6px;
+      gap: 0.5rem;
       overflow-x: auto;
-      padding-bottom: 4px;
-    }
-    .tab-btn {
-      background: var(--secondary);
-      border: 1px solid var(--border);
-      color: var(--muted-foreground);
-      padding: 6px 12px;
-      border-radius: var(--radius-sm);
-      font-size: 11.5px;
-      font-weight: 600;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      transition: all 0.15s ease;
-      white-space: nowrap;
-    }
-    .tab-btn:hover {
-      background: rgba(250, 156, 27, 0.1);
-      color: #fff;
-      border-color: var(--primary);
-    }
-    .tab-btn.active {
-      background: var(--primary);
-      color: #07090D;
-      border-color: var(--primary);
-      box-shadow: var(--glow-orange);
-      font-weight: 700;
-    }
-    .tab-badge {
-      background: var(--card);
-      color: var(--cyber-cyan);
-      border: 1px solid var(--border);
-      padding: 1px 7px;
-      border-radius: 10px;
-      font-size: 10.5px;
-      font-weight: 700;
-      font-family: Consolas, Monaco, monospace;
-      letter-spacing: 0.3px;
-    }
-    .tab-btn.active .tab-badge {
-      background: rgba(7, 9, 13, 0.25);
-      color: #07090D;
-      border-color: transparent;
+      padding-bottom: 0.25rem;
     }
 
     .filter-actions-row {
       display: flex;
-      gap: 10px;
+      gap: 0.75rem;
       align-items: center;
       flex-wrap: wrap;
-    }
-    .search-input {
-      flex: 1;
-      min-width: 250px;
-      background: var(--background);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      padding: 7px 12px;
-      color: #fff;
-      font-size: 12.5px;
-      outline: none;
-      transition: border-color 0.2s, box-shadow 0.2s;
-    }
-    .search-input:focus {
-      border-color: var(--primary);
-      box-shadow: var(--glow-orange);
-    }
-
-    .btn {
-      font-size: 11.5px;
-      font-weight: 600;
-      padding: 7px 12px;
-      border-radius: var(--radius-sm);
-      cursor: pointer;
-      border: 1px solid transparent;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      transition: all 0.15s ease;
-      white-space: nowrap;
-      text-decoration: none;
-    }
-    .btn-primary {
-      background: var(--primary);
-      color: #07090D;
-      border-color: rgba(250, 156, 27, 0.5);
-      font-weight: 700;
-    }
-    .btn-primary:hover {
-      background: var(--primary-glow);
-      box-shadow: var(--glow-orange);
-    }
-    .btn-cyan {
-      background: var(--cyber-cyan);
-      color: #07090D;
-      border-color: rgba(0, 234, 255, 0.4);
-      font-weight: 700;
-    }
-    .btn-cyan:hover {
-      box-shadow: var(--glow-cyan);
-    }
-    .btn-outline {
-      background: var(--secondary);
-      color: var(--foreground);
-      border-color: var(--border);
-    }
-    .btn-outline:hover {
-      background: var(--card);
-      border-color: var(--primary);
-      color: var(--primary);
     }
 
     .options-row {
       display: flex;
-      gap: 16px;
-      font-size: 12px;
+      gap: 1.25rem;
+      font-size: 0.8125rem;
       color: var(--muted-foreground);
       align-items: center;
       flex-wrap: wrap;
-    }
-    .checkbox-label {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      cursor: pointer;
-      user-select: none;
-    }
-    .checkbox-label input {
-      cursor: pointer;
-      accent-color: var(--primary);
-      width: 14px;
-      height: 14px;
     }
 
     .view-toggle {
       margin-left: auto;
       display: flex;
-      gap: 4px;
-    }
-    .view-btn {
+      gap: 0.35rem;
       background: var(--secondary);
       border: 1px solid var(--border);
-      color: var(--muted-foreground);
-      padding: 4px 9px;
+      padding: 0.2rem;
       border-radius: var(--radius-sm);
-      cursor: pointer;
-      font-size: 11px;
     }
+
+    .view-btn {
+      background: transparent;
+      border: none;
+      color: var(--muted-foreground);
+      padding: 0.3rem 0.75rem;
+      border-radius: calc(var(--radius-sm) - 1px);
+      cursor: pointer;
+      font-size: 0.75rem;
+      font-weight: 600;
+      transition: all 0.15s ease;
+    }
+
     .view-btn.active {
       background: var(--primary);
-      color: #07090D;
-      border-color: var(--primary);
+      color: var(--primary-foreground);
       font-weight: 700;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
     }
 
     .content-container {
@@ -304,39 +94,46 @@
       border: 1px solid var(--border);
       border-radius: var(--radius);
       overflow: hidden;
-      padding: 10px;
+      padding: 1rem;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+      min-height: 250px;
     }
 
+    /* List View Items */
     .asset-list {
       list-style: none;
       display: flex;
       flex-direction: column;
-      gap: 4px;
+      gap: 0.35rem;
     }
+
     .asset-item {
       display: flex;
       align-items: center;
-      gap: 10px;
-      padding: 6px 10px;
+      gap: 0.75rem;
+      padding: 0.6rem 0.85rem;
       border-radius: var(--radius-sm);
       background: var(--secondary);
-      border: 1px solid var(--border-light);
+      border: 1px solid var(--border);
       transition: background 0.15s, border-color 0.15s;
     }
+
     .asset-item:hover {
       background: var(--card-header);
-      border-color: rgba(250, 156, 27, 0.4);
+      border-color: rgba(250, 156, 27, 0.45);
     }
+
     .item-num {
       color: var(--muted-foreground);
-      font-size: 10.5px;
-      font-family: monospace;
-      min-width: 28px;
+      font-size: 0.75rem;
+      font-family: 'JetBrains Mono', monospace;
+      min-width: 2rem;
       text-align: right;
     }
+
     .item-thumb {
-      width: 42px;
-      height: 42px;
+      width: 2.65rem;
+      height: 2.65rem;
       border-radius: var(--radius-sm);
       background: #000;
       border: 1px solid var(--border);
@@ -348,21 +145,24 @@
       align-items: center;
       justify-content: center;
     }
+
     .item-thumb img {
       width: 100%;
       height: 100%;
       object-fit: cover;
     }
+
     .item-badge {
-      font-size: 9.5px;
+      font-size: 0.68rem;
       font-weight: 700;
-      padding: 2px 5px;
-      border-radius: 3px;
+      padding: 0.2rem 0.45rem;
+      border-radius: 0.25rem;
       text-transform: uppercase;
-      font-family: monospace;
+      font-family: 'JetBrains Mono', monospace;
       white-space: nowrap;
       flex-shrink: 0;
     }
+
     .badge-image { background: rgba(250, 156, 27, 0.15); color: var(--primary); border: 1px solid rgba(250, 156, 27, 0.35); }
     .badge-link { background: rgba(0, 234, 255, 0.15); color: var(--cyber-cyan); border: 1px solid rgba(0, 234, 255, 0.35); }
     .badge-media { background: rgba(26, 121, 255, 0.15); color: var(--cyber-blue); border: 1px solid rgba(26, 121, 255, 0.35); }
@@ -371,87 +171,99 @@
     .badge-base64 { background: rgba(240, 66, 66, 0.15); color: var(--destructive); border: 1px solid rgba(240, 66, 66, 0.35); }
 
     .item-dim {
-      font-size: 9.5px;
+      font-size: 0.7rem;
       color: var(--muted-foreground);
-      font-family: monospace;
+      font-family: 'JetBrains Mono', monospace;
       white-space: nowrap;
     }
+
     .item-host {
-      background: var(--secondary);
+      background: var(--card);
       color: var(--cyber-cyan);
-      border-radius: 3px;
-      padding: 1px 5px;
-      font-size: 10.5px;
+      border-radius: 0.25rem;
+      padding: 0.15rem 0.45rem;
+      font-size: 0.72rem;
       font-weight: 600;
       white-space: nowrap;
       border: 1px solid var(--border);
+      font-family: 'JetBrains Mono', monospace;
     }
+
     .item-title {
       color: var(--foreground);
-      font-size: 11.5px;
+      font-size: 0.8125rem;
       max-width: 180px;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
     }
+
     .item-url {
       flex: 1;
       color: var(--primary);
       text-decoration: none;
-      font-family: monospace;
-      font-size: 11.5px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8125rem;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
       word-break: break-all;
     }
+
     .item-url:hover {
       text-decoration: underline;
       color: var(--primary-glow);
     }
+
     .item-actions {
       display: flex;
-      gap: 5px;
+      gap: 0.35rem;
       align-items: center;
       flex-shrink: 0;
     }
+
     .btn-action {
-      background: var(--secondary);
+      background: var(--card);
       border: 1px solid var(--border);
       color: var(--muted-foreground);
       border-radius: var(--radius-sm);
-      padding: 3px 8px;
+      padding: 0.25rem 0.55rem;
       cursor: pointer;
-      font-size: 10.5px;
+      font-size: 0.72rem;
       font-weight: 600;
       transition: all 0.15s;
       white-space: nowrap;
       text-decoration: none;
       display: inline-flex;
       align-items: center;
-      gap: 3px;
+      gap: 0.25rem;
     }
+
     .btn-action:hover {
       background: var(--primary);
-      color: #07090D;
+      color: var(--primary-foreground);
       border-color: var(--primary);
     }
+
     .btn-action-b64 {
       border-color: rgba(250, 156, 27, 0.35);
       color: var(--primary);
     }
+
     .btn-action-b64:hover {
       background: var(--primary);
-      color: #07090D;
+      color: var(--primary-foreground);
       border-color: var(--primary);
     }
 
+    /* Grid Gallery View */
     .asset-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
-      gap: 12px;
-      padding: 6px;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 1rem;
+      padding: 0.5rem;
     }
+
     .grid-card {
       background: var(--secondary);
       border: 1px solid var(--border);
@@ -461,102 +273,232 @@
       flex-direction: column;
       transition: transform 0.2s, border-color 0.2s;
     }
+
     .grid-card:hover {
       transform: translateY(-2px);
       border-color: var(--primary);
       box-shadow: var(--glow-orange);
     }
+
     .grid-img-wrap {
-      height: 140px;
+      height: 150px;
       background: #000;
       display: flex;
       align-items: center;
       justify-content: center;
       overflow: hidden;
     }
+
     .grid-img-wrap img {
       max-width: 100%;
       max-height: 100%;
       object-fit: contain;
     }
+
     .grid-body {
-      padding: 8px 10px;
+      padding: 0.65rem 0.85rem;
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: 0.45rem;
       flex: 1;
     }
+
     .grid-meta {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      font-size: 9.5px;
-      font-family: monospace;
+      font-size: 0.7rem;
+      font-family: 'JetBrains Mono', monospace;
       color: var(--muted-foreground);
     }
+
     .grid-title {
-      font-size: 11px;
+      font-size: 0.78rem;
       color: var(--foreground);
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
+      font-weight: 500;
     }
+
     .grid-actions {
       display: flex;
-      gap: 4px;
+      gap: 0.25rem;
       margin-top: auto;
+      padding-top: 0.35rem;
     }
+
     .grid-actions .btn-action {
       flex: 1;
       justify-content: center;
-      font-size: 10px;
-      padding: 4px 3px;
+      font-size: 0.7rem;
+      padding: 0.3rem 0.2rem;
     }
 
     .empty-state {
-      padding: 50px 20px;
+      padding: 4rem 1.5rem;
       text-align: center;
       color: var(--muted-foreground);
-      font-size: 13px;
-    }
-
-    #toast {
-      position: fixed;
-      bottom: 20px;
-      right: 24px;
-      background: var(--card-header);
-      color: var(--primary);
-      border: 1px solid var(--primary);
-      padding: 9px 16px;
-      border-radius: var(--radius-sm);
-      font-size: 12px;
-      font-weight: 600;
-      box-shadow: var(--glow-orange);
-      opacity: 0;
-      transform: translateY(8px);
-      transition: all 0.2s ease;
-      pointer-events: none;
-      z-index: 1000;
-    }
-    #toast.show {
-      opacity: 1;
-      transform: translateY(0);
+      font-size: 0.875rem;
     }
   </style>
 </head>
-<body>
-  <header>
-    <div class="brand">
-      <img src="icons/icon128.png" alt="IPvFooKan" class="brand-logo-img">
-      <h1>Content &amp; Asset Grabber</h1>
-      <span class="header-badge" id="header-total-count">0 items</span>
-      <a href="#" target="_blank" class="source-link" id="source-link-elem" title="Buka website asli">🌐 Loading...</a>
+
+<body data-theme="dark">
+
+  <!-- ========================================================================
+       TOP NAVBAR (SHADCN HEADER)
+       ======================================================================== -->
+  <header class="header">
+    <div class="container header-content">
+      <div class="brand-group">
+        <a href="#" class="brand">
+          <div class="brand-icon">
+            <img src="icons/icon128.png" alt="IPvFooKan" style="width: 20px; height: 20px; border-radius: 4px;">
+          </div>
+          <span>IPvFooKan</span>
+          <span class="brand-badge">Link &amp; Asset Grabber</span>
+        </a>
+        <div class="header-target-info">
+          <a href="#" target="_blank" class="source-link" id="source-link-elem" title="Buka website asli">
+            🌐 Memuat URL Halaman...
+          </a>
+        </div>
+      </div>
+
+      <div class="nav-actions">
+        <button id="btn-copy-urls" class="btn btn-primary" title="Salin semua URL yang tampil ke clipboard">
+          📋 Copy URLs
+        </button>
+        <button id="btn-export-txt" class="btn btn-cyan" title="Download daftar URL ke file teks .txt">
+          💾 Export TXT
+        </button>
+
+        <!-- Mode Toggle -->
+        <button class="icon-btn" id="theme-toggle" title="Toggle Light / Dark Mode">
+          <!-- Sun (Light) -->
+          <svg id="sun-icon" style="display: none;" width="18" height="18" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          </svg>
+          <!-- Moon (Dark) -->
+          <svg id="moon-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+        </button>
+      </div>
     </div>
   </header>
 
-  <main class="main-wrap">
+  <!-- ========================================================================
+       MAIN WRAPPER
+       ======================================================================== -->
+  <main class="container main-wrap">
+
+    <!-- HERO SECTION -->
+    <section class="hero">
+      <div class="hero-pill">
+        <span style="display:inline-block; width:6px; height:6px; border-radius:50%; background:var(--primary);"></span>
+        IPvFooKan v0.1 • Link &amp; Asset Grabber Engine
+      </div>
+      <h1 class="hero-title">
+        The <span class="text-gradient">Asset Grabber</span> Engine
+      </h1>
+      <p class="hero-desc">
+        Ekstraksi dan inspeksi seluruh tautan, berkas media, gambar resolusi tinggi, stylesheet, dan skrip secara
+        real-time dari halaman aktif.
+      </p>
+
+      <div class="url-bar-container">
+        <div class="url-content-left">
+          <span class="protocol-tag" id="badge-protocol">HTTPS</span>
+          <a id="target-url-link" href="#" target="_blank" class="target-url-link">Memuat data aset...</a>
+        </div>
+        <button class="btn btn-secondary" id="btn-copy-url" title="Salin URL Target">📋 Copy URL</button>
+      </div>
+    </section>
+
+    <!-- METRICS OVERVIEW (KPI 6-CARDS) -->
+    <section class="grid-metrics">
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Total Aset</span>
+          <span class="badge badge-primary" id="header-total-count">0 items</span>
+        </div>
+        <div class="card-value" id="kpi-count-all">0</div>
+        <div class="card-trend trend-amber">
+          <span>📦 Semua tipe aset</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Gambar</span>
+          <span class="badge badge-primary">JPG / PNG / SVG</span>
+        </div>
+        <div class="card-value" id="kpi-count-image">0</div>
+        <div class="card-trend trend-amber">
+          <span>🖼️ Visual assets</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Hyperlinks</span>
+          <span class="badge badge-cyan">Anchors</span>
+        </div>
+        <div class="card-value" id="kpi-count-link">0</div>
+        <div class="card-trend trend-cyan">
+          <span>⚓ Internal &amp; eksternal</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Media</span>
+          <span class="badge badge-primary">AV Media</span>
+        </div>
+        <div class="card-value" id="kpi-count-media">0</div>
+        <div class="card-trend trend-up">
+          <span>🎬 Audio / Video</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Dokumen</span>
+          <span class="badge badge-green">PDF / Docs</span>
+        </div>
+        <div class="card-value" id="kpi-count-doc">0</div>
+        <div class="card-trend trend-up">
+          <span>📄 File download</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Scripts &amp; CSS</span>
+          <span class="badge badge-secondary">JS / CSS</span>
+        </div>
+        <div class="card-value" id="kpi-count-code">0</div>
+        <div class="card-trend">
+          <span>⚡ Source code</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- TOOLBAR & FILTERS -->
     <div class="toolbar-card">
-      <div class="tabs-row">
+      <div class="tabs-list tabs-row">
         <button class="tab-btn active" data-tab="all">Semua <span class="tab-badge" id="count-all">0</span></button>
         <button class="tab-btn" data-tab="image">Gambar <span class="tab-badge" id="count-image">0</span></button>
         <button class="tab-btn" data-tab="link">Links <span class="tab-badge" id="count-link">0</span></button>
@@ -566,30 +508,45 @@
       </div>
 
       <div class="filter-actions-row">
-        <input type="text" id="search-input" class="search-input" placeholder="Ketik kata kunci untuk memfilter URL / nama file..." />
-        <button id="btn-copy-urls" class="btn btn-primary" title="Salin semua URL yang tampil ke clipboard">📋 Copy URLs</button>
-        <button id="btn-export-txt" class="btn btn-cyan" title="Download daftar URL ke file teks .txt">💾 Export TXT</button>
+        <input type="text" id="search-input" class="search-input"
+          placeholder="🔍 Ketik kata kunci untuk memfilter URL, ekstensi, atau nama berkas..." />
       </div>
 
       <div class="options-row">
         <label class="checkbox-label"><input type="checkbox" id="opt-dedup" checked /> Hapus Duplikat</label>
         <label class="checkbox-label"><input type="checkbox" id="opt-diff-origin" /> Hanya Domain Pihak Ke-3</label>
         <label class="checkbox-label"><input type="checkbox" id="opt-group" checked /> Kelompokkan per Tipe</label>
-        
+
         <div class="view-toggle">
-          <button id="btn-view-list" class="view-btn active" title="Tampilan Daftar Rinci">List</button>
-          <button id="btn-view-grid" class="view-btn" title="Tampilan Galeri Gambar">Gallery</button>
+          <button id="btn-view-list" class="view-btn active" title="Tampilan Daftar Rinci">List View</button>
+          <button id="btn-view-grid" class="view-btn" title="Tampilan Galeri Gambar">Gallery View</button>
         </div>
       </div>
     </div>
 
+    <!-- ASSET CONTENT CONTAINER -->
     <div class="content-container" id="content-container">
       <div class="empty-state">Memuat data aset halaman...</div>
     </div>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+      <div>
+        Built with the <b>shadcn/ui</b> design methodology &amp; <b>COLOR_PALETTE.md</b> tokens.
+      </div>
+      <div>
+        <a href="themes/SHADCN_THEME.md" style="color: var(--primary); text-decoration: none; font-weight: 600;">Lihat
+          Dokumentasi SHADCN_THEME.md &rarr;</a>
+      </div>
+    </footer>
+
   </main>
 
+  <!-- TOAST NOTIFICATION -->
   <div id="toast">Notifikasi</div>
 
+  <!-- SCRIPT -->
   <script src="scripts/grabber.js"></script>
 </body>
+
 </html>

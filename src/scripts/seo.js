@@ -137,6 +137,12 @@
       targetLink.textContent = sourceUrl;
     }
 
+    const navLink = document.getElementById("target-url-link-nav");
+    if (navLink) {
+      navLink.href = sourceUrl;
+      navLink.textContent = "🌐 " + sourceUrl;
+    }
+
     const badgeProto = document.getElementById("badge-protocol");
     if (badgeProto) {
       badgeProto.textContent = sourceUrl.startsWith("https") ? "HTTPS" : "HTTP";
@@ -514,19 +520,35 @@
   // Event Listeners
   document.addEventListener("DOMContentLoaded", () => {
     // Theme toggle
-    const themeBtn = document.getElementById("btn-theme-toggle");
-    const savedTheme = localStorage.getItem("msi_theme") || "dark";
-    if (savedTheme === "light") {
-      document.body.classList.add("light-theme");
-      document.body.setAttribute("data-theme", "light");
+    const themeBtn = document.getElementById("theme-toggle") || document.getElementById("btn-theme-toggle");
+    const sunIcon = document.getElementById("sun-icon");
+    const moonIcon = document.getElementById("moon-icon");
+
+    function applyTheme(isLight) {
+      if (isLight) {
+        document.documentElement.classList.remove("dark");
+        document.body.classList.add("light-theme");
+        document.body.setAttribute("data-theme", "light");
+        if (sunIcon) sunIcon.style.display = "block";
+        if (moonIcon) moonIcon.style.display = "none";
+      } else {
+        document.documentElement.classList.add("dark");
+        document.body.classList.remove("light-theme");
+        document.body.setAttribute("data-theme", "dark");
+        if (sunIcon) sunIcon.style.display = "none";
+        if (moonIcon) moonIcon.style.display = "block";
+      }
     }
+
+    const savedTheme = localStorage.getItem("msi_theme") || "dark";
+    applyTheme(savedTheme === "light");
 
     if (themeBtn) {
       themeBtn.onclick = () => {
-        const isLight = document.body.classList.toggle("light-theme");
-        document.body.setAttribute("data-theme", isLight ? "light" : "dark");
-        localStorage.setItem("msi_theme", isLight ? "light" : "dark");
-        showToast("Tema diubah ke: " + (isLight ? "Terang" : "Gelap"));
+        const nextIsLight = !document.body.classList.contains("light-theme");
+        applyTheme(nextIsLight);
+        localStorage.setItem("msi_theme", nextIsLight ? "light" : "dark");
+        showToast("Tema diubah ke: " + (nextIsLight ? "Terang" : "Gelap"));
       };
     }
 

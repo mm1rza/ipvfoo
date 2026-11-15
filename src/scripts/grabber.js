@@ -94,6 +94,8 @@
     for (const key in counts) {
       const el = document.getElementById("count-" + key);
       if (el) el.textContent = counts[key];
+      const kpiEl = document.getElementById("kpi-count-" + key);
+      if (kpiEl) kpiEl.textContent = counts[key];
     }
 
     const headerCount = document.getElementById("header-total-count");
@@ -267,6 +269,22 @@
       linkElem.textContent = "🌐 " + (SOURCE_URL || "Halaman Asli");
     }
 
+    const targetLinkElem = document.getElementById("target-url-link");
+    if (targetLinkElem) {
+      targetLinkElem.href = SOURCE_URL || "#";
+      targetLinkElem.textContent = SOURCE_URL || "Halaman Asli";
+    }
+
+    const protoElem = document.getElementById("badge-protocol");
+    if (protoElem && SOURCE_URL) {
+      try {
+        const u = new URL(SOURCE_URL);
+        protoElem.textContent = u.protocol.replace(":", "").toUpperCase();
+      } catch (e) {
+        protoElem.textContent = "URL";
+      }
+    }
+
     updateTabCounts();
     renderContent();
   }
@@ -336,6 +354,51 @@
         downloadFile(url, "assets_" + (SOURCE_HOST || "export") + "_" + Date.now() + ".txt");
         URL.revokeObjectURL(url);
         showToast("✅ Berhasil ekspor " + currentFiltered.length + " aset ke file TXT!");
+      };
+    }
+
+    // Theme toggle handling
+    const themeBtn = document.getElementById("theme-toggle");
+    const sunIcon = document.getElementById("sun-icon");
+    const moonIcon = document.getElementById("moon-icon");
+
+    function applyTheme(isLight) {
+      if (isLight) {
+        document.documentElement.classList.remove("dark");
+        document.body.classList.add("light-theme");
+        document.body.setAttribute("data-theme", "light");
+        if (sunIcon) sunIcon.style.display = "block";
+        if (moonIcon) moonIcon.style.display = "none";
+      } else {
+        document.documentElement.classList.add("dark");
+        document.body.classList.remove("light-theme");
+        document.body.setAttribute("data-theme", "dark");
+        if (sunIcon) sunIcon.style.display = "none";
+        if (moonIcon) moonIcon.style.display = "block";
+      }
+    }
+
+    const savedTheme = localStorage.getItem("msi_theme");
+    applyTheme(savedTheme === "light");
+
+    if (themeBtn) {
+      themeBtn.onclick = () => {
+        const nextIsLight = !document.body.classList.contains("light-theme");
+        applyTheme(nextIsLight);
+        localStorage.setItem("msi_theme", nextIsLight ? "light" : "dark");
+        showToast("Tema diubah ke: " + (nextIsLight ? "Terang" : "Gelap"));
+      };
+    }
+
+    // Copy Hero URL button
+    const copyUrlBtn = document.getElementById("btn-copy-url");
+    if (copyUrlBtn) {
+      copyUrlBtn.onclick = () => {
+        if (SOURCE_URL) {
+          copyToClipboard(SOURCE_URL, "URL Target");
+        } else {
+          showToast("Tidak ada URL untuk disalin");
+        }
       };
     }
 

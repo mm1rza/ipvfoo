@@ -340,3 +340,105 @@ Berikut struktur sintaks HTML / React JSX untuk komponen shadcn/ui dengan tema C
 | `--chart-2` | `#00EAFF` (Electric Cyan) | `#00EAFF` | Indikator throughput bandwidth |
 | `--chart-3` | `#1AE680` (Cyber Green) | `#16A34A` | Status online & IPv6 |
 | `--chart-4` | `#1A79FF` (Neon Blue) | `#2563EB` | Port link & traceroute transit |
+
+---
+
+## 6. Standar Template Halaman Ekstensi (Unified Page Architecture)
+
+Untuk menjaga konsistensi antarmuka pengguna lintas modul mandiri (standalone tabs), halaman **Link & Asset Grabber (`src/grabber.html`)** dan **Deep Page & SEO Audit (`src/seo.html`)** mengimplementasikan arsitektur template yang identik mengikuti showcase `themes/theme-preview.html`.
+
+### 6.1 Anatomi Struktur Halaman (Wireframe Hierarki)
+
+Kedua halaman menggunakan hierarki elemen berikut secara seragam:
+
+```
+┌───────────────────────────────────────────────────────────────────────────────┐
+│ 1. STICKY NAVBAR (.header)                                                    │
+│    [Logo] IPvFooKan [Badge: Modul]  🌐 https://target.domain/path             │
+│    [Action 1: Copy/Export] [Action 2: Format] [Action 3: Print] [🌓 Theme]    │
+├───────────────────────────────────────────────────────────────────────────────┤
+│ 2. HERO BANNER (.hero)                                                        │
+│    [Pill: Design System & Version]                                            │
+│    The Asset Grabber / SEO Audit Engine (.text-gradient)                       │
+│    Deskripsi fungsi modul...                                                  │
+│    ┌─────────────────────────────────────────────────────────────────────┐    │
+│    │ [HTTPS] https://target.domain/page                      [📋 Copy URL] │    │
+│    └─────────────────────────────────────────────────────────────────────┘    │
+├───────────────────────────────────────────────────────────────────────────────┤
+│ 3. KPI METRICS SCORECARDS GRID (.grid-metrics -> 6 Cards)                     │
+│    ┌───────────┐ ┌───────────┐ ┌───────────┐ ┌───────────┐ ┌───────────┐ ┌───┐ │
+│    │ Metric 1  │ │ Metric 2  │ │ Metric 3  │ │ Metric 4  │ │ Metric 5  │ │...│ │
+│    │   128     │ │   42      │ │   95      │ │    1      │ │    3      │ │ 0 │ │
+│    │  Label    │ │  Label    │ │  Label    │ │  Label    │ │  Label    │ │   │ │
+│    └───────────┘ └───────────┘ └───────────┘ └───────────┘ └───────────┘ └───┘ │
+├───────────────────────────────────────────────────────────────────────────────┤
+│ 4. INTERACTIVE TOOLBAR & FILTER                                               │
+│    [Tab 1: All] [Tab 2] [Tab 3] ... (atau Category Chips)                    │
+│    [ 🔍 Search Input dengan focus ring amber... ]                             │
+│    [☑ Dedup] [☑ Pihak Ke-3]               [List View] [Gallery View]         │
+├───────────────────────────────────────────────────────────────────────────────┤
+│ 5. MAIN CONTENT AREA (.content-container / .app-layout)                       │
+│    ┌─────────────────────────────────────────────────┐ ┌────────────────────┐ │
+│    │ Card / List / Table Views                       │ │ Sticky Sidebar     │ │
+│    │ (Asset List/Grid atau SEO Section Cards)        │ │ Table of Contents  │ │
+│    │                                                 │ │ (Khusus SEO Audit) │ │
+│    └─────────────────────────────────────────────────┘ └────────────────────┘ │
+├───────────────────────────────────────────────────────────────────────────────┤
+│ 6. FOOTER & FLOATING TOAST (.footer & #toast)                                 │
+│    Built with shadcn/ui & COLOR_PALETTE.md            Dokumentasi Theme ->    │
+└───────────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+### 6.2 Komponen Standar Bersama
+
+#### A. Sticky Navbar (`.header`)
+Navbar selalu menempel di posisi atas (`position: sticky; top: 0`) dengan efek latar *glassmorphism blur* (`backdrop-filter: blur(12px)`):
+- **Brand Identity**: Logo ekstensi dengan pendar oranye (`.brand-icon`), nama `IPvFooKan`, dan badge nama modul (`.brand-badge`).
+- **Target URL Indicator**: Menampilkan URL website yang sedang diperiksa secara real-time (`.source-link`).
+- **Mode Toggle Button (`#theme-toggle`)**: Tombol ikon dengan SVG Matahari & Bulan yang secara otomatis menyimpan preferensi ke `localStorage.getItem("msi_theme")` dan menyinkronkan kelas `dark` / `light-theme` pada elemen `<html>` dan `<body>`.
+
+#### B. Hero Section & Target URL Bar
+- **Pill Status (`.hero-pill`)**: Mengindikasikan engine ekstensi dan design system.
+- **Gradasi Tipografi (`.text-gradient`)**: Judul utama menggunakan gradasi linear tajam dari teks kontras ke Cyber Amber (`#FA9C1B`).
+- **URL Bar Container (`.url-bar-container`)**:
+  Menyajikan protokol target (`HTTPS`/`HTTP` via `.protocol-tag`), tautan aktif target (`.target-url-link`), serta tombol aksi cepat penyalinan URL (`#btn-copy-url`).
+
+#### C. Grid Metrik KPI (6-Card Overview)
+Kedua halaman menggunakan `.grid-metrics` berkolom 6 dengan kartu `.card` berlatar belakang elevasi Obsidian (`#0D1016`):
+- **Link Grabber**:
+  1. `Total Aset`: Jumlah keseluruhan link, image, media, dokumen, dan script.
+  2. `Gambar`: Berkas format JPG, PNG, WebP, SVG, ICO, Base64.
+  3. `Hyperlinks`: Semua tautan anchor `<a href>`.
+  4. `Media`: Berkas audio dan video HTML5.
+  5. `Dokumen`: Berkas PDF, DOCX, ZIP, dan unduhan dokumen lainnya.
+  6. `Scripts & CSS`: Berkas JavaScript eksternal dan Stylesheet CSS.
+- **Deep SEO Audit**:
+  1. `Passed Checks`: Diagnostik kesehatan lolos validasi.
+  2. `Warnings`: Item audit yang memerlukan perhatian.
+  3. `Critical Errors`: Kegagalan teknis SEO mayor (misal tidak ada H1, canonical salah).
+  4. `H1 Headings`: Jumlah outline judul H1.
+  5. `JSON-LD Schemas`: Jumlah objek structured data terdeteksi.
+  6. `Total Links`: Statistik keseluruhan anchor internal dan eksternal.
+
+#### D. Toolbar & Tabs Kontrol
+- **Shadcn UI Tabs (`.tabs-list`, `.tab-btn` / `.tab-trigger`)**:
+  Tab kategori horizontal dengan indikator angka aset berbentuk kapsul (`.tab-badge`).
+- **Search Input (`.search-input`)**:
+  Pencarian instan dengan ikon kaca pembesar dan focus ring aksen pendar oranye (`--ring`).
+- **View Mode Switcher (`.view-toggle`, `.view-btn`)**:
+  Pilihan tampilan daftar tabel rinci (*List View*) atau galeri visual (*Gallery View*).
+
+---
+
+### 6.3 Ringkasan File Implementasi
+
+| File Halaman | Peran | Komponen Kunci |
+| :--- | :--- | :--- |
+| `src/grabber.html` | Content & Link Asset Grabber | Sticky Navbar, Hero URL Bar, KPI 6-Grid, Shadcn Tabs, List View, Gallery Grid, Toast |
+| `src/scripts/grabber.js` | Controller Asset Grabber | Sinkronisasi KPI realtime, filter dedup/diff-origin, Base64 converter, Export TXT, Light/Dark toggle |
+| `src/seo.html` | Deep Page & Technical SEO Audit | Sticky Navbar, Hero URL Bar, KPI 6-Grid, Section Filter Chips, Social Cards Preview, Headings Tree, Sticky Sidebar, JSON-LD Code block, Toast |
+| `src/scripts/seo.js` | Controller SEO Audit | KPI scorecards calculation, copy markdown summary, export JSON, print layout, real-time query filter, Light/Dark toggle |
+| `src/theme.css` | Sentralisasi Master Tokens & Components | Definisi token HSL/HEX `:root` & `.dark`, font import Plus Jakarta Sans & JetBrains Mono, layout utilitas |
+| `themes/theme-preview.html` | Showcase & Sandbox Komponen | Preview interaktif lengkap semua ragam komponen shadcn/ui dan visualisasi warna |

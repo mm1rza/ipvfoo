@@ -1,333 +1,96 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="id" class="dark">
 
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>IPvFooKan - Deep Page &amp; SEO Audit</title>
   <link rel="icon" type="image/png" href="icons/icon128.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
+    rel="stylesheet">
   <link rel="stylesheet" href="theme.css">
   <style>
     /* ========================================================================
-       SHADCN UI THEME VARIABLES (Cyber Obsidian & Neon Amber)
-       Diambil dari themes/SHADCN_THEME.md & COLOR_PALETTE.md
+       PAGE-SPECIFIC STYLES: DEEP PAGE & SEO AUDIT
+       Mengikuti Desain Sistem Cyber Obsidian & Neon Amber (themes/SHADCN_THEME.md)
        ======================================================================== */
-    :root {
-      --bg-body: var(--background, #07090D);
-      --bg-surface: var(--card, #0D1016);
-      --bg-surface-alt: var(--popover, #161A22);
-      --bg-card: var(--card, #0D1016);
-      --bg-card-header: var(--popover, #161A22);
-      --border-color: var(--border, rgba(61, 71, 92, 0.45));
-      --border-focus: var(--ring, #FA9C1B);
-      --text-main: var(--foreground, #FFFFFF);
-      --text-muted: var(--muted-foreground, #98A1B3);
-      --text-dim: #606876;
-      --accent-cyan: var(--cyber-cyan, #00EAFF);
-      --accent-blue: var(--cyber-blue, #1A79FF);
-      --accent-emerald: var(--cyber-green, #1AE680);
-      --accent-amber: var(--primary, #FA9C1B);
-      --accent-rose: var(--destructive, #F04242);
-      --accent-purple: #c084fc;
-      --accent-indigo: #818cf8;
-      --card-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.55);
-      --glow-primary: 0 0 25px rgba(250, 156, 27, 0.35);
-      --glow-cyan: 0 0 25px rgba(0, 234, 255, 0.25);
-      --font-mono: 'JetBrains Mono', Consolas, Monaco, "Courier New", monospace;
-    }
-
-    body.light-theme {
-      --bg-body: #F5F7FA;
-      --bg-surface: #FFFFFF;
-      --bg-surface-alt: #EEF2F6;
-      --bg-card: #FFFFFF;
-      --bg-card-header: #EEF2F6;
-      --border-color: rgba(209, 213, 219, 0.85);
-      --border-focus: #FA9C1B;
-      --text-main: #111827;
-      --text-muted: #6B7280;
-      --text-dim: #94A3B8;
-      --accent-amber: #E0870E;
-      --accent-cyan: #00BBD4;
-      --accent-emerald: #10B981;
-      --card-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
-      --glow-primary: 0 0 20px rgba(224, 135, 14, 0.25);
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
 
     html {
       scroll-behavior: smooth;
     }
 
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      background-color: var(--bg-body);
-      color: var(--text-main);
-      line-height: 1.55;
-      font-size: 14px;
-      transition: background-color 0.2s, color 0.2s;
+    .main-wrap {
+      padding-top: 1.5rem;
+      padding-bottom: 2.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
     }
 
     /* Layout */
     .app-layout {
       display: flex;
-      min-height: 100vh;
-      max-width: 1600px;
-      margin: 0 auto;
+      gap: 1.5rem;
+      align-items: flex-start;
+      width: 100%;
     }
 
     .main-viewport {
       flex: 1;
-      padding: 24px 36px;
-      max-width: calc(100% - 290px);
+      min-width: 0;
     }
 
     .sidebar-viewport {
       width: 290px;
       position: sticky;
-      top: 0;
-      height: 100vh;
+      top: 5rem;
+      max-height: calc(100vh - 6rem);
       overflow-y: auto;
-      background: var(--bg-surface);
-      border-left: 1px solid var(--border-color);
-      padding: 24px 20px;
-    }
-
-    /* Header Bar */
-    .top-header {
-      background: var(--bg-surface);
-      border: 1px solid var(--border-color);
-      border-radius: 14px;
-      padding: 20px 26px;
-      margin-bottom: 24px;
-      box-shadow: var(--card-shadow);
-    }
-
-    .header-row-1 {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 18px;
-      flex-wrap: wrap;
-      gap: 16px;
-    }
-
-    .brand-group {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .brand-logo-img {
-      width: 36px;
-      height: 36px;
-      border-radius: 8px;
-      object-fit: contain;
-    }
-
-    .brand-info h1 {
-      font-size: 21px;
-      font-weight: 800;
-      letter-spacing: -0.3px;
-      color: var(--text-main);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .brand-info h1 span.gradient-text {
-      background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-
-    .badge-version {
-      font-size: 11px;
-      background: rgba(56, 189, 248, 0.12);
-      color: var(--accent-cyan);
-      border: 1px solid rgba(56, 189, 248, 0.3);
-      padding: 2px 8px;
-      border-radius: 20px;
-      font-weight: 700;
-      letter-spacing: 0.3px;
-    }
-
-    .header-actions {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 8px 14px;
-      font-size: 12.5px;
-      font-weight: 600;
-      border-radius: 8px;
-      border: 1px solid var(--border-color);
-      background: var(--bg-surface-alt);
-      color: var(--text-main);
-      cursor: pointer;
-      transition: all 0.15s ease;
-      text-decoration: none;
-      white-space: nowrap;
-    }
-
-    .btn:hover {
-      background: var(--border-color);
-      color: #fff;
-      transform: translateY(-1px);
-    }
-
-    .btn-primary {
-      background: var(--accent-amber);
-      border-color: rgba(250, 156, 27, 0.5);
-      color: #07090D;
-      font-weight: 700;
-    }
-
-    .btn-primary:hover {
-      background: #FFB03A;
-      box-shadow: var(--glow-primary);
-      color: #000;
-    }
-
-    .btn-cyan {
-      background: var(--accent-cyan);
-      border-color: rgba(0, 234, 255, 0.4);
-      color: #07090D;
-      font-weight: 700;
-    }
-
-    .btn-cyan:hover {
-      box-shadow: var(--glow-cyan);
-    }
-
-    /* URL Box */
-    .url-bar-container {
-      background: var(--bg-surface-alt);
-      border: 1px solid var(--border-color);
-      border-radius: 10px;
-      padding: 10px 16px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      font-size: 13.5px;
-      word-break: break-all;
-      margin-bottom: 20px;
-    }
-
-    .url-content-left {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      min-width: 0;
-    }
-
-    .protocol-tag {
-      background: rgba(16, 185, 129, 0.15);
-      border: 1px solid rgba(16, 185, 129, 0.35);
-      color: var(--accent-emerald);
-      padding: 2px 7px;
-      border-radius: 6px;
-      font-size: 11px;
-      font-weight: 800;
-      font-family: var(--font-mono);
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem 1rem;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
       flex-shrink: 0;
     }
 
-    .target-url-link {
-      color: var(--accent-cyan);
-      text-decoration: none;
-      font-family: var(--font-mono);
-      font-weight: 600;
+    @media (max-width: 1024px) {
+      .app-layout {
+        flex-direction: column;
+      }
+      .sidebar-viewport {
+        width: 100%;
+        position: static;
+        max-height: none;
+      }
     }
 
-    .target-url-link:hover {
-      text-decoration: underline;
-    }
-
-    /* KPI Dashboard Scorecards */
-    .kpi-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(135px, 1fr));
-      gap: 12px;
-    }
+    /* Value states in KPI cards */
+    .val-pass { color: var(--cyber-green); }
+    .val-warn { color: var(--primary); }
+    .val-err { color: var(--destructive); }
+    .val-head { color: #c084fc; }
+    .val-data { color: var(--cyber-cyan); }
+    .val-link { color: var(--cyber-blue); }
 
     .kpi-card {
-      background: var(--bg-surface-alt);
-      border: 1px solid var(--border-color);
-      border-radius: 10px;
-      padding: 14px 16px;
-      text-align: center;
-      transition: transform 0.15s ease, border-color 0.15s ease;
       cursor: pointer;
     }
 
-    .kpi-card:hover {
-      transform: translateY(-2px);
-      border-color: var(--accent-cyan);
-    }
-
-    .kpi-value {
-      font-size: 26px;
-      font-weight: 800;
-      font-family: var(--font-mono);
-      line-height: 1.1;
-      margin-bottom: 4px;
-    }
-
-    .kpi-label {
-      font-size: 11px;
-      font-weight: 700;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    .val-pass {
-      color: var(--accent-emerald);
-    }
-
-    .val-warn {
-      color: var(--accent-amber);
-    }
-
-    .val-err {
-      color: var(--accent-rose);
-    }
-
-    .val-head {
-      color: var(--accent-purple);
-    }
-
-    .val-data {
-      color: var(--accent-cyan);
-    }
-
-    .val-link {
-      color: var(--accent-indigo);
-    }
-
-    /* Search & Filter Toolbar */
+    /* Filter Toolbar */
     .filter-toolbar {
-      background: var(--bg-surface);
-      border: 1px solid var(--border-color);
-      border-radius: 12px;
-      padding: 14px 18px;
-      margin-bottom: 24px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem 1.25rem;
+      margin-bottom: 1.5rem;
       display: flex;
       flex-direction: column;
-      gap: 12px;
-      box-shadow: var(--card-shadow);
+      gap: 0.85rem;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
     }
 
     .search-input-wrap {
@@ -338,75 +101,42 @@
 
     .search-input-icon {
       position: absolute;
-      left: 14px;
-      color: var(--text-dim);
-      font-size: 14px;
+      left: 12px;
+      color: var(--muted-foreground);
+      font-size: 0.875rem;
       pointer-events: none;
     }
 
-    .search-input {
-      width: 100%;
-      background: var(--bg-surface-alt);
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
-      padding: 10px 16px 10px 38px;
-      color: var(--text-main);
-      font-size: 13.5px;
-      outline: none;
-      transition: all 0.2s ease;
-    }
-
-    .search-input:focus {
-      border-color: var(--accent-cyan);
-      box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2);
+    .search-input-wrap .search-input {
+      padding-left: 2.25rem;
     }
 
     .chips-filter-row {
       display: flex;
-      gap: 8px;
+      gap: 0.45rem;
       overflow-x: auto;
-      padding-bottom: 2px;
-    }
-
-    .chip-btn {
-      background: var(--bg-surface-alt);
-      border: 1px solid var(--border-color);
-      color: var(--text-muted);
-      padding: 5px 12px;
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.15s ease;
-      white-space: nowrap;
-    }
-
-    .chip-btn:hover,
-    .chip-btn.active {
-      background: rgba(56, 189, 248, 0.18);
-      color: var(--accent-cyan);
-      border-color: rgba(56, 189, 248, 0.45);
+      padding-bottom: 0.2rem;
     }
 
     /* Section Cards */
     section.seo-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border-color);
-      border-radius: 14px;
-      margin-bottom: 24px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 1.5rem;
       overflow: hidden;
-      box-shadow: var(--card-shadow);
-      transition: border-color 0.15s;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+      transition: border-color 0.15s ease;
     }
 
     section.seo-card:hover {
-      border-color: rgba(56, 189, 248, 0.3);
+      border-color: rgba(250, 156, 27, 0.4);
     }
 
-    .card-header {
-      background: var(--bg-card-header);
-      padding: 15px 22px;
-      border-bottom: 1px solid var(--border-color);
+    .card-header-styled {
+      background: var(--card-header);
+      padding: 0.85rem 1.25rem;
+      border-bottom: 1px solid var(--border);
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -415,34 +145,34 @@
     .card-title-group {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 0.65rem;
     }
 
     .card-icon {
-      font-size: 18px;
+      font-size: 1.15rem;
     }
 
     .card-title-text {
-      font-size: 15px;
+      font-size: 0.875rem;
       font-weight: 700;
       letter-spacing: -0.2px;
-      color: var(--text-main);
+      color: var(--foreground);
       text-transform: uppercase;
     }
 
     .card-badge-count {
-      font-size: 11.5px;
-      background: var(--bg-surface-alt);
-      border: 1px solid var(--border-color);
-      color: var(--accent-cyan);
-      padding: 2px 10px;
-      border-radius: 12px;
-      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      background: var(--secondary);
+      border: 1px solid var(--border);
+      color: var(--cyber-cyan);
+      padding: 0.15rem 0.6rem;
+      border-radius: 9999px;
+      font-family: 'JetBrains Mono', monospace;
       font-weight: 700;
     }
 
     .card-body {
-      padding: 18px 24px;
+      padding: 1.25rem;
     }
 
     /* Rows & Items */
@@ -450,15 +180,10 @@
     .meta-row {
       display: flex;
       align-items: flex-start;
-      padding: 10px 0;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-      gap: 16px;
+      padding: 0.65rem 0;
+      border-bottom: 1px solid var(--border);
+      gap: 1rem;
       transition: background-color 0.15s ease;
-    }
-
-    body.light-theme .ad_seo_item,
-    body.light-theme .meta-row {
-      border-bottom: 1px solid rgba(0, 0, 0, 0.06);
     }
 
     .ad_seo_item:last-child,
@@ -468,7 +193,8 @@
 
     .ad_seo_item:hover,
     .meta-row:hover {
-      background: rgba(255, 255, 255, 0.015);
+      background: var(--accent);
+      border-radius: var(--radius-sm);
     }
 
     .attr_name,
@@ -476,17 +202,17 @@
       width: 175px;
       min-width: 175px;
       font-weight: 700;
-      color: var(--accent-cyan);
-      font-size: 13px;
+      color: var(--cyber-cyan);
+      font-size: 0.8125rem;
       text-align: right;
-      font-family: var(--font-mono);
-      padding-top: 2px;
+      font-family: 'JetBrains Mono', monospace;
+      padding-top: 0.15rem;
       word-break: break-all;
       flex-shrink: 0;
     }
 
     .attr_link {
-      color: var(--accent-cyan);
+      color: var(--cyber-cyan);
       text-decoration: none;
     }
 
@@ -496,19 +222,19 @@
 
     .content,
     .meta-content {
-      color: var(--text-main);
+      color: var(--foreground);
       word-break: break-word;
-      font-size: 13.5px;
+      font-size: 0.84rem;
       line-height: 1.5;
       flex: 1;
     }
 
     .item_count,
     .char-count {
-      font-size: 11px;
-      color: var(--text-dim);
-      font-family: var(--font-mono);
-      margin-left: 6px;
+      font-size: 0.7rem;
+      color: var(--muted-foreground);
+      font-family: 'JetBrains Mono', monospace;
+      margin-left: 0.4rem;
     }
 
     /* Alert Pills */
@@ -517,87 +243,88 @@
     .alert-pill {
       display: inline-flex;
       align-items: center;
-      gap: 6px;
-      padding: 3px 10px;
-      border-radius: 6px;
-      font-size: 12px;
+      gap: 0.4rem;
+      padding: 0.25rem 0.65rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.75rem;
       font-weight: 600;
-      margin: 2px 4px;
+      margin: 0.15rem 0.25rem;
       width: auto !important;
     }
 
     .warning,
     .alert-warn {
-      background: rgba(245, 158, 11, 0.15);
-      border: 1px solid rgba(245, 158, 11, 0.4);
-      color: #fbbf24;
+      background: rgba(250, 156, 27, 0.15);
+      border: 1px solid rgba(250, 156, 27, 0.4);
+      color: var(--primary);
     }
 
     .alert-err {
-      background: rgba(239, 68, 68, 0.15);
-      border: 1px solid rgba(239, 68, 68, 0.4);
-      color: #f87171;
+      background: rgba(240, 66, 66, 0.15);
+      border: 1px solid rgba(240, 66, 66, 0.4);
+      color: var(--destructive);
     }
 
     .info,
     .alert-info {
-      background: rgba(56, 189, 248, 0.15);
-      border: 1px solid rgba(56, 189, 248, 0.4);
-      color: #7dd3fc;
+      background: var(--cyber-cyan-bg);
+      border: 1px solid rgba(0, 234, 255, 0.35);
+      color: var(--cyber-cyan);
     }
 
     .alert-good {
-      background: rgba(16, 185, 129, 0.15);
-      border: 1px solid rgba(16, 185, 129, 0.4);
-      color: #34d399;
+      background: var(--cyber-green-bg);
+      border: 1px solid rgba(26, 230, 128, 0.35);
+      color: var(--cyber-green);
     }
 
     .copy-btn {
-      background: transparent;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      color: var(--text-muted);
-      border-radius: 6px;
-      padding: 2px 8px;
-      font-size: 11px;
+      background: var(--secondary);
+      border: 1px solid var(--border);
+      color: var(--muted-foreground);
+      border-radius: var(--radius-sm);
+      padding: 0.25rem 0.65rem;
+      font-size: 0.72rem;
       cursor: pointer;
       transition: all 0.15s ease;
-      margin-left: 8px;
+      margin-left: 0.5rem;
+      font-weight: 600;
     }
 
     .copy-btn:hover {
-      background: rgba(56, 189, 248, 0.15);
-      border-color: var(--accent-cyan);
-      color: var(--accent-cyan);
+      background: var(--primary);
+      border-color: var(--primary);
+      color: var(--primary-foreground);
     }
 
     /* Social Previews */
     .social-previews-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-      gap: 20px;
-      margin-bottom: 20px;
+      gap: 1.25rem;
+      margin-bottom: 1.25rem;
     }
 
     .preview-card-box {
-      background: var(--bg-surface-alt);
-      border: 1px solid var(--border-color);
-      border-radius: 12px;
+      background: var(--secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
       overflow: hidden;
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
     }
 
     .preview-card-top {
-      padding: 10px 14px;
-      background: rgba(0, 0, 0, 0.2);
-      font-size: 11px;
+      padding: 0.6rem 0.85rem;
+      background: var(--card-header);
+      font-size: 0.7rem;
       font-weight: 700;
-      color: var(--text-muted);
+      color: var(--muted-foreground);
       text-transform: uppercase;
       letter-spacing: 0.5px;
-      border-bottom: 1px solid var(--border-color);
+      border-bottom: 1px solid var(--border);
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 0.4rem;
     }
 
     .preview-img-frame {
@@ -617,34 +344,34 @@
     }
 
     .preview-no-img-text {
-      color: var(--text-dim);
-      font-size: 12px;
+      color: var(--muted-foreground);
+      font-size: 0.75rem;
     }
 
     .preview-content-body {
-      padding: 14px 16px;
+      padding: 0.85rem 1rem;
     }
 
     .preview-domain-name {
-      font-size: 11px;
-      color: var(--accent-cyan);
+      font-size: 0.7rem;
+      color: var(--cyber-cyan);
       text-transform: uppercase;
-      font-family: var(--font-mono);
+      font-family: 'JetBrains Mono', monospace;
       font-weight: 700;
-      margin-bottom: 4px;
+      margin-bottom: 0.25rem;
     }
 
     .preview-post-title {
       font-weight: 700;
-      font-size: 14.5px;
-      color: var(--text-main);
-      margin-bottom: 6px;
+      font-size: 0.9rem;
+      color: var(--foreground);
+      margin-bottom: 0.35rem;
       line-height: 1.35;
     }
 
     .preview-post-desc {
-      font-size: 12.5px;
-      color: var(--text-muted);
+      font-size: 0.78rem;
+      color: var(--muted-foreground);
       line-height: 1.45;
     }
 
@@ -652,163 +379,104 @@
     .heading-tree-list {
       display: flex;
       flex-direction: column;
-      gap: 6px;
-      margin-top: 14px;
+      gap: 0.4rem;
+      margin-top: 0.85rem;
     }
 
     .heading-node {
       display: flex;
       align-items: center;
-      gap: 12px;
-      padding: 8px 12px;
-      border-radius: 8px;
-      background: var(--bg-surface-alt);
-      border: 1px solid rgba(255, 255, 255, 0.04);
-      font-size: 13.5px;
-      transition: border-color 0.15s;
+      gap: 0.75rem;
+      padding: 0.55rem 0.85rem;
+      border-radius: var(--radius-sm);
+      background: var(--secondary);
+      border: 1px solid var(--border);
+      font-size: 0.84rem;
+      transition: border-color 0.15s ease;
     }
 
     .heading-node:hover {
-      border-color: rgba(56, 189, 248, 0.35);
+      border-color: rgba(250, 156, 27, 0.4);
     }
 
     .htag-badge {
       font-weight: 800;
-      font-family: var(--font-mono);
-      padding: 2px 7px;
-      border-radius: 4px;
-      font-size: 11px;
+      font-family: 'JetBrains Mono', monospace;
+      padding: 0.15rem 0.5rem;
+      border-radius: 0.25rem;
+      font-size: 0.7rem;
       flex-shrink: 0;
     }
 
-    .htag-h1 {
-      background: #7c3aed;
-      color: #fff;
-    }
+    .htag-h1 { background: #7c3aed; color: #fff; }
+    .htag-h2 { background: #0284c7; color: #fff; }
+    .htag-h3 { background: #0d9488; color: #fff; }
+    .htag-h4 { background: #ca8a04; color: #fff; }
+    .htag-h5 { background: #475569; color: #fff; }
+    .htag-h6 { background: #334155; color: #cbd5e1; }
 
-    .htag-h2 {
-      background: #0284c7;
-      color: #fff;
-    }
-
-    .htag-h3 {
-      background: #0d9488;
-      color: #fff;
-    }
-
-    .htag-h4 {
-      background: #ca8a04;
-      color: #fff;
-    }
-
-    .htag-h5 {
-      background: #475569;
-      color: #fff;
-    }
-
-    .htag-h6 {
-      background: #334155;
-      color: #cbd5e1;
-    }
-
-    .hlevel-1 {
-      margin-left: 0;
-    }
-
-    .hlevel-2 {
-      margin-left: 20px;
-      border-left: 3px solid #0284c7;
-    }
-
-    .hlevel-3 {
-      margin-left: 40px;
-      border-left: 3px solid #0d9488;
-    }
-
-    .hlevel-4 {
-      margin-left: 60px;
-      border-left: 3px solid #ca8a04;
-    }
-
-    .hlevel-5 {
-      margin-left: 80px;
-      border-left: 3px solid #475569;
-    }
-
-    .hlevel-6 {
-      margin-left: 100px;
-      border-left: 3px solid #334155;
-    }
+    .hlevel-1 { margin-left: 0; }
+    .hlevel-2 { margin-left: 1.25rem; border-left: 3px solid #0284c7; }
+    .hlevel-3 { margin-left: 2.5rem; border-left: 3px solid #0d9488; }
+    .hlevel-4 { margin-left: 3.75rem; border-left: 3px solid #ca8a04; }
+    .hlevel-5 { margin-left: 5rem; border-left: 3px solid #475569; }
+    .hlevel-6 { margin-left: 6.25rem; border-left: 3px solid #334155; }
 
     /* Tables */
-    table,
     table.data-table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 13px;
+      font-size: 0.8125rem;
       word-break: break-all;
     }
 
-    table th,
     table.data-table th {
       text-align: left;
-      padding: 10px 14px;
-      background: var(--bg-surface-alt);
-      color: var(--text-muted);
-      border-bottom: 1px solid var(--border-color);
-      font-size: 11px;
+      padding: 0.65rem 0.85rem;
+      background: var(--secondary);
+      color: var(--muted-foreground);
+      border-bottom: 1px solid var(--border);
+      font-size: 0.72rem;
       text-transform: uppercase;
       font-weight: 700;
       letter-spacing: 0.5px;
     }
 
-    table td,
     table.data-table td {
-      padding: 10px 14px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      padding: 0.65rem 0.85rem;
+      border-bottom: 1px solid var(--border);
       vertical-align: middle;
-      border-top: none;
-      border-left: none;
-      border-right: none;
-    }
-
-    body.light-theme table td {
-      border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-    }
-
-    table tr:hover {
-      background: rgba(255, 255, 255, 0.02);
     }
 
     /* Structured Data Code Blocks */
     .code-block-wrap {
-      background: #05070d;
-      border: 1px solid var(--border-color);
-      border-radius: 10px;
-      margin-bottom: 14px;
+      background: var(--secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      margin-bottom: 0.85rem;
       overflow: hidden;
     }
 
     .code-block-header {
-      background: var(--bg-card-header);
-      padding: 9px 16px;
+      background: var(--card-header);
+      padding: 0.55rem 1rem;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      border-bottom: 1px solid var(--border-color);
-      font-size: 12px;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.75rem;
     }
 
     .code-block-header .title {
       font-weight: 700;
-      color: var(--accent-cyan);
-      font-family: var(--font-mono);
+      color: var(--cyber-cyan);
+      font-family: 'JetBrains Mono', monospace;
     }
 
     pre.json-code {
-      padding: 14px 16px;
-      font-family: var(--font-mono);
-      font-size: 12.5px;
+      padding: 0.85rem 1rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
       color: #93c5fd;
       overflow-x: auto;
       max-height: 380px;
@@ -817,12 +485,12 @@
 
     /* Sidebar Navigation */
     .sidebar-title {
-      font-size: 11px;
+      font-size: 0.7rem;
       font-weight: 800;
       text-transform: uppercase;
-      color: var(--text-dim);
+      color: var(--muted-foreground);
       letter-spacing: 0.8px;
-      margin-bottom: 14px;
+      margin-bottom: 0.85rem;
     }
 
     .section-nav-list {
@@ -830,18 +498,18 @@
     }
 
     .section-nav-item {
-      margin-bottom: 4px;
+      margin-bottom: 0.25rem;
     }
 
     .section-nav-link {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 9px 12px;
-      border-radius: 8px;
-      color: var(--text-muted);
+      padding: 0.55rem 0.75rem;
+      border-radius: var(--radius-sm);
+      color: var(--muted-foreground);
       text-decoration: none;
-      font-size: 13px;
+      font-size: 0.8125rem;
       font-weight: 500;
       transition: all 0.15s ease;
       border-left: 3px solid transparent;
@@ -849,48 +517,26 @@
 
     .section-nav-link:hover,
     .section-nav-link.active {
-      background: var(--bg-surface-alt);
-      color: var(--accent-cyan);
-      border-left-color: var(--accent-cyan);
-      padding-left: 14px;
+      background: var(--secondary);
+      color: var(--primary);
+      border-left-color: var(--primary);
+      padding-left: 0.85rem;
     }
 
     .nav-count-badge {
-      font-size: 11px;
-      background: rgba(0, 0, 0, 0.25);
-      padding: 1px 7px;
-      border-radius: 10px;
-      color: var(--text-dim);
-      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      background: var(--card);
+      padding: 0.1rem 0.45rem;
+      border-radius: 9999px;
+      color: var(--muted-foreground);
+      font-family: 'JetBrains Mono', monospace;
+      border: 1px solid var(--border);
     }
 
     .section-nav-link.active .nav-count-badge {
-      background: rgba(56, 189, 248, 0.2);
-      color: var(--accent-cyan);
-    }
-
-    /* Floating Toast */
-    #toast-notification {
-      position: fixed;
-      bottom: 24px;
-      right: 28px;
-      background: var(--accent-blue);
-      color: #fff;
-      padding: 11px 20px;
-      border-radius: 8px;
-      font-weight: 600;
-      font-size: 13px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-      opacity: 0;
-      transform: translateY(12px);
-      transition: all 0.25s ease;
-      pointer-events: none;
-      z-index: 99999;
-    }
-
-    #toast-notification.show {
-      opacity: 1;
-      transform: translateY(0);
+      background: rgba(250, 156, 27, 0.15);
+      color: var(--primary);
+      border-color: rgba(250, 156, 27, 0.3);
     }
 
     /* Print Styles */
@@ -900,10 +546,12 @@
         color: #000 !important;
       }
 
+      .header,
       .sidebar-viewport,
       .filter-toolbar,
-      .header-actions,
-      .copy-btn {
+      .copy-btn,
+      .icon-btn,
+      .footer {
         display: none !important;
       }
 
@@ -919,7 +567,7 @@
         margin-bottom: 20px;
       }
 
-      .card-header {
+      .card-header-styled {
         background: #f0f0f0 !important;
         color: #000 !important;
       }
@@ -927,11 +575,6 @@
       .card-title-text,
       .content {
         color: #000 !important;
-      }
-
-      .url-bar-container {
-        border: 1px solid #ccc !important;
-        background: #fafafa !important;
       }
 
       pre.json-code {
@@ -943,247 +586,404 @@
 </head>
 
 <body data-theme="dark">
-  <div class="app-layout">
-    <!-- Main Viewport -->
-    <main class="main-viewport">
-      <header class="top-header">
-        <div class="header-row-1">
-          <div class="brand-group">
-            <img src="icons/icon128.png" alt="Logo" class="brand-logo-img">
-            <div class="brand-info">
-              <h1><span class="gradient-text">IPvFooKan</span> SEO Audit</h1>
-              <span class="badge-version">v0.1 &bull; In-Page Network &amp; SEO Engine</span>
+
+  <!-- ========================================================================
+       TOP NAVBAR (SHADCN HEADER)
+       ======================================================================== -->
+  <header class="header">
+    <div class="container header-content">
+      <div class="brand-group">
+        <a href="#" class="brand">
+          <div class="brand-icon">
+            <img src="icons/icon128.png" alt="IPvFooKan" style="width: 20px; height: 20px; border-radius: 4px;">
+          </div>
+          <span>IPvFooKan</span>
+          <span class="brand-badge">Deep Page &amp; SEO Audit</span>
+        </a>
+        <div class="header-target-info">
+          <a href="#" target="_blank" class="source-link" id="target-url-link-nav" title="Buka website asli">
+            🌐 Memuat URL Halaman...
+          </a>
+        </div>
+      </div>
+
+      <div class="nav-actions">
+        <button id="btn-copy-summary" class="btn btn-secondary" title="Copy Ringkasan Audit (Markdown)">
+          📋 Copy Summary
+        </button>
+        <button id="btn-export-json" class="btn btn-cyan" title="Download Data Audit sebagai JSON">
+          💾 Export JSON
+        </button>
+        <button id="btn-print" class="btn btn-primary" title="Cetak atau Simpan PDF">
+          🖨️ Print / PDF
+        </button>
+
+        <!-- Mode Toggle -->
+        <button class="icon-btn" id="theme-toggle" title="Toggle Light / Dark Mode">
+          <!-- Sun (Light) -->
+          <svg id="sun-icon" style="display: none;" width="18" height="18" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          </svg>
+          <!-- Moon (Dark) -->
+          <svg id="moon-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ========================================================================
+       MAIN WRAPPER
+       ======================================================================== -->
+  <main class="container main-wrap">
+
+    <!-- HERO SECTION -->
+    <section class="hero">
+      <div class="hero-pill">
+        <span style="display:inline-block; width:6px; height:6px; border-radius:50%; background:var(--primary);"></span>
+        IPvFooKan v0.1 • In-Page Network &amp; SEO Engine
+      </div>
+      <h1 class="hero-title">
+        Deep Page &amp; <span class="text-gradient">SEO Audit</span>
+      </h1>
+      <p class="hero-desc">
+        Analisis komprehensif metadata halaman aktif, Open Graph, Twitter Cards, Schema.org JSON-LD, heading tree, dan
+        diagnostik teknis SEO secara real-time.
+      </p>
+
+      <div class="url-bar-container">
+        <div class="url-content-left">
+          <span class="protocol-tag" id="badge-protocol">HTTPS</span>
+          <a id="target-url-link" href="#" target="_blank" class="target-url-link">Memuat data SEO...</a>
+        </div>
+        <button class="btn btn-secondary" id="btn-copy-url" title="Salin URL Target">📋 Copy URL</button>
+      </div>
+    </section>
+
+    <!-- METRICS OVERVIEW (KPI 6-CARDS) -->
+    <section class="grid-metrics">
+      <div class="card kpi-card" data-filter="passed" title="Klik untuk melompat ke diagnostik lolos">
+        <div class="card-header">
+          <span class="card-title">Passed</span>
+          <span class="badge badge-green">Valid</span>
+        </div>
+        <div class="card-value val-pass" id="kpi-good">0</div>
+        <div class="card-trend trend-up">
+          <span>✅ Lolos pemeriksaan</span>
+        </div>
+      </div>
+
+      <div class="card kpi-card" data-filter="warning" title="Klik untuk melompat ke peringatan">
+        <div class="card-header">
+          <span class="card-title">Warnings</span>
+          <span class="badge badge-primary">Review</span>
+        </div>
+        <div class="card-value val-warn" id="kpi-warn">0</div>
+        <div class="card-trend trend-amber">
+          <span>⚠️ Perlu perbaikan</span>
+        </div>
+      </div>
+
+      <div class="card kpi-card" data-filter="error" title="Klik untuk melompat ke error">
+        <div class="card-header">
+          <span class="card-title">Errors</span>
+          <span class="badge badge-destructive">Critical</span>
+        </div>
+        <div class="card-value val-err" id="kpi-err">0</div>
+        <div class="card-trend" style="color: var(--destructive);">
+          <span>🚨 Masalah kritis</span>
+        </div>
+      </div>
+
+      <div class="card kpi-card" data-filter="headings" title="Klik untuk melompat ke heading tree">
+        <div class="card-header">
+          <span class="card-title">H1 Headings</span>
+          <span class="badge badge-primary">Structure</span>
+        </div>
+        <div class="card-value val-head" id="kpi-h1">0</div>
+        <div class="card-trend trend-amber">
+          <span>📑 Outline judul H1</span>
+        </div>
+      </div>
+
+      <div class="card kpi-card" data-filter="schemas" title="Klik untuk melompat ke structured data">
+        <div class="card-header">
+          <span class="card-title">JSON-LD</span>
+          <span class="badge badge-cyan">Schema</span>
+        </div>
+        <div class="card-value val-data" id="kpi-schema">0</div>
+        <div class="card-trend trend-cyan">
+          <span>🧩 Structured data</span>
+        </div>
+      </div>
+
+      <div class="card kpi-card" data-filter="links" title="Klik untuk melompat ke analisis links">
+        <div class="card-header">
+          <span class="card-title">Total Links</span>
+          <span class="badge badge-secondary">Anchors</span>
+        </div>
+        <div class="card-value val-link" id="kpi-links">0</div>
+        <div class="card-trend">
+          <span>⚓ Internal &amp; eksternal</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- FILTER & SEARCH TOOLBAR -->
+    <div class="filter-toolbar">
+      <div class="search-input-wrap">
+        <span class="search-input-icon">🔍</span>
+        <input type="text" id="global-search-input" class="search-input"
+          placeholder="Ketik untuk memfilter meta tag, properti, heading, atau domain..." />
+      </div>
+      <div class="chips-filter-row">
+        <button class="chip-btn active" data-tab="all">Semua Bagian</button>
+        <button class="chip-btn" data-tab="diagnostics-section">🩺 Diagnostics</button>
+        <button class="chip-btn" data-tab="common">📄 Common Meta</button>
+        <button class="chip-btn" data-tab="social">🌐 Social</button>
+        <button class="chip-btn" data-tab="structureddata">🧩 Structured Data</button>
+        <button class="chip-btn" data-tab="headings">📑 Headings</button>
+        <button class="chip-btn" data-tab="links">⚓ Links</button>
+        <button class="chip-btn" data-tab="security">🛡️ Security</button>
+      </div>
+    </div>
+
+    <!-- APP LAYOUT: MAIN VIEWPORT & SIDEBAR VIEWPORT -->
+    <div class="app-layout">
+      <!-- Main Viewport -->
+      <div class="main-viewport">
+
+        <!-- Section: Diagnostics -->
+        <section id="diagnostics-section" class="seo-card">
+          <div class="card-header-styled">
+            <div class="card-title-group">
+              <span class="card-icon">🩺</span>
+              <span class="card-title-text">SEO Health Diagnostics</span>
             </div>
+            <span id="badge-diag-count" class="card-badge-count">0 items</span>
           </div>
-          <div class="header-actions">
-            <button id="btn-theme-toggle" class="btn" title="Ganti Tema Gelap / Terang">🌓 Tema</button>
-            <button id="btn-copy-summary" class="btn" title="Copy Ringkasan Audit (Markdown)">📋 Copy Summary</button>
-            <button id="btn-export-json" class="btn" title="Download Data Audit sebagai JSON">💾 Export JSON</button>
-            <button id="btn-print" class="btn btn-primary" title="Cetak atau Simpan PDF">🖨️ Print / PDF</button>
-          </div>
-        </div>
+          <div class="card-body" id="diagnostics-container"></div>
+        </section>
 
-        <div class="url-bar-container">
-          <div class="url-content-left">
-            <span class="protocol-tag" id="badge-protocol">HTTPS</span>
-            <a id="target-url-link" href="#" target="_blank" class="target-url-link">Memuat data SEO...</a>
+        <!-- Section: Common Meta -->
+        <section id="common" class="seo-card">
+          <div class="card-header-styled">
+            <div class="card-title-group">
+              <span class="card-icon">📄</span>
+              <span class="card-title-text">Common &amp; Core Meta</span>
+            </div>
+            <span id="badge-common-count" class="card-badge-count">Core SEO</span>
           </div>
-          <button class="copy-btn" id="btn-copy-url">Copy URL</button>
-        </div>
+          <div class="card-body" id="common-container"></div>
+        </section>
 
-        <div class="kpi-grid">
-          <div class="kpi-card" data-filter="passed">
-            <div id="kpi-good" class="kpi-value val-pass">0</div>
-            <div class="kpi-label">Passed Checks</div>
+        <!-- Section: Mobile & Viewport -->
+        <section id="mobile" class="seo-card">
+          <div class="card-header-styled">
+            <div class="card-title-group">
+              <span class="card-icon">📱</span>
+              <span class="card-title-text">Mobile &amp; Viewport</span>
+            </div>
+            <span class="card-badge-count">Responsive</span>
           </div>
-          <div class="kpi-card" data-filter="warning">
-            <div id="kpi-warn" class="kpi-value val-warn">0</div>
-            <div class="kpi-label">Warnings</div>
-          </div>
-          <div class="kpi-card" data-filter="error">
-            <div id="kpi-err" class="kpi-value val-err">0</div>
-            <div class="kpi-label">Errors</div>
-          </div>
-          <div class="kpi-card" data-filter="headings">
-            <div id="kpi-h1" class="kpi-value val-head">0</div>
-            <div class="kpi-label">H1 Headings</div>
-          </div>
-          <div class="kpi-card" data-filter="schemas">
-            <div id="kpi-schema" class="kpi-value val-data">0</div>
-            <div class="kpi-label">Schemas (JSON-LD)</div>
-          </div>
-          <div class="kpi-card" data-filter="links">
-            <div id="kpi-links" class="kpi-value val-link">0</div>
-            <div class="kpi-label">Total Links</div>
-          </div>
-        </div>
-      </header>
+          <div class="card-body" id="mobile-container"></div>
+        </section>
 
-      <!-- Filter / Search Toolbar -->
-      <div class="filter-toolbar">
-        <div class="search-input-wrap">
-          <span class="search-input-icon">🔍</span>
-          <input type="text" id="global-search-input" class="search-input"
-            placeholder="Ketik untuk memfilter meta tag, properti, heading, atau domain..." />
-        </div>
-        <div class="chips-filter-row">
-          <button class="chip-btn active" data-tab="all">Semua Bagian</button>
-          <button class="chip-btn" data-tab="diagnostics-section">🩺 Diagnostics</button>
-          <button class="chip-btn" data-tab="common">📄 Common Meta</button>
-          <button class="chip-btn" data-tab="social">🌐 Social</button>
-          <button class="chip-btn" data-tab="structureddata">🧩 Structured Data</button>
-          <button class="chip-btn" data-tab="headings">📑 Headings</button>
-          <button class="chip-btn" data-tab="links">⚓ Links</button>
-          <button class="chip-btn" data-tab="security">🛡️ Security</button>
-        </div>
+        <!-- Section: Social -->
+        <section id="social" class="seo-card">
+          <div class="card-header-styled">
+            <div class="card-title-group">
+              <span class="card-icon">🌐</span>
+              <span class="card-title-text">Social Media (Open Graph &amp; Twitter)</span>
+            </div>
+            <span id="badge-social-count" class="card-badge-count">0 tags</span>
+          </div>
+          <div class="card-body">
+            <div class="social-previews-grid" id="social-previews-container"></div>
+            <div id="social-tags-container" style="margin-top: 16px;"></div>
+          </div>
+        </section>
+
+        <!-- Section: Structured Data -->
+        <section id="structureddata" class="seo-card">
+          <div class="card-header-styled">
+            <div class="card-title-group">
+              <span class="card-icon">🧩</span>
+              <span class="card-title-text">Structured Data (JSON-LD &amp; Schema)</span>
+            </div>
+            <span id="badge-schema-count" class="card-badge-count">0 schemas</span>
+          </div>
+          <div class="card-body" id="schema-container"></div>
+        </section>
+
+        <!-- Section: Headings -->
+        <section id="headings" class="seo-card">
+          <div class="card-header-styled">
+            <div class="card-title-group">
+              <span class="card-icon">📑</span>
+              <span class="card-title-text">Markup &amp; Headings Outline (H1 - H6)</span>
+            </div>
+            <span id="badge-headings-count" class="card-badge-count">0 headings</span>
+          </div>
+          <div class="card-body">
+            <div id="headings-summary-badges" style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px;"></div>
+            <div class="heading-tree-list" id="headings-tree-container"></div>
+            <div id="forms-container" style="margin-top: 20px;"></div>
+            <div id="html5-container" style="margin-top: 14px;"></div>
+          </div>
+        </section>
+
+        <!-- Section: Links -->
+        <section id="links" class="seo-card">
+          <div class="card-header-styled">
+            <div class="card-title-group">
+              <span class="card-icon">⚓</span>
+              <span class="card-title-text">Links &amp; Anchors Analysis</span>
+            </div>
+            <span id="badge-links-count" class="card-badge-count">0 links</span>
+          </div>
+          <div class="card-body" id="links-container"></div>
+        </section>
+
+        <!-- Section: Resource Hints -->
+        <section id="rhints" class="seo-card">
+          <div class="card-header-styled">
+            <div class="card-title-group">
+              <span class="card-icon">⚡</span>
+              <span class="card-title-text">Resource Hints (Preload / Preconnect)</span>
+            </div>
+            <span id="badge-hints-count" class="card-badge-count">0 hints</span>
+          </div>
+          <div class="card-body" id="hints-container"></div>
+        </section>
+
+        <!-- Section: External Resources -->
+        <section id="externalr" class="seo-card">
+          <div class="card-header-styled">
+            <div class="card-title-group">
+              <span class="card-icon">🏢</span>
+              <span class="card-title-text">External Resources &amp; 3rd Parties</span>
+            </div>
+            <span id="badge-ext-count" class="card-badge-count">0 domains</span>
+          </div>
+          <div class="card-body" id="external-container"></div>
+        </section>
+
+        <!-- Section: Security -->
+        <section id="security" class="seo-card">
+          <div class="card-header-styled">
+            <div class="card-title-group">
+              <span class="card-icon">🛡️</span>
+              <span class="card-title-text">Security &amp; Headers Configuration</span>
+            </div>
+            <span class="card-badge-count">HTTPS / CSP</span>
+          </div>
+          <div class="card-body" id="security-container"></div>
+        </section>
+
       </div>
 
-      <!-- Section: Diagnostics -->
-      <section id="diagnostics-section" class="seo-card">
-        <div class="card-header">
-          <div class="card-title-group">
-            <span class="card-icon">🩺</span>
-            <span class="card-title-text">SEO Health Diagnostics</span>
-          </div>
-          <span id="badge-diag-count" class="card-badge-count">0 items</span>
-        </div>
-        <div class="card-body" id="diagnostics-container"></div>
-      </section>
+      <!-- Sidebar Viewport -->
+      <aside class="sidebar-viewport">
+        <div class="sidebar-title">Daftar Bagian Audit</div>
+        <ul class="section-nav-list">
+          <li class="section-nav-item">
+            <a href="#diagnostics-section" class="section-nav-link active">
+              <span>🩺 Diagnostics</span>
+              <span id="nav-badge-diag" class="nav-count-badge">0</span>
+            </a>
+          </li>
+          <li class="section-nav-item">
+            <a href="#common" class="section-nav-link">
+              <span>📄 Common Meta</span>
+              <span id="nav-badge-common" class="nav-count-badge">0</span>
+            </a>
+          </li>
+          <li class="section-nav-item">
+            <a href="#mobile" class="section-nav-link">
+              <span>📱 Mobile Ready</span>
+            </a>
+          </li>
+          <li class="section-nav-item">
+            <a href="#social" class="section-nav-link">
+              <span>🌐 Social Meta</span>
+              <span id="nav-badge-social" class="nav-count-badge">0</span>
+            </a>
+          </li>
+          <li class="section-nav-item">
+            <a href="#structureddata" class="section-nav-link">
+              <span>🧩 Structured Data</span>
+              <span id="nav-badge-schema" class="nav-count-badge">0</span>
+            </a>
+          </li>
+          <li class="section-nav-item">
+            <a href="#headings" class="section-nav-link">
+              <span>📑 Headings Tree</span>
+              <span id="nav-badge-headings" class="nav-count-badge">0</span>
+            </a>
+          </li>
+          <li class="section-nav-item">
+            <a href="#links" class="section-nav-link">
+              <span>⚓ Links Analysis</span>
+              <span id="nav-badge-links" class="nav-count-badge">0</span>
+            </a>
+          </li>
+          <li class="section-nav-item">
+            <a href="#rhints" class="section-nav-link">
+              <span>⚡ Resource Hints</span>
+              <span id="nav-badge-hints" class="nav-count-badge">0</span>
+            </a>
+          </li>
+          <li class="section-nav-item">
+            <a href="#externalr" class="section-nav-link">
+              <span>🏢 External 3rd Party</span>
+              <span id="nav-badge-ext" class="nav-count-badge">0</span>
+            </a>
+          </li>
+          <li class="section-nav-item">
+            <a href="#security" class="section-nav-link">
+              <span>🛡️ Security Audit</span>
+            </a>
+          </li>
+        </ul>
 
-      <!-- Section: Common Meta -->
-      <section id="common" class="seo-card">
-        <div class="card-header">
-          <div class="card-title-group">
-            <span class="card-icon">📄</span>
-            <span class="card-title-text">Common & Core Meta</span>
-          </div>
-          <span id="badge-common-count" class="card-badge-count">Core SEO</span>
+        <div
+          style="margin-top: 2rem; padding-top: 1rem; border-top: 1px solid var(--border); font-size: 0.75rem; color: var(--muted-foreground); line-height: 1.5;">
+          <a href="https://github.com/mm1rza/ipvfoo" target="_blank"
+            style="color:var(--cyber-cyan); text-decoration:none; font-weight:700;">IPvFooKan v0.1</a><br>
+          In-Page Network &amp; SEO Audit Engine
         </div>
-        <div class="card-body" id="common-container"></div>
-      </section>
+      </aside>
+    </div>
 
-      <!-- Section: Mobile & Viewport -->
-      <section id="mobile" class="seo-card">
-        <div class="card-header">
-          <div class="card-title-group">
-            <span class="card-icon">📱</span>
-            <span class="card-title-text">Mobile & Viewport</span>
-          </div>
-          <span class="card-badge-count">Responsive</span>
-        </div>
-        <div class="card-body" id="mobile-container"></div>
-      </section>
-
-      <!-- Section: Social -->
-      <section id="social" class="seo-card">
-        <div class="card-header">
-          <div class="card-title-group">
-            <span class="card-icon">🌐</span>
-            <span class="card-title-text">Social Media (Open Graph & Twitter)</span>
-          </div>
-          <span id="badge-social-count" class="card-badge-count">0 tags</span>
-        </div>
-        <div class="card-body">
-          <div class="social-previews-grid" id="social-previews-container"></div>
-          <div id="social-tags-container" style="margin-top: 16px;"></div>
-        </div>
-      </section>
-
-      <!-- Section: Structured Data -->
-      <section id="structureddata" class="seo-card">
-        <div class="card-header">
-          <div class="card-title-group">
-            <span class="card-icon">🧩</span>
-            <span class="card-title-text">Structured Data (JSON-LD & Schema)</span>
-          </div>
-          <span id="badge-schema-count" class="card-badge-count">0 schemas</span>
-        </div>
-        <div class="card-body" id="schema-container"></div>
-      </section>
-
-      <!-- Section: Headings -->
-      <section id="headings" class="seo-card">
-        <div class="card-header">
-          <div class="card-title-group">
-            <span class="card-icon">📑</span>
-            <span class="card-title-text">Markup & Headings Outline (H1 - H6)</span>
-          </div>
-          <span id="badge-headings-count" class="card-badge-count">0 headings</span>
-        </div>
-        <div class="card-body">
-          <div id="headings-summary-badges" style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px;">
-          </div>
-          <div class="heading-tree-list" id="headings-tree-container"></div>
-          <div id="forms-container" style="margin-top: 20px;"></div>
-          <div id="html5-container" style="margin-top: 14px;"></div>
-        </div>
-      </section>
-
-      <!-- Section: Links -->
-      <section id="links" class="seo-card">
-        <div class="card-header">
-          <div class="card-title-group">
-            <span class="card-icon">⚓</span>
-            <span class="card-title-text">Links & Anchors Analysis</span>
-          </div>
-          <span id="badge-links-count" class="card-badge-count">0 links</span>
-        </div>
-        <div class="card-body" id="links-container"></div>
-      </section>
-
-      <!-- Section: Resource Hints -->
-      <section id="rhints" class="seo-card">
-        <div class="card-header">
-          <div class="card-title-group">
-            <span class="card-icon">⚡</span>
-            <span class="card-title-text">Resource Hints (Preload / Preconnect)</span>
-          </div>
-          <span id="badge-hints-count" class="card-badge-count">0 hints</span>
-        </div>
-        <div class="card-body" id="hints-container"></div>
-      </section>
-
-      <!-- Section: External Resources -->
-      <section id="externalr" class="seo-card">
-        <div class="card-header">
-          <div class="card-title-group">
-            <span class="card-icon">🏢</span>
-            <span class="card-title-text">External Resources & 3rd Parties</span>
-          </div>
-          <span id="badge-ext-count" class="card-badge-count">0 domains</span>
-        </div>
-        <div class="card-body" id="external-container"></div>
-      </section>
-
-      <!-- Section: Security -->
-      <section id="security" class="seo-card">
-        <div class="card-header">
-          <div class="card-title-group">
-            <span class="card-icon">🛡️</span>
-            <span class="card-title-text">Security & Headers Configuration</span>
-          </div>
-          <span class="card-badge-count">HTTPS / CSP</span>
-        </div>
-        <div class="card-body" id="security-container"></div>
-      </section>
-    </main>
-
-    <!-- Sidebar Viewport -->
-    <aside class="sidebar-viewport">
-      <div class="sidebar-title">Daftar Bagian Audit</div>
-      <ul class="section-nav-list">
-        <li class="section-nav-item"><a href="#diagnostics-section" class="section-nav-link active"><span>🩺
-              Diagnostics</span> <span id="nav-badge-diag" class="nav-count-badge">0</span></a></li>
-        <li class="section-nav-item"><a href="#common" class="section-nav-link"><span>📄 Common Meta</span> <span
-              id="nav-badge-common" class="nav-count-badge">0</span></a></li>
-        <li class="section-nav-item"><a href="#mobile" class="section-nav-link"><span>📱 Mobile Ready</span></a></li>
-        <li class="section-nav-item"><a href="#social" class="section-nav-link"><span>🌐 Social Meta</span> <span
-              id="nav-badge-social" class="nav-count-badge">0</span></a></li>
-        <li class="section-nav-item"><a href="#structureddata" class="section-nav-link"><span>🧩 Structured Data</span>
-            <span id="nav-badge-schema" class="nav-count-badge">0</span></a></li>
-        <li class="section-nav-item"><a href="#headings" class="section-nav-link"><span>📑 Headings Tree</span> <span
-              id="nav-badge-headings" class="nav-count-badge">0</span></a></li>
-        <li class="section-nav-item"><a href="#links" class="section-nav-link"><span>⚓ Links Analysis</span> <span
-              id="nav-badge-links" class="nav-count-badge">0</span></a></li>
-        <li class="section-nav-item"><a href="#rhints" class="section-nav-link"><span>⚡ Resource Hints</span> <span
-              id="nav-badge-hints" class="nav-count-badge">0</span></a></li>
-        <li class="section-nav-item"><a href="#externalr" class="section-nav-link"><span>🏢 External 3rd Party</span>
-            <span id="nav-badge-ext" class="nav-count-badge">0</span></a></li>
-        <li class="section-nav-item"><a href="#security" class="section-nav-link"><span>🛡️ Security Audit</span></a>
-        </li>
-      </ul>
-
-      <div
-        style="margin-top: 32px; padding-top: 18px; border-top: 1px solid var(--border-color); font-size: 11.5px; color: var(--text-dim); line-height: 1.5;">
-        <a href="https://github.com/mm1rza/ipvfoo" target="_blank"
-          style="color:var(--accent-cyan); text-decoration:none; font-weight:700;">IPvFooKan v0.1</a><br>
-        In-Page Network &amp; SEO Audit Engine
+    <!-- FOOTER -->
+    <footer class="footer">
+      <div>
+        Built with the <b>shadcn/ui</b> design methodology &amp; <b>COLOR_PALETTE.md</b> tokens.
       </div>
-    </aside>
-  </div>
+      <div>
+        <a href="themes/SHADCN_THEME.md" style="color: var(--primary); text-decoration: none; font-weight: 600;">Lihat
+          Dokumentasi SHADCN_THEME.md &rarr;</a>
+      </div>
+    </footer>
 
+  </main>
+
+  <!-- TOAST NOTIFICATION -->
   <div id="toast-notification">Teks berhasil disalin!</div>
 
+  <!-- SCRIPT -->
   <script src="scripts/seo.js"></script>
 </body>
 
