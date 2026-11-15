@@ -1928,6 +1928,14 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     chrome.storage.local.set({ ipHitCounter: {}, ipByteCounter: {}, lastResetDate: new Date().toDateString() });
     sendResponse({ status: "ok" });
     return true;
+  } else if (msg.cmd === "open_seo_tab") {
+    chrome.tabs.create({ url: chrome.runtime.getURL("seo.html") });
+    sendResponse({ status: "ok" });
+    return true;
+  } else if (msg.cmd === "open_tab" && msg.url) {
+    chrome.tabs.create({ url: msg.url });
+    sendResponse({ status: "ok" });
+    return true;
   } else if (msg.cmd === "lookupBgpPath") {
     fetchBgpPath(msg.ip).then((data) => {
       sendResponse(data);

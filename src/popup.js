@@ -535,6 +535,21 @@ window.onload = async function () {
     };
   }
 
+  const seoBtn = document.getElementById("seo_btn");
+  if (seoBtn) {
+    seoBtn.onclick = () => {
+      chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+        if (!tabs || !tabs[0]) return;
+        chrome.tabs.sendMessage(tabs[0].id, { action: "open_seo" }, (resp) => {
+          if (chrome.runtime.lastError || !resp) {
+            chrome.tabs.create({ url: chrome.runtime.getURL("seo.html") });
+          }
+          window.close();
+        });
+      });
+    };
+  }
+
   const linkgrabberBtn = document.getElementById("linkgrabber_btn");
   if (linkgrabberBtn) {
     linkgrabberBtn.onclick = () => {

@@ -444,6 +444,17 @@
       color: #fff;
     }
 
+    .btn-seo {
+      background: rgba(14, 165, 233, 0.2);
+      color: #38bdf8;
+      border-color: rgba(14, 165, 233, 0.45);
+    }
+    .btn-seo:hover {
+      background: #0284c7;
+      color: #fff;
+      box-shadow: 0 0 8px rgba(14, 165, 233, 0.6);
+    }
+
     .btn-grabber {
       background: rgba(124, 58, 237, 0.2);
       color: #c084fc;
@@ -970,10 +981,11 @@
       <div class="controls">
         <button id="btn-export-csv" class="btn btn-export" title="Export Session ke CSV">CSV</button>
         <button id="btn-export-txt" class="btn btn-export" title="Export Session ke TXT">TXT</button>
+        <button id="btn-seo" class="btn btn-seo" title="Buka META SEO Inspector (New Tab)">META SEO</button>
         <button id="btn-linkgrabber" class="btn btn-grabber" title="Ekstrak Semua Link di Halaman Ini (Link Grabber)">LINKGRABBER</button>
         <button id="btn-rst" class="btn btn-rst" title="Reset Hit & Size Counter">RESET HITS</button>
         <button id="btn-min" class="btn btn-action" title="Minimize / Sembunyikan">_</button>
-        <button id="btn-close" class="btn btn-action" title="Tutup Widget">✕</button>
+        <button id="btn-close" class="btn btn-action" title="Tutup Widget">âœ•</button>
       </div>
     </div>
     <div id="table-wrap">
@@ -1029,7 +1041,7 @@
         const icon = el.querySelector(".sort-icon");
         if (icon) {
           if (currentSort.column === c) {
-            icon.textContent = currentSort.order === "asc" ? " ▲" : " ▼";
+            icon.textContent = currentSort.order === "asc" ? " â–²" : " â–¼";
             el.style.color = "#00d9ff";
           } else {
             icon.textContent = "";
@@ -1155,7 +1167,7 @@
     const csvContent = rows.join("\r\n");
     const filename = getExportFilename(mainDomain, "csv");
     triggerDownload(csvContent, filename, "text/csv;charset=utf-8;");
-    showCopyToast(`✅ Exported CSV (${tuples.length} baris)`);
+    showCopyToast(`âœ… Exported CSV (${tuples.length} baris)`);
   }
 
   function exportTxtSession(tuples, mainDomain) {
@@ -1233,7 +1245,7 @@
     const txtContent = lines.join("\r\n");
     const filename = getExportFilename(mainDomain, "txt");
     triggerDownload(txtContent, filename, "text/plain;charset=utf-8;");
-    showCopyToast(`✅ Exported TXT (${tuples.length} baris)`);
+    showCopyToast(`âœ… Exported TXT (${tuples.length} baris)`);
   }
 
   // Buttons
@@ -1243,6 +1255,10 @@
 
   shadow.getElementById("btn-export-txt").onclick = () => {
     exportTxtSession(allTuplesCache, allTuplesCache[0] ? allTuplesCache[0][0] : location.hostname);
+  };
+
+  shadow.getElementById("btn-seo").onclick = () => {
+    openSeoInNewTab();
   };
 
   shadow.getElementById("btn-linkgrabber").onclick = () => {
@@ -1289,7 +1305,7 @@
     tr._tuple = tuple;
     tr._domain = domain;
 
-    const lockIcon = (flags & (DFLAG_H1 | DFLAG_H2 | DFLAG_H3) || !(flags & DFLAG_NO_TLS)) ? "🔒 " : "";
+    const lockIcon = (flags & (DFLAG_H1 | DFLAG_H2 | DFLAG_H3) || !(flags & DFLAG_NO_TLS)) ? "ðŸ”’ " : "";
     const ipClass = version === "6" ? "ip6" : "ip4";
 
     let statusClass = "status-2xx";
@@ -1352,7 +1368,7 @@
       : `<span style="color:#666;">-</span>`;
 
     const dSpeed = domainSpeedMap[domain] || 0;
-    const speedHtml = dSpeed >= 200 ? `<span class="speed-tag">⚡${formatSpeed(dSpeed)}</span> ` : "";
+    const speedHtml = dSpeed >= 200 ? `<span class="speed-tag">âš¡${formatSpeed(dSpeed)}</span> ` : "";
 
     tr.innerHTML = `
       <td class="domain-cell" title="Klik untuk copy: ${domain}">${lockIcon}${domain}</td>
@@ -1454,7 +1470,7 @@
       totalHits += t[4] || 0;
       totalBytes += t[5] || 0;
     });
-    const speedStr = currentSpeedBps >= 200 ? ` | ⚡ ${formatSpeed(currentSpeedBps)}` : "";
+    const speedStr = currentSpeedBps >= 200 ? ` | âš¡ ${formatSpeed(currentSpeedBps)}` : "";
     const miniText = shadow.getElementById("mini-text");
     if (miniText) {
       miniText.textContent = `${mainAddr} | ${mainStatus}${mainLat} | ${totalHits} req | ${formatBytes(totalBytes)}${speedStr}`;
@@ -1505,7 +1521,7 @@
     const speedEl = shadow.getElementById("widget-speed");
     if (speedEl) {
       if (currentSpeedBps >= 200) {
-        speedEl.textContent = `⚡ ${formatSpeed(currentSpeedBps)}`;
+        speedEl.textContent = `âš¡ ${formatSpeed(currentSpeedBps)}`;
         speedEl.style.display = "inline-flex";
       } else {
         speedEl.style.display = "none";
@@ -1523,7 +1539,7 @@
           const sizeTd = tr.querySelector(".size-cell");
           if (sizeTd) {
             const bytes = tr._tuple[5] || 0;
-            const speedHtml = dSpeed >= 200 ? `<span class="speed-tag">⚡${formatSpeed(dSpeed)}</span> ` : "";
+            const speedHtml = dSpeed >= 200 ? `<span class="speed-tag">âš¡${formatSpeed(dSpeed)}</span> ` : "";
             sizeTd.innerHTML = `${speedHtml}${formatBytes(bytes)}`;
           }
         }
@@ -1579,12 +1595,12 @@
     <div id="bgp-modal">
       <div id="bgp-modal-header">
         <div class="title">
-          <span>🛰️ Live Traceroute & BGP AS-Path (HalloNet LG)</span>
+          <span>ðŸ›°ï¸ Live Traceroute & BGP AS-Path (HalloNet LG)</span>
         </div>
-        <button id="bgp-modal-close" title="Tutup Modal">✕</button>
+        <button id="bgp-modal-close" title="Tutup Modal">âœ•</button>
       </div>
       <div id="bgp-modal-body">
-        <div class="bgp-loading">⏳ Menjalankan traceroute live...</div>
+        <div class="bgp-loading">â³ Menjalankan traceroute live...</div>
       </div>
     </div>
   `;
@@ -1610,7 +1626,7 @@
     const body = modalBackdrop.querySelector("#bgp-modal-body");
     body.innerHTML = `
       <div class="bgp-loading">
-        <div style="font-size: 26px; margin-bottom: 8px;">🛰️</div>
+        <div style="font-size: 26px; margin-bottom: 8px;">ðŸ›°ï¸</div>
         Menjalankan Live Traceroute dari <strong>Looking Glass HalloNet</strong> ke <strong>${addr}</strong> (${domain})...
       </div>
     `;
@@ -1627,7 +1643,7 @@
             } else {
               body.innerHTML = `
                 <div style="color:#ff5252; padding: 25px; text-align:center;">
-                  ⚠️ Gagal mengambil rute: ${res?.error || bgpRes?.error || "Koneksi timeout"}
+                  âš ï¸ Gagal mengambil rute: ${res?.error || bgpRes?.error || "Koneksi timeout"}
                 </div>
               `;
             }
@@ -1677,10 +1693,10 @@
       flowHtml = `
         <div class="bgp-path-container">
           <div class="bgp-path-title">
-            <span>🛣️ Jalur Transit ISP (AS-Path Breadcrumb)</span>
+            <span>ðŸ›£ï¸ Jalur Transit ISP (AS-Path Breadcrumb)</span>
           </div>
           <div class="bgp-flow-wrapper">
-            ${nodes.join('<span class="bgp-arrow">──▶</span>')}
+            ${nodes.join('<span class="bgp-arrow">â”€â”€â–¶</span>')}
           </div>
         </div>
       `;
@@ -1716,17 +1732,17 @@
     body.innerHTML = `
       <div class="bgp-summary-grid">
         <div class="bgp-card">
-          <div class="bgp-card-label">🎯 Target Host & IP</div>
+          <div class="bgp-card-label">ðŸŽ¯ Target Host & IP</div>
           <div class="bgp-card-val">${addr}</div>
           <div class="bgp-card-sub">${domain}</div>
         </div>
         <div class="bgp-card">
-          <div class="bgp-card-label">⚡ Traceroute Latency (RTT)</div>
+          <div class="bgp-card-label">âš¡ Traceroute Latency (RTT)</div>
           <div class="bgp-card-val" style="color:#48ff00;">${targetRtt}</div>
           <div class="bgp-card-sub">${data.hops_count || hops.length} Hops Total (${data.timestamp || 'Real-time'})</div>
         </div>
         <div class="bgp-card">
-          <div class="bgp-card-label">🏢 Destination AS & ISP</div>
+          <div class="bgp-card-label">ðŸ¢ Destination AS & ISP</div>
           <div class="bgp-card-val" style="color:#00d9ff;">${targetAsn}</div>
           <div class="bgp-card-sub" style="color:#ccc;">Source: gw-ixp.106-1.hallonet.id (AS151584 HalloNet)</div>
         </div>
@@ -1751,10 +1767,10 @@
       </div>
 
       <div class="bgp-actions">
-        <button id="btn-re-trace" class="bgp-btn" style="background:#334466; color:#fff;">🔄 Re-Run</button>
-        <button id="btn-copy-mkt-rule" class="bgp-btn bgp-btn-mkt">📋 Copy MikroTik Address-List</button>
-        <button id="btn-open-lg" class="bgp-btn" style="background:#2e7d32; color:#fff;">🌐 Looking Glass ↗</button>
-        <button id="btn-open-he-bgp" class="bgp-btn bgp-btn-he">🌐 BGP.HE.NET ↗</button>
+        <button id="btn-re-trace" class="bgp-btn" style="background:#334466; color:#fff;">ðŸ”„ Re-Run</button>
+        <button id="btn-copy-mkt-rule" class="bgp-btn bgp-btn-mkt">ðŸ“‹ Copy MikroTik Address-List</button>
+        <button id="btn-open-lg" class="bgp-btn" style="background:#2e7d32; color:#fff;">ðŸŒ Looking Glass â†—</button>
+        <button id="btn-open-he-bgp" class="bgp-btn bgp-btn-he">ðŸŒ BGP.HE.NET â†—</button>
       </div>
     `;
 
@@ -1821,14 +1837,14 @@
       pathHtml = `
         <div class="bgp-path-container">
           <div class="bgp-path-title">
-            <span>🛣️ AS-Path Route (Global Ingress ➔ Origin)</span>
+            <span>ðŸ›£ï¸ AS-Path Route (Global Ingress âž” Origin)</span>
           </div>
           <div class="bgp-flow-wrapper">
-            ${flowNodes.join('<span class="bgp-arrow">──▶</span>')}
+            ${flowNodes.join('<span class="bgp-arrow">â”€â”€â–¶</span>')}
           </div>
           <div style="font-size:11px; color:#8fa0b5; margin-top:8px;">
-            • Total Hop AS: <strong>${primaryPath.length} AS</strong> &nbsp;|&nbsp; 
-            • Total Jalur BGP Terdeteksi: <strong>${data.totalPaths || paths.length} rute global</strong>
+            â€¢ Total Hop AS: <strong>${primaryPath.length} AS</strong> &nbsp;|&nbsp; 
+            â€¢ Total Jalur BGP Terdeteksi: <strong>${data.totalPaths || paths.length} rute global</strong>
           </div>
         </div>
       `;
@@ -1846,17 +1862,17 @@
     body.innerHTML = `
       <div class="bgp-summary-grid">
         <div class="bgp-card">
-          <div class="bgp-card-label">🎯 Target Host & IP</div>
+          <div class="bgp-card-label">ðŸŽ¯ Target Host & IP</div>
           <div class="bgp-card-val">${addr}</div>
           <div class="bgp-card-sub">${domain}</div>
         </div>
         <div class="bgp-card">
-          <div class="bgp-card-label">📡 BGP Announced Prefix</div>
+          <div class="bgp-card-label">ðŸ“¡ BGP Announced Prefix</div>
           <div class="bgp-card-val" style="color:#00d9ff;">${prefix}</div>
           <div class="bgp-card-sub">Route Advertisement</div>
         </div>
         <div class="bgp-card" style="grid-column: span 2;">
-          <div class="bgp-card-label">🏢 Origin Autonomous System</div>
+          <div class="bgp-card-label">ðŸ¢ Origin Autonomous System</div>
           <div class="bgp-card-val" style="color:#48ff00;">${originAsn}</div>
           <div class="bgp-card-sub" style="color:#ccc;">${originHolder}</div>
         </div>
@@ -1865,8 +1881,8 @@
       ${pathHtml}
 
       <div class="bgp-actions">
-        <button id="btn-copy-mkt-rule" class="bgp-btn bgp-btn-mkt">📋 Copy MikroTik Address-List</button>
-        <button id="btn-open-he-bgp" class="bgp-btn bgp-btn-he">🌐 Buka BGP.HE.NET ↗</button>
+        <button id="btn-copy-mkt-rule" class="bgp-btn bgp-btn-mkt">ðŸ“‹ Copy MikroTik Address-List</button>
+        <button id="btn-open-he-bgp" class="bgp-btn bgp-btn-he">ðŸŒ Buka BGP.HE.NET â†—</button>
       </div>
     `;
 
@@ -2039,7 +2055,7 @@
     const sourceUrl = window.location.href;
     const sourceHost = window.location.hostname;
 
-    showCopyToast(`🚀 Membuka Grabber (${assets.length} aset) di Tab Baru...`);
+    showCopyToast(`ðŸš€ Membuka Grabber (${assets.length} aset) di Tab Baru...`);
 
     const html = `<!DOCTYPE html>
 <html lang="id">
@@ -2523,31 +2539,31 @@
 <body>
   <header>
     <div class="brand">
-      <h1>📦 Content & Asset Grabber</h1>
+      <h1>ðŸ“¦ Content & Asset Grabber</h1>
       <span class="header-badge" id="header-total-count">0 items</span>
-      <a href="${escapeHtml(sourceUrl)}" target="_blank" class="source-link" title="Buka website asli">🌐 ${escapeHtml(sourceUrl)}</a>
+      <a href="${escapeHtml(sourceUrl)}" target="_blank" class="source-link" title="Buka website asli">ðŸŒ ${escapeHtml(sourceUrl)}</a>
     </div>
   </header>
 
   <div class="main-wrap">
     <div class="toolbar-card">
       <div class="tabs-row" id="tabs-bar">
-        <button class="tab-btn active" data-tab="all">🌟 Semua <span class="tab-badge" id="count-all">0</span></button>
-        <button class="tab-btn" data-tab="image">🖼️ Gambar (PNG/B64) <span class="tab-badge" id="count-image">0</span></button>
-        <button class="tab-btn" data-tab="link">🔗 Links <span class="tab-badge" id="count-link">0</span></button>
-        <button class="tab-btn" data-tab="media">🎬 Video & Audio <span class="tab-badge" id="count-media">0</span></button>
-        <button class="tab-btn" data-tab="doc">📄 Dokumen <span class="tab-badge" id="count-doc">0</span></button>
-        <button class="tab-btn" data-tab="code">⚡ Scripts & CSS <span class="tab-badge" id="count-code">0</span></button>
+        <button class="tab-btn active" data-tab="all">ðŸŒŸ Semua <span class="tab-badge" id="count-all">0</span></button>
+        <button class="tab-btn" data-tab="image">ðŸ–¼ï¸ Gambar (PNG/B64) <span class="tab-badge" id="count-image">0</span></button>
+        <button class="tab-btn" data-tab="link">ðŸ”— Links <span class="tab-badge" id="count-link">0</span></button>
+        <button class="tab-btn" data-tab="media">ðŸŽ¬ Video & Audio <span class="tab-badge" id="count-media">0</span></button>
+        <button class="tab-btn" data-tab="doc">ðŸ“„ Dokumen <span class="tab-badge" id="count-doc">0</span></button>
+        <button class="tab-btn" data-tab="code">âš¡ Scripts & CSS <span class="tab-badge" id="count-code">0</span></button>
       </div>
 
       <div class="filter-actions-row">
         <input type="text" id="search-input" class="search-input" placeholder="Ketik untuk filter: nama file, domain, ekstensi .png, base64, dll..." autofocus />
-        <button id="btn-copy-urls" class="btn btn-primary" title="Copy semua URL yang tampil">📋 Copy URLs (<span id="copy-count">0</span>)</button>
-        <button id="btn-export-txt" class="btn btn-purple" title="Download daftar URL sebagai file teks">📥 Export TXT</button>
+        <button id="btn-copy-urls" class="btn btn-primary" title="Copy semua URL yang tampil">ðŸ“‹ Copy URLs (<span id="copy-count">0</span>)</button>
+        <button id="btn-export-txt" class="btn btn-purple" title="Download daftar URL sebagai file teks">ðŸ“¥ Export TXT</button>
         
         <div class="view-toggle">
-          <button id="btn-view-list" class="view-btn active" title="Tampilan List">☰ List</button>
-          <button id="btn-view-grid" class="view-btn" title="Tampilan Grid Galeri">⊞ Grid</button>
+          <button id="btn-view-list" class="view-btn active" title="Tampilan List">â˜° List</button>
+          <button id="btn-view-grid" class="view-btn" title="Tampilan Grid Galeri">âŠž Grid</button>
         </div>
       </div>
 
@@ -2584,7 +2600,7 @@
     function copyToClipboard(text, label) {
       if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(text).then(() => {
-          showToast("✅ Berhasil copy " + (label || "teks") + "!");
+          showToast("âœ… Berhasil copy " + (label || "teks") + "!");
         }).catch(() => fallbackCopy(text, label));
       } else {
         fallbackCopy(text, label);
@@ -2598,7 +2614,7 @@
       ta.select();
       document.execCommand("copy");
       document.body.removeChild(ta);
-      showToast("✅ Berhasil copy " + (label || "teks") + "!");
+      showToast("âœ… Berhasil copy " + (label || "teks") + "!");
     }
 
     function downloadFile(url, filename) {
@@ -2715,7 +2731,7 @@
       const hasImages = activeCategory === "image" || filtered.some(f => f.category === "image");
 
       if (filtered.length === 0) {
-        contentArea.innerHTML = '<div class="empty-state">🔍 Tidak ada aset yang cocok dengan filter "' + escapeHtml(searchVal) + '"</div>';
+        contentArea.innerHTML = '<div class="empty-state">ðŸ” Tidak ada aset yang cocok dengan filter "' + escapeHtml(searchVal) + '"</div>';
         return;
       }
 
@@ -2741,7 +2757,7 @@
 
         let dimHtml = "";
         if (item.width && item.height) {
-          dimHtml = '<span class="item-dim">' + item.width + '×' + item.height + '</span>';
+          dimHtml = '<span class="item-dim">' + item.width + 'Ã—' + item.height + '</span>';
         }
 
         const displayUrl = isB64 ? item.url.substring(0, 85) + "..." : item.url;
@@ -2755,9 +2771,9 @@
           (item.title && item.title !== item.url ? '<span class="item-title" title="' + escapeHtml(item.title) + '">' + escapeHtml(item.title) + '</span>' : '') +
           '<a href="' + escapeHtml(item.url) + '" target="_blank" class="item-url" title="' + escapeHtml(item.url) + '">' + escapeHtml(displayUrl) + '</a>' +
           '<div class="item-actions">' +
-            '<button class="btn-action btn-copy-url" data-idx="' + idx + '">📋 URL</button>' +
-            (isImg ? '<button class="btn-action btn-action-b64 btn-copy-b64" data-idx="' + idx + '">🧬 Base64</button>' : '') +
-            '<button class="btn-action btn-download" data-idx="' + idx + '">⬇️</button>' +
+            '<button class="btn-action btn-copy-url" data-idx="' + idx + '">ðŸ“‹ URL</button>' +
+            (isImg ? '<button class="btn-action btn-action-b64 btn-copy-b64" data-idx="' + idx + '">ðŸ§¬ Base64</button>' : '') +
+            '<button class="btn-action btn-download" data-idx="' + idx + '">â¬‡ï¸</button>' +
           '</div>' +
         '</li>';
       });
@@ -2775,18 +2791,18 @@
 
         html += '<div class="grid-card">' +
           '<div class="grid-img-wrap">' +
-            (isImg ? '<a href="' + escapeHtml(item.url) + '" target="_blank"><img src="' + escapeHtml(item.url) + '" loading="lazy" alt="asset" /></a>' : '<div style="font-size:32px;">📄</div>') +
+            (isImg ? '<a href="' + escapeHtml(item.url) + '" target="_blank"><img src="' + escapeHtml(item.url) + '" loading="lazy" alt="asset" /></a>' : '<div style="font-size:32px;">ðŸ“„</div>') +
           '</div>' +
           '<div class="grid-body">' +
             '<div class="grid-meta">' +
               '<span class="item-badge badge-' + item.category + '">' + escapeHtml(typeLabel) + '</span>' +
-              (item.width ? '<span>' + item.width + '×' + item.height + '</span>' : '') +
+              (item.width ? '<span>' + item.width + 'Ã—' + item.height + '</span>' : '') +
             '</div>' +
             '<div class="grid-title" title="' + escapeHtml(item.title || item.url) + '">' + escapeHtml(item.title || item.hostname) + '</div>' +
             '<div class="grid-actions">' +
-              '<button class="btn-action btn-copy-url" data-idx="' + idx + '" title="Copy URL">📋 URL</button>' +
-              (isImg ? '<button class="btn-action btn-action-b64 btn-copy-b64" data-idx="' + idx + '" title="Copy Base64">🧬 B64</button>' : '') +
-              '<button class="btn-action btn-download" data-idx="' + idx + '" title="Download">⬇️</button>' +
+              '<button class="btn-action btn-copy-url" data-idx="' + idx + '" title="Copy URL">ðŸ“‹ URL</button>' +
+              (isImg ? '<button class="btn-action btn-action-b64 btn-copy-b64" data-idx="' + idx + '" title="Copy Base64">ðŸ§¬ B64</button>' : '') +
+              '<button class="btn-action btn-download" data-idx="' + idx + '" title="Download">â¬‡ï¸</button>' +
             '</div>' +
           '</div>' +
         '</div>';
@@ -2810,16 +2826,16 @@
           e.stopPropagation();
           const item = items[parseInt(btn.getAttribute("data-idx"), 10)];
           if (!item) return;
-          btn.textContent = "⏳...";
+          btn.textContent = "â³...";
           const b64 = await convertImgToBase64(item.url);
           if (b64) {
             copyToClipboard(b64, "Base64 Image");
-            btn.textContent = "✅ Copied!";
+            btn.textContent = "âœ… Copied!";
           } else {
-            showToast("❌ Gagal convert Base64 (CORS)");
-            btn.textContent = "❌ Gagal";
+            showToast("âŒ Gagal convert Base64 (CORS)");
+            btn.textContent = "âŒ Gagal";
           }
-          setTimeout(() => { btn.textContent = currentViewMode === "grid" ? "🧬 B64" : "🧬 Base64"; }, 1500);
+          setTimeout(() => { btn.textContent = currentViewMode === "grid" ? "ðŸ§¬ B64" : "ðŸ§¬ Base64"; }, 1500);
         };
       });
 
@@ -2887,7 +2903,7 @@
       const url = URL.createObjectURL(blob);
       downloadFile(url, "assets_" + SOURCE_HOST + "_" + Date.now() + ".txt");
       URL.revokeObjectURL(url);
-      showToast("✅ Exported " + currentFiltered.length + " assets!");
+      showToast("âœ… Exported " + currentFiltered.length + " assets!");
     };
 
     // Init
@@ -2902,11 +2918,1061 @@
     window.open(blobUrl, "_blank");
   }
 
+  function extractPageSeoData() {
+    const data = {};
+
+    data.url = window.location.href;
+    data.origin = window.location.origin;
+    data.pathname = window.location.pathname;
+    data.hostname = window.location.hostname;
+    data.protocol = window.location.protocol;
+    data.generatedAt = new Date().toLocaleString();
+    data.doctype = document.doctype ? ("<!DOCTYPE " + document.doctype.name + ">") : "";
+    data.lang = document.documentElement.lang || "";
+    data.charset = document.characterSet || document.inputEncoding || "UTF-8";
+
+    // Title
+    data.title = (document.title || "").trim();
+    data.titleLength = data.title.length;
+
+    // Description
+    const descEl = document.querySelector('meta[name="description" i], meta[property="description" i]');
+    data.description = descEl ? (descEl.getAttribute("content") || "").trim() : "";
+    data.descriptionLength = data.description.length;
+
+    // Keywords
+    const kwEl = document.querySelector('meta[name="keywords" i]');
+    data.keywords = kwEl ? (kwEl.getAttribute("content") || "").trim() : "";
+
+    // Canonical
+    const canonicalEl = document.querySelector('link[rel="canonical" i]');
+    data.canonical = canonicalEl ? (canonicalEl.getAttribute("href") || "").trim() : "";
+    data.canonicalAbsolute = canonicalEl ? canonicalEl.href : "";
+    data.isCanonicalSelf = data.canonicalAbsolute === data.url;
+
+    // Robots & Googlebot
+    const robotsEl = document.querySelector('meta[name="robots" i]');
+    data.robots = robotsEl ? (robotsEl.getAttribute("content") || "").trim() : "";
+    const googlebotEl = document.querySelector('meta[name="googlebot" i]');
+    data.googlebot = googlebotEl ? (googlebotEl.getAttribute("content") || "").trim() : "";
+
+    // Viewport
+    const viewportEl = document.querySelector('meta[name="viewport" i]');
+    data.viewport = viewportEl ? (viewportEl.getAttribute("content") || "").trim() : "";
+
+    // Other Meta
+    const authorEl = document.querySelector('meta[name="author" i]');
+    data.author = authorEl ? (authorEl.getAttribute("content") || "").trim() : "";
+    const generatorEl = document.querySelector('meta[name="generator" i]');
+    data.generator = generatorEl ? (generatorEl.getAttribute("content") || "").trim() : "";
+    const themeEl = document.querySelector('meta[name="theme-color" i]');
+    data.themeColor = themeEl ? (themeEl.getAttribute("content") || "").trim() : "";
+
+    // Social: Open Graph
+    data.og = [];
+    document.querySelectorAll('meta[property^="og:" i], meta[name^="og:" i]').forEach(el => {
+      const prop = el.getAttribute("property") || el.getAttribute("name");
+      const content = el.getAttribute("content") || "";
+      data.og.push({ property: prop, content });
+    });
+
+    // Social: Twitter Cards
+    data.twitter = [];
+    document.querySelectorAll('meta[name^="twitter:" i], meta[property^="twitter:" i]').forEach(el => {
+      const name = el.getAttribute("name") || el.getAttribute("property");
+      const content = el.getAttribute("content") || "";
+      data.twitter.push({ name, content });
+    });
+
+    // Structured Data: JSON-LD
+    data.jsonLd = [];
+    document.querySelectorAll('script[type="application/ld+json"]').forEach((script, idx) => {
+      const raw = script.textContent.trim();
+      let parsed = null;
+      let error = null;
+      try {
+        parsed = JSON.parse(raw);
+      } catch (e) {
+        error = e.message;
+      }
+      let types = [];
+      if (parsed) {
+        if (Array.isArray(parsed)) {
+          types = parsed.map(p => p["@type"] || "Item").filter(Boolean);
+        } else if (parsed["@graph"]) {
+          types = parsed["@graph"].map(p => p["@type"] || "Item").filter(Boolean);
+        } else if (parsed["@type"]) {
+          types = [parsed["@type"]];
+        }
+      }
+      data.jsonLd.push({
+        index: idx + 1,
+        raw,
+        parsed,
+        error,
+        types: types.join(", ") || (parsed ? "Schema.org" : "Invalid")
+      });
+    });
+
+    // Headings (H1 - H6)
+    data.headings = [];
+    const headingCounts = { h1: 0, h2: 0, h3: 0, h4: 0, h5: 0, h6: 0 };
+    let prevLevel = 0;
+    document.querySelectorAll("h1, h2, h3, h4, h5, h6").forEach((el, idx) => {
+      const tag = el.tagName.toLowerCase();
+      headingCounts[tag] = (headingCounts[tag] || 0) + 1;
+      const level = parseInt(tag.charAt(1), 10);
+      const text = (el.innerText || el.textContent || "").trim().replace(/\\s+/g, " ");
+      const isHidden = (el.offsetParent === null && el.offsetWidth === 0 && el.offsetHeight === 0);
+      let isSkip = false;
+      let expectedTag = "";
+      if (prevLevel > 0 && level > prevLevel + 1) {
+        isSkip = true;
+        expectedTag = "h" + (prevLevel + 1);
+      }
+      prevLevel = level;
+
+      data.headings.push({
+        id: "h_" + idx,
+        tag: tag.toUpperCase(),
+        level,
+        text: text || "(Empty heading)",
+        length: text.length,
+        isHidden,
+        isSkip,
+        expectedTag
+      });
+    });
+    data.headingCounts = headingCounts;
+
+    // Links Analysis (Tanpa img)
+    const allLinks = Array.from(document.querySelectorAll("a[href]"));
+    let internalLinks = 0;
+    let externalLinks = 0;
+    let nofollowLinks = 0;
+    let targetBlankNoOpener = 0;
+    let emptyLinks = 0;
+
+    allLinks.forEach(a => {
+      const href = a.getAttribute("href") || "";
+      const rel = (a.getAttribute("rel") || "").toLowerCase();
+      const target = (a.getAttribute("target") || "").toLowerCase();
+
+      if (rel.includes("nofollow")) nofollowLinks++;
+      if (target === "_blank" && !rel.includes("noopener") && !rel.includes("noreferrer")) {
+        targetBlankNoOpener++;
+      }
+
+      if (!href || href === "#" || href.startsWith("javascript:")) {
+        emptyLinks++;
+      } else {
+        try {
+          const u = new URL(a.href);
+          if (u.origin === window.location.origin) {
+            internalLinks++;
+          } else {
+            externalLinks++;
+          }
+        } catch (e) {
+          internalLinks++;
+        }
+      }
+    });
+
+    data.linksStats = {
+      total: allLinks.length,
+      internal: internalLinks,
+      external: externalLinks,
+      nofollow: nofollowLinks,
+      blankNoOpener: targetBlankNoOpener,
+      empty: emptyLinks
+    };
+
+    // Resource Hints
+    data.resourceHints = [];
+    document.querySelectorAll('link[rel="preload" i], link[rel="preconnect" i], link[rel="prefetch" i], link[rel="dns-prefetch" i]').forEach(el => {
+      data.resourceHints.push({
+        rel: el.getAttribute("rel"),
+        href: el.getAttribute("href"),
+        as: el.getAttribute("as") || "-",
+        type: el.getAttribute("type") || "-",
+        crossorigin: el.hasAttribute("crossorigin") ? (el.getAttribute("crossorigin") || "anonymous") : null
+      });
+    });
+
+    // External Resources
+    const domainMap = new Map();
+    const currentHost = window.location.hostname;
+    const checkUrl = (url, type) => {
+      if (!url || url.startsWith("data:") || url.startsWith("blob:") || url.startsWith("javascript:")) return;
+      try {
+        const u = new URL(url, window.location.href);
+        if (u.hostname !== currentHost && !u.hostname.endsWith("." + currentHost)) {
+          if (!domainMap.has(u.hostname)) {
+            let category = "Third Party";
+            const h = u.hostname.toLowerCase();
+            if (h.includes("google-analytics") || h.includes("googletagmanager") || h.includes("segment") || h.includes("hotjar") || h.includes("clarity")) category = "Analytics";
+            else if (h.includes("cloudflare") || h.includes("unpkg") || h.includes("jsdelivr") || h.includes("cdnjs") || h.includes("akamai") || h.includes("fastly")) category = "CDN";
+            else if (h.includes("fonts.googleapis") || h.includes("fonts.gstatic") || h.includes("typekit")) category = "Web Fonts";
+            else if (h.includes("facebook") || h.includes("twitter") || h.includes("linkedin") || h.includes("tiktok")) category = "Social Media";
+            else if (h.includes("doubleclick") || h.includes("googlesyndication") || h.includes("adnxs")) category = "Advertising";
+            domainMap.set(u.hostname, { hostname: u.hostname, category, count: 0, types: new Set() });
+          }
+          const entry = domainMap.get(u.hostname);
+          entry.count++;
+          entry.types.add(type);
+        }
+      } catch (e) {}
+    };
+
+    document.querySelectorAll("script[src]").forEach(s => checkUrl(s.src, "script"));
+    document.querySelectorAll("link[href]").forEach(l => checkUrl(l.href, l.getAttribute("rel") || "link"));
+    data.externalDomains = Array.from(domainMap.values()).map(d => ({
+      hostname: d.hostname,
+      category: d.category,
+      count: d.count,
+      types: Array.from(d.types).join(", ")
+    }));
+
+    // Forms
+    data.forms = Array.from(document.forms).map((f, i) => ({
+      index: i + 1,
+      action: f.action || "(Current URL)",
+      method: (f.method || "get").toUpperCase(),
+      fields: f.elements ? f.elements.length : 0
+    }));
+
+    // HTML5 Report
+    data.html5 = {
+      isHtml5: !!(document.doctype && document.doctype.name && document.doctype.name.toLowerCase() === "html" && !document.doctype.publicId),
+      hasHtml5Tags: !!document.querySelector("header, nav, main, footer, section, article, aside")
+    };
+
+    // Security
+    const cspEl = document.querySelector('meta[http-equiv="Content-Security-Policy" i]');
+    const referrerEl = document.querySelector('meta[name="referrer" i]');
+    data.security = {
+      isHttps: window.location.protocol === "https:",
+      csp: cspEl ? cspEl.getAttribute("content") : null,
+      referrerPolicy: referrerEl ? referrerEl.getAttribute("content") : null
+    };
+
+    // Diagnostics
+    data.diagnostics = [];
+    if (!data.title) {
+      data.diagnostics.push({ level: "error", category: "Title", message: "Tag <title> tidak ditemukan pada halaman ini!" });
+    } else if (data.titleLength < 30) {
+      data.diagnostics.push({ level: "warning", category: "Title", message: "Title pendek (" + data.titleLength + " karakter). Rekomendasi: 30 - 60 karakter." });
+    } else if (data.titleLength > 60) {
+      data.diagnostics.push({ level: "warning", category: "Title", message: "Title panjang (" + data.titleLength + " karakter). Berisiko terpotong pada hasil Google SERP." });
+    } else {
+      data.diagnostics.push({ level: "good", category: "Title", message: "Panjang title optimal (" + data.titleLength + " karakter)." });
+    }
+
+    if (!data.description) {
+      data.diagnostics.push({ level: "warning", category: "Description", message: "Meta description tidak ditemukan! Google akan membuat cuplikan otomatis." });
+    } else if (data.descriptionLength < 70) {
+      data.diagnostics.push({ level: "warning", category: "Description", message: "Meta description pendek (" + data.descriptionLength + " karakter). Rekomendasi: 120 - 160 karakter." });
+    } else if (data.descriptionLength > 160) {
+      data.diagnostics.push({ level: "warning", category: "Description", message: "Meta description panjang (" + data.descriptionLength + " karakter). Berpotensi terpotong di SERP." });
+    } else {
+      data.diagnostics.push({ level: "good", category: "Description", message: "Panjang meta description optimal (" + data.descriptionLength + " karakter)." });
+    }
+
+    if (!data.canonical) {
+      data.diagnostics.push({ level: "info", category: "Canonical", message: "Canonical link tidak didefinisikan. Disarankan untuk mencegah konten duplikat." });
+    } else if (document.querySelectorAll('link[rel="canonical"]').length > 1) {
+      data.diagnostics.push({ level: "error", category: "Canonical", message: "Ditemukan lebih dari 1 tag canonical di halaman!" });
+    } else {
+      data.diagnostics.push({ level: "good", category: "Canonical", message: "Canonical terpasang: " + data.canonical });
+    }
+
+    if (data.headingCounts.h1 === 0) {
+      data.diagnostics.push({ level: "error", category: "Headings", message: "Tidak ada tag <h1> pada halaman! Setiap halaman harus memiliki tepat 1 <h1>." });
+    } else if (data.headingCounts.h1 > 1) {
+      data.diagnostics.push({ level: "warning", category: "Headings", message: "Ditemukan " + data.headingCounts.h1 + " tag <h1>. Rekomendasi SEO terbaik adalah 1 tag <h1> utama per halaman." });
+    } else {
+      data.diagnostics.push({ level: "good", category: "Headings", message: "Struktur <h1> tepat (terdapat 1 tag <h1> utama)." });
+    }
+
+    if (!data.viewport) {
+      data.diagnostics.push({ level: "error", category: "Mobile", message: "Meta viewport tidak ditemukan! Halaman tidak ramah mobile." });
+    } else {
+      if (data.viewport.includes("user-scalable=no")) {
+        data.diagnostics.push({ level: "warning", category: "Mobile", message: "user-scalable=no mematikan fitur zoom cubit di ponsel (isu aksesibilitas WCAG)." });
+      }
+      if (data.viewport.includes("maximum-scale=1") || data.viewport.includes("maximum-scale=1.0")) {
+        data.diagnostics.push({ level: "warning", category: "Mobile", message: "maximum-scale membatasi kemampuan zoom pengguna (sebaiknya jangan dibatasi)." });
+      }
+    }
+
+    if (data.robots.toLowerCase().includes("noindex")) {
+      data.diagnostics.push({ level: "warning", category: "Robots", message: "Tag robots berisi 'noindex'! Mesin pencari TIDAK akan mengindeks halaman ini." });
+    }
+
+    if (data.jsonLd.length > 0) {
+      data.diagnostics.push({ level: "good", category: "Structured Data", message: "Ditemukan " + data.jsonLd.length + " skema Structured Data JSON-LD (Schema.org)." });
+    } else {
+      data.diagnostics.push({ level: "info", category: "Structured Data", message: "Tidak ditemukan structured data JSON-LD (Schema.org)." });
+    }
+
+    const hasOgTitle = data.og.some(o => o.property.toLowerCase() === "og:title");
+    const hasOgImage = data.og.some(o => o.property.toLowerCase() === "og:image");
+    if (hasOgTitle && hasOgImage) {
+      data.diagnostics.push({ level: "good", category: "Social", message: "Meta Open Graph terpasang (og:title dan og:image tersedia)." });
+    } else {
+      data.diagnostics.push({ level: "info", category: "Social", message: "Meta Open Graph belum lengkap (og:title atau og:image belum terdeteksi)." });
+    }
+
+    return data;
+  }
+
+  function buildSeoReportHtml(data) {
+    if (!data) data = {};
+    const sourceUrl = data.url || window.location.href || "";
+    const sourceHost = data.hostname || "page";
+    const generatedAt = data.generatedAt || new Date().toLocaleString();
+
+    function escapeHtml(str) {
+      if (str === null || str === undefined) return "";
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    const diagnostics = data.diagnostics || [];
+    const goodCount = diagnostics.filter(d => d.level === "good").length;
+    const warnCount = diagnostics.filter(d => d.level === "warning").length;
+    const errCount = diagnostics.filter(d => d.level === "error").length;
+
+    const headingCounts = data.headingCounts || { h1: 0, h2: 0, h3: 0, h4: 0, h5: 0, h6: 0 };
+    const h1Count = headingCounts.h1 || 0;
+    const schemas = data.jsonLd || [];
+    const ogList = data.og || [];
+    const twList = data.twitter || [];
+    const headings = data.headings || [];
+    const lStats = data.linksStats || { total: 0, internal: 0, external: 0, nofollow: 0, blankNoOpener: 0, empty: 0 };
+    const hints = data.resourceHints || [];
+    const extDomains = data.externalDomains || [];
+    const sec = data.security || {};
+
+    let diagHtml = '<div style="display:flex; flex-direction:column; gap:8px;">';
+    diagnostics.forEach(diag => {
+      let pillClass = "alert-good";
+      let icon = "PASS";
+      if (diag.level === "warning") { pillClass = "alert-warn"; icon = "WARNING"; }
+      if (diag.level === "error") { pillClass = "alert-err"; icon = "ERROR"; }
+      if (diag.level === "info") { pillClass = "alert-info"; icon = "INFO"; }
+      diagHtml += '<div class="meta-row" style="padding:6px 0;">' +
+        '<div class="meta-key" style="width:130px; min-width:130px;"><span class="alert-pill ' + pillClass + '">' + icon + '</span></div>' +
+        '<div class="meta-value-wrap">' +
+          '<strong style="color:#fff; font-size:12px; margin-right:6px;">[' + escapeHtml(diag.category) + ']</strong>' +
+          '<span class="meta-content">' + escapeHtml(diag.message) + '</span>' +
+        '</div></div>';
+    });
+    diagHtml += '</div>';
+
+    const commonRows = [
+      { key: "doctype", val: data.doctype ? escapeHtml(data.doctype) : "<em>None</em>", count: null },
+      { key: "html lang", val: data.lang ? escapeHtml(data.lang) : "<em>Not specified</em>", count: null },
+      { key: "charset", val: escapeHtml(data.charset || "UTF-8"), count: null },
+      { key: "head title", val: data.title ? escapeHtml(data.title) : "<em>(Missing Title)</em>", count: (data.titleLength || 0) + " characters" },
+      { key: "meta description", val: data.description ? escapeHtml(data.description) : "<em>(Missing Description)</em>", count: (data.descriptionLength || 0) + " characters" },
+      { key: "canonical link", val: data.canonical ? ('<a href="' + escapeHtml(data.canonical) + '" target="_blank" style="color:var(--accent-cyan); text-decoration:none;">' + escapeHtml(data.canonical) + '</a>') : "<em>Not defined</em>", count: null },
+      { key: "meta keywords", val: data.keywords ? (escapeHtml(data.keywords) + ' <span class="alert-pill alert-info">INFO: Obsolete for Google</span>') : "<em>None</em>", count: null },
+      { key: "meta robots", val: data.robots ? escapeHtml(data.robots) : "<em>None (index, follow assumed)</em>", count: null },
+      { key: "author", val: data.author ? escapeHtml(data.author) : "<em>None</em>", count: null },
+      { key: "generator", val: data.generator ? escapeHtml(data.generator) : "<em>None</em>", count: null },
+      { key: "theme-color", val: data.themeColor ? ('<span style="display:inline-block; width:12px; height:12px; background:' + escapeHtml(data.themeColor) + '; border-radius:2px; vertical-align:middle; margin-right:4px;"></span> ' + escapeHtml(data.themeColor)) : "<em>None</em>", count: null }
+    ];
+    let commonHtml = "";
+    commonRows.forEach(r => {
+      commonHtml += '<div class="meta-row">' +
+        '<div class="meta-key">' + escapeHtml(r.key) + '</div>' +
+        '<div class="meta-value-wrap">' +
+          '<div class="meta-content">' + r.val + '</div>' +
+          '<div class="meta-sub-info">' +
+            (r.count ? '<span class="char-count">(' + escapeHtml(r.count) + ')</span>' : '') +
+            '<button class="copy-btn" data-copy="' + escapeHtml(String(r.val).replace(/<[^>]*>/g, '')) + '" data-label="' + escapeHtml(r.key) + '">Copy</button>' +
+          '</div>' +
+        '</div></div>';
+    });
+
+    let mobileHtml = '<div class="meta-row"><div class="meta-key">viewport</div><div class="meta-value-wrap"><div class="meta-content">' + escapeHtml(data.viewport || "Missing meta viewport") + '</div><div class="meta-sub-info"><button class="copy-btn" data-copy="' + escapeHtml(data.viewport || '') + '" data-label="Viewport">Copy</button></div></div></div>';
+
+    const findOg = (prop) => {
+      const item = ogList.find(o => o.property && o.property.toLowerCase() === prop.toLowerCase());
+      return item ? item.content : "";
+    };
+    const findTw = (name) => {
+      const item = twList.find(t => t.name && t.name.toLowerCase() === name.toLowerCase());
+      return item ? item.content : "";
+    };
+    const ogTitle = findOg("og:title") || data.title || "";
+    const ogDesc = findOg("og:description") || data.description || "";
+    const ogImage = findOg("og:image");
+    const ogSite = findOg("og:site_name") || sourceHost;
+    const twTitle = findTw("twitter:title") || ogTitle;
+    const twDesc = findTw("twitter:description") || ogDesc;
+    const twImage = findTw("twitter:image") || ogImage;
+
+    let socialPreviewsHtml =
+      '<div class="preview-card">' +
+        '<div class="preview-card-header">Facebook / Open Graph Preview</div>' +
+        '<div class="preview-img-wrap">' +
+          (ogImage ? ('<img src="' + escapeHtml(ogImage) + '" alt="OG Image Preview" onerror="this.onerror=null; this.parentNode.innerHTML=\'<span class=preview-no-img>Gambar Gagal Dimuat</span>\';">') : '<span class="preview-no-img">Tidak ada og:image</span>') +
+        '</div>' +
+        '<div class="preview-body">' +
+          '<div class="preview-domain">' + escapeHtml(ogSite) + '</div>' +
+          '<div class="preview-title">' + escapeHtml(ogTitle || "Judul Halaman") + '</div>' +
+          '<div class="preview-desc">' + escapeHtml(ogDesc || "Deskripsi halaman") + '</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="preview-card">' +
+        '<div class="preview-card-header">Twitter / X Card Preview</div>' +
+        '<div class="preview-img-wrap">' +
+          (twImage ? ('<img src="' + escapeHtml(twImage) + '" alt="Twitter Image Preview" onerror="this.onerror=null; this.parentNode.innerHTML=\'<span class=preview-no-img>Gambar Gagal Dimuat</span>\';">') : '<span class="preview-no-img">Tidak ada twitter:image</span>') +
+        '</div>' +
+        '<div class="preview-body">' +
+          '<div class="preview-domain">' + escapeHtml(sourceHost) + '</div>' +
+          '<div class="preview-title">' + escapeHtml(twTitle || "Judul Halaman") + '</div>' +
+          '<div class="preview-desc">' + escapeHtml(twDesc || "Deskripsi halaman") + '</div>' +
+        '</div>' +
+      '</div>';
+
+    let socTagsHtml = '<div style="display:flex; flex-direction:column; gap:4px;">';
+    ogList.forEach(item => {
+      socTagsHtml += '<div class="meta-row" style="padding:6px 0;"><div class="meta-key" style="color:#60a5fa;">' + escapeHtml(item.property) + '</div><div class="meta-value-wrap"><span class="meta-content">' + escapeHtml(item.content) + '</span><button class="copy-btn" data-copy="' + escapeHtml(item.content) + '" data-label="' + escapeHtml(item.property) + '">Copy</button></div></div>';
+    });
+    twList.forEach(item => {
+      socTagsHtml += '<div class="meta-row" style="padding:6px 0;"><div class="meta-key" style="color:#38bdf8;">' + escapeHtml(item.name) + '</div><div class="meta-value-wrap"><span class="meta-content">' + escapeHtml(item.content) + '</span><button class="copy-btn" data-copy="' + escapeHtml(item.content) + '" data-label="' + escapeHtml(item.name) + '">Copy</button></div></div>';
+    });
+    socTagsHtml += '</div>';
+
+    let schemaHtml = "";
+    if (schemas.length === 0) {
+      schemaHtml = '<div style="color:var(--text-muted); font-style:italic;">Tidak ditemukan Structured Data JSON-LD pada halaman ini.</div>';
+    } else {
+      schemas.forEach(s => {
+        let codeStr = s.raw;
+        try { codeStr = JSON.stringify(s.parsed, null, 2); } catch(e) {}
+        schemaHtml += '<div class="code-block-wrap"><div class="code-block-header"><span class="title">JSON-LD #' + s.index + ' &mdash; ' + escapeHtml(s.types) + '</span><button class="copy-btn btn-copy-schema" data-idx="' + s.index + '">Copy JSON</button></div><pre class="json-code">' + escapeHtml(codeStr) + '</pre></div>';
+      });
+    }
+
+    let sumHtml = "";
+    ["h1", "h2", "h3", "h4", "h5", "h6"].forEach(h => {
+      sumHtml += '<span class="heading-tag-badge htag-' + h + '">' + h.toUpperCase() + ': ' + (headingCounts[h] || 0) + '</span>';
+    });
+
+    let treeHtml = "";
+    if (headings.length === 0) {
+      treeHtml = '<div style="color:var(--text-muted); font-style:italic;">Tidak ada tag heading (H1 - H6) ditemukan.</div>';
+    } else {
+      headings.forEach(item => {
+        const skipWarning = item.isSkip ? ('<span class="alert-pill alert-warn">Expected ' + item.expectedTag.toUpperCase() + '</span>') : "";
+        const hiddenWarning = item.isHidden ? '<span class="alert-pill alert-info">Hidden Element</span>' : "";
+        treeHtml += '<div class="heading-item hlevel-' + item.level + '">' +
+          '<span class="heading-tag-badge htag-' + item.tag.toLowerCase() + '">' + item.tag + '</span>' +
+          '<span style="flex:1; color:#fff;">' + escapeHtml(item.text) + '</span>' +
+          '<span class="char-count">(' + item.length + ' chars)</span>' +
+          skipWarning + hiddenWarning +
+          '<button class="copy-btn" data-copy="' + escapeHtml(item.text) + '" data-label="' + item.tag + '">Copy</button>' +
+        '</div>';
+      });
+    }
+
+    const forms = data.forms || [];
+    let formsHtml = "";
+    if (forms.length > 0) {
+      formsHtml = '<div style="margin-top:16px;"><strong style="font-size:12px; color:var(--accent-cyan); text-transform:uppercase;">Forms (' + forms.length + ')</strong><table class="data-table" style="margin-top:6px;"><thead><tr><th>Action</th><th>Method</th><th>Fields Count</th></tr></thead><tbody>';
+      forms.forEach(f => {
+        formsHtml += '<tr><td><code>' + escapeHtml(f.action) + '</code></td><td><span class="alert-pill alert-info">' + escapeHtml(f.method) + '</span></td><td>' + f.fields + ' fields</td></tr>';
+      });
+      formsHtml += '</tbody></table></div>';
+    }
+
+    const html5 = data.html5 || {};
+    let html5Html = '<div style="margin-top:14px; padding:10px 14px; background:#0d121f; border:1px solid var(--border-color); border-radius:6px; font-size:12.5px;">' +
+      '<span>Doctype is ' + (html5.isHtml5 ? '<span class="alert-pill alert-good">HTML5</span>' : '<span class="alert-pill alert-warn">Legacy / None</span>') + ' &mdash; HTML5 semantic elements ' + (html5.hasHtml5Tags ? '<span class="alert-pill alert-good">Detected</span>' : '<span class="alert-pill alert-info">None</span>') + '</span>' +
+    '</div>';
+
+    let linksHtml =
+      '<table class="data-table">' +
+        '<thead><tr><th>Tipe Link / Anchor</th><th>Jumlah</th><th>Status Rekomendasi SEO</th></tr></thead>' +
+        '<tbody>' +
+          '<tr><td><strong>Total Link &lt;a href&gt;</strong></td><td><span class="alert-pill alert-info">' + lStats.total + '</span></td><td>Semua tautan yang terdeteksi di dokumen</td></tr>' +
+          '<tr><td><strong>Internal Links</strong></td><td><span class="alert-pill alert-good">' + lStats.internal + '</span></td><td>Tautan menuju halaman internal domain yang sama</td></tr>' +
+          '<tr><td><strong>External Links</strong></td><td><span class="alert-pill alert-info">' + lStats.external + '</span></td><td>Tautan menuju domain lain (Outbound links)</td></tr>' +
+          '<tr><td><strong>Nofollow Links</strong></td><td><span class="alert-pill alert-warn">' + lStats.nofollow + '</span></td><td>Tautan dengan instruksi <code>rel="nofollow"</code></td></tr>' +
+          '<tr><td><strong>Target _blank tanpa noopener</strong></td><td><span class="alert-pill ' + (lStats.blankNoOpener > 0 ? 'alert-err' : 'alert-good') + '">' + lStats.blankNoOpener + '</span></td><td>' + (lStats.blankNoOpener > 0 ? 'Risiko keamanan tab-nabbing, tambahkan rel="noopener"' : 'Aman') + '</td></tr>' +
+          '<tr><td><strong>Link Kosong / Javascript (#)</strong></td><td><span class="alert-pill alert-warn">' + lStats.empty + '</span></td><td>Tautan yang mengarah ke \'#\' atau \'javascript:void(0)\'</td></tr>' +
+        '</tbody>' +
+      '</table>';
+
+    let hintsHtml = "";
+    if (hints.length === 0) {
+      hintsHtml = '<div style="color:var(--text-muted); font-style:italic;">Tidak ada resource hints (preload/preconnect) ditemukan.</div>';
+    } else {
+      hintsHtml = '<table class="data-table"><thead><tr><th>Rel</th><th>As Type</th><th>Target URL</th><th>Crossorigin</th></tr></thead><tbody>';
+      hints.forEach(h => {
+        hintsHtml += '<tr><td><span class="alert-pill alert-info">' + escapeHtml(h.rel) + '</span></td><td><code>' + escapeHtml(h.as) + '</code></td><td><a href="' + escapeHtml(h.href) + '" target="_blank" style="color:var(--accent-cyan); text-decoration:none;">' + escapeHtml(h.href) + '</a></td><td>' + (h.crossorigin ? escapeHtml(h.crossorigin) : '-') + '</td></tr>';
+      });
+      hintsHtml += '</tbody></table>';
+    }
+
+    let extHtml = "";
+    if (extDomains.length === 0) {
+      extHtml = '<div style="color:var(--text-muted); font-style:italic;">Tidak ada domain pihak ketiga eksternal yang dipanggil.</div>';
+    } else {
+      extHtml = '<table class="data-table"><thead><tr><th>Domain Eksternal</th><th>Kategori</th><th>Hits / Panggilan</th><th>Tipe Resource</th></tr></thead><tbody>';
+      extDomains.forEach(ed => {
+        extHtml += '<tr><td><strong>' + escapeHtml(ed.hostname) + '</strong></td><td><span class="alert-pill alert-info">' + escapeHtml(ed.category) + '</span></td><td>' + ed.count + '</td><td><code>' + escapeHtml(ed.types) + '</code></td></tr>';
+      });
+      extHtml += '</tbody></table>';
+    }
+
+    let secHtml =
+      '<table class="data-table">' +
+        '<thead><tr><th>Konfigurasi Keamanan</th><th>Nilai</th><th>Status</th></tr></thead>' +
+        '<tbody>' +
+          '<tr><td><strong>Protokol HTTPS</strong></td><td>' + escapeHtml(data.protocol || 'https:') + '</td><td><span class="alert-pill ' + (sec.isHttps ? 'alert-good' : 'alert-err') + '">' + (sec.isHttps ? 'SECURE (HTTPS)' : 'INSECURE (HTTP)') + '</span></td></tr>' +
+          '<tr><td><strong>Content-Security-Policy (CSP)</strong></td><td>' + (sec.csp ? escapeHtml(sec.csp) : '<em>Not specified in meta</em>') + '</td><td><span class="alert-pill ' + (sec.csp ? 'alert-good' : 'alert-info') + '">' + (sec.csp ? 'Configured' : 'Optional / Server Header') + '</span></td></tr>' +
+          '<tr><td><strong>Referrer-Policy</strong></td><td>' + (sec.referrerPolicy ? escapeHtml(sec.referrerPolicy) : '<em>Default browser policy</em>') + '</td><td><span class="alert-pill alert-info">' + escapeHtml(sec.referrerPolicy || 'Default') + '</span></td></tr>' +
+        '</tbody>' +
+      '</table>';
+
+    return `<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>META SEO Inspector - ${escapeHtml(sourceHost)}</title>
+  <style>
+    :root {
+      --bg-body: #0b0f19;
+      --bg-card: #151c2e;
+      --bg-card-alt: #1c2438;
+      --border-color: #26334d;
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --accent-cyan: #38bdf8;
+      --accent-blue: #0284c7;
+      --accent-green: #10b981;
+      --accent-yellow: #f59e0b;
+      --accent-red: #ef4444;
+      --accent-purple: #a855f7;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: var(--bg-body);
+      color: var(--text-main);
+      line-height: 1.5;
+      font-size: 14px;
+    }
+    .app-container { display: flex; min-height: 100vh; }
+    .main-content { flex: 1; padding: 24px 32px; max-width: calc(100% - 280px); }
+    .sidebar-nav {
+      width: 280px; position: sticky; top: 0; height: 100vh;
+      overflow-y: auto; background: #101524;
+      border-left: 1px solid var(--border-color); padding: 24px 18px;
+    }
+    header.report-header {
+      background: var(--bg-card); border: 1px solid var(--border-color);
+      border-radius: 12px; padding: 20px 24px; margin-bottom: 24px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    }
+    .header-top {
+      display: flex; justify-content: space-between; align-items: flex-start;
+      margin-bottom: 16px; flex-wrap: wrap; gap: 12px;
+    }
+    .brand-title { display: flex; align-items: center; gap: 10px; }
+    .brand-title h1 { font-size: 20px; font-weight: 800; color: var(--accent-cyan); letter-spacing: -0.3px; }
+    .version-tag {
+      font-size: 11px; background: rgba(56, 189, 248, 0.15);
+      color: var(--accent-cyan); padding: 2px 8px; border-radius: 12px;
+      border: 1px solid rgba(56, 189, 248, 0.3); font-weight: 600;
+    }
+    .header-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+    .btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 7px 14px; font-size: 12px; font-weight: 600;
+      border-radius: 6px; border: 1px solid var(--border-color);
+      background: var(--bg-card-alt); color: var(--text-main); cursor: pointer;
+      transition: all 0.15s ease; text-decoration: none;
+    }
+    .btn:hover { background: #25314a; border-color: #3b4d70; color: #fff; }
+    .btn-primary { background: var(--accent-blue); border-color: #0369a1; color: #fff; }
+    .btn-primary:hover { background: #0284c7; }
+    .target-url-box {
+      background: #0d121f; border: 1px solid var(--border-color);
+      border-radius: 8px; padding: 10px 14px; display: flex;
+      align-items: center; justify-content: space-between; gap: 12px;
+      font-family: Consolas, Monaco, monospace; font-size: 13px; word-break: break-all;
+    }
+    .target-url-link { color: var(--accent-cyan); text-decoration: none; }
+    .target-url-link:hover { text-decoration: underline; }
+    .diagnostic-cards {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 12px; margin-top: 16px;
+    }
+    .score-card {
+      background: #0d121f; border: 1px solid var(--border-color);
+      border-radius: 8px; padding: 12px 14px; text-align: center;
+    }
+    .score-num { font-size: 22px; font-weight: 800; font-family: Consolas, Monaco, monospace; }
+    .score-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; margin-top: 2px; }
+    .num-good { color: var(--accent-green); }
+    .num-warn { color: var(--accent-yellow); }
+    .num-err { color: var(--accent-red); }
+    .num-info { color: var(--accent-cyan); }
+    .filter-bar { margin-bottom: 24px; display: flex; gap: 12px; }
+    .search-input {
+      flex: 1; background: var(--bg-card); border: 1px solid var(--border-color);
+      border-radius: 8px; padding: 10px 16px; color: #fff; font-size: 13px; outline: none;
+      transition: border-color 0.15s;
+    }
+    .search-input:focus { border-color: var(--accent-cyan); box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2); }
+    section.report-section {
+      background: var(--bg-card); border: 1px solid var(--border-color);
+      border-radius: 12px; margin-bottom: 24px; overflow: hidden;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+    }
+    .section-header {
+      background: #121827; padding: 14px 20px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .section-title { font-size: 15px; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 8px; }
+    .section-badge {
+      font-size: 11px; background: var(--bg-card-alt); border: 1px solid var(--border-color);
+      padding: 2px 8px; border-radius: 10px; color: var(--text-muted); font-family: Consolas, monospace;
+    }
+    .section-body { padding: 16px 20px; }
+    .meta-row {
+      display: flex; align-items: flex-start; padding: 10px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05); gap: 16px;
+    }
+    .meta-row:last-child { border-bottom: none; }
+    .meta-key {
+      width: 170px; min-width: 170px; font-weight: 700;
+      color: var(--accent-cyan); font-size: 12.5px; text-align: right;
+      font-family: Consolas, Monaco, monospace; padding-top: 2px; word-break: break-all;
+    }
+    .meta-value-wrap { flex: 1; word-break: break-word; font-size: 13.5px; }
+    .meta-content { color: #e2e8f0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    .meta-sub-info { display: flex; align-items: center; gap: 10px; margin-top: 4px; flex-wrap: wrap; }
+    .char-count { font-size: 11px; color: var(--text-muted); font-family: Consolas, monospace; }
+    .alert-pill {
+      display: inline-flex; align-items: center; gap: 5px;
+      font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 4px;
+    }
+    .alert-good { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
+    .alert-warn { background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
+    .alert-err { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
+    .alert-info { background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); }
+    .copy-btn {
+      background: transparent; border: none; cursor: pointer; color: #64748b;
+      padding: 2px 6px; font-size: 12px; border-radius: 4px; transition: all 0.15s;
+    }
+    .copy-btn:hover { color: var(--accent-cyan); background: rgba(56, 189, 248, 0.1); }
+    .social-preview-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 16px; margin-top: 14px;
+    }
+    .preview-card { background: #0d121f; border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden; }
+    .preview-card-header {
+      padding: 8px 12px; background: #141b2b; font-weight: 700;
+      font-size: 11px; color: var(--text-muted); text-transform: uppercase;
+      border-bottom: 1px solid var(--border-color);
+    }
+    .preview-img-wrap {
+      width: 100%; height: 180px; background: #090c14;
+      display: flex; align-items: center; justify-content: center; overflow: hidden;
+    }
+    .preview-img-wrap img { max-width: 100%; max-height: 100%; object-fit: cover; }
+    .preview-no-img { color: #475569; font-size: 12px; }
+    .preview-body { padding: 12px 14px; }
+    .preview-title { font-weight: 700; font-size: 14px; color: #fff; margin-bottom: 4px; line-height: 1.3; }
+    .preview-desc { font-size: 12px; color: var(--text-muted); line-height: 1.4; margin-bottom: 6px; }
+    .preview-domain { font-size: 11px; color: var(--accent-cyan); text-transform: uppercase; font-family: Consolas, monospace; }
+    .heading-tree { display: flex; flex-direction: column; gap: 6px; }
+    .heading-item {
+      display: flex; align-items: center; gap: 10px; padding: 6px 10px;
+      border-radius: 6px; background: #0d121f; border: 1px solid rgba(255, 255, 255, 0.04); font-size: 13px;
+    }
+    .heading-tag-badge { font-weight: 800; font-family: Consolas, monospace; padding: 1px 6px; border-radius: 4px; font-size: 11px; }
+    .htag-h1 { background: #7c3aed; color: #fff; }
+    .htag-h2 { background: #0284c7; color: #fff; }
+    .htag-h3 { background: #0d9488; color: #fff; }
+    .htag-h4 { background: #ca8a04; color: #fff; }
+    .htag-h5 { background: #475569; color: #fff; }
+    .htag-h6 { background: #334155; color: #cbd5e1; }
+    .hlevel-1 { margin-left: 0px; }
+    .hlevel-2 { margin-left: 20px; border-left: 2px solid #0284c7; }
+    .hlevel-3 { margin-left: 40px; border-left: 2px solid #0d9488; }
+    .hlevel-4 { margin-left: 60px; border-left: 2px solid #ca8a04; }
+    .hlevel-5 { margin-left: 80px; border-left: 2px solid #475569; }
+    .hlevel-6 { margin-left: 100px; border-left: 2px solid #334155; }
+    table.data-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+    table.data-table th {
+      text-align: left; padding: 8px 12px; background: #0d121f;
+      color: var(--text-muted); border-bottom: 1px solid var(--border-color);
+      font-size: 11px; text-transform: uppercase; font-weight: 600;
+    }
+    table.data-table td { padding: 9px 12px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); vertical-align: middle; }
+    table.data-table tr:hover { background: rgba(255, 255, 255, 0.02); }
+    .code-block-wrap { background: #070a12; border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 12px; overflow: hidden; }
+    .code-block-header {
+      background: #0e1320; padding: 8px 14px; display: flex;
+      justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); font-size: 12px;
+    }
+    .code-block-header .title { font-weight: 700; color: var(--accent-cyan); font-family: Consolas, monospace; }
+    pre.json-code { padding: 12px 14px; font-family: Consolas, Monaco, monospace; font-size: 12px; color: #93c5fd; overflow-x: auto; max-height: 350px; line-height: 1.45; }
+    .sidebar-nav-title { font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px; margin-bottom: 12px; }
+    .nav-list { list-style: none; }
+    .nav-item { margin-bottom: 4px; }
+    .nav-link {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 8px 12px; border-radius: 6px; color: #94a3b8; text-decoration: none; font-size: 13px; font-weight: 500; transition: all 0.15s;
+    }
+    .nav-link:hover, .nav-link.active { background: var(--bg-card-alt); color: var(--accent-cyan); }
+    .nav-count { font-size: 11px; background: #0d121f; padding: 1px 6px; border-radius: 10px; color: #64748b; font-family: Consolas, monospace; }
+    .toast-msg {
+      position: fixed; bottom: 24px; right: 24px; background: #0284c7; color: #fff;
+      padding: 10px 18px; border-radius: 8px; font-weight: 600; font-size: 13px;
+      z-index: 99999; opacity: 0; transform: translateY(10px); transition: all 0.2s; pointer-events: none;
+    }
+    .toast-msg.show { opacity: 1; transform: translateY(0); }
+    @media print {
+      body { background: #fff !important; color: #000 !important; }
+      .sidebar-nav, .filter-bar, .header-actions, .copy-btn { display: none !important; }
+      .main-content { max-width: 100% !important; padding: 0 !important; }
+      section.report-section { border: 1px solid #ccc !important; box-shadow: none !important; break-inside: avoid; }
+      .section-header { background: #f0f0f0 !important; color: #000 !important; }
+      .section-title { color: #000 !important; }
+      .meta-content { color: #000 !important; }
+      .target-url-box { border: 1px solid #ccc !important; background: #fafafa !important; }
+      pre.json-code { color: #222 !important; max-height: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <main class="main-content">
+      <header class="report-header">
+        <div class="header-top">
+          <div class="brand-title">
+            <span style="font-size:24px;">🔍</span>
+            <div>
+              <h1>META SEO Inspector &mdash; <span style="color:#fff;">${escapeHtml(sourceHost)}</span></h1>
+              <span class="version-tag">v3.11.7 Compatible</span>
+            </div>
+          </div>
+          <div class="header-actions">
+            <button id="btn-copy-summary" class="btn" title="Copy Ringkasan SEO (Markdown)">📋 Copy Summary</button>
+            <button id="btn-export-json" class="btn" title="Export Raw Data ke JSON">💾 Export JSON</button>
+            <button id="btn-print" class="btn btn-primary" title="Cetak atau Simpan PDF">🖨️ Print / PDF</button>
+          </div>
+        </div>
+
+        <div class="target-url-box">
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span>🌐</span>
+            <a id="target-url-link" href="${escapeHtml(sourceUrl)}" target="_blank" class="target-url-link">${escapeHtml(sourceUrl)}</a>
+          </div>
+          <button class="copy-btn" id="btn-copy-url" title="Copy URL">Copy</button>
+        </div>
+
+        <div class="diagnostic-cards">
+          <div class="score-card"><div id="stat-tests" class="score-num">${diagnostics.length}</div><div class="score-label">Total Checks</div></div>
+          <div class="score-card"><div id="stat-good" class="score-num num-good">${goodCount}</div><div class="score-label">Passed</div></div>
+          <div class="score-card"><div id="stat-warn" class="score-num num-warn">${warnCount}</div><div class="score-label">Warnings</div></div>
+          <div class="score-card"><div id="stat-err" class="score-num num-err">${errCount}</div><div class="score-label">Errors</div></div>
+          <div class="score-card"><div id="stat-h1" class="score-num num-info">${h1Count}</div><div class="score-label">H1 Count</div></div>
+          <div class="score-card"><div id="stat-schema" class="score-num num-info">${schemas.length}</div><div class="score-label">Schemas</div></div>
+        </div>
+      </header>
+
+      <div class="filter-bar">
+        <input type="text" id="search-input" class="search-input" placeholder="🔍 Cari meta tag, nilai property, atau heading di laporan..." />
+      </div>
+
+      <section id="diagnostics-section" class="report-section">
+        <div class="section-header">
+          <div class="section-title"><span>🩺</span> SEO Health Diagnostics</div>
+          <span id="badge-diag-count" class="section-badge">${diagnostics.length} checks</span>
+        </div>
+        <div class="section-body" id="diagnostics-container">${diagHtml}</div>
+      </section>
+
+      <section id="common" class="report-section">
+        <div class="section-header">
+          <div class="section-title"><span>📄</span> COMMON & CORE META</div>
+          <span class="section-badge">Core SEO</span>
+        </div>
+        <div class="section-body" id="common-container">${commonHtml}</div>
+      </section>
+
+      <section id="mobile" class="report-section">
+        <div class="section-header">
+          <div class="section-title"><span>📱</span> MOBILE & VIEWPORT</div>
+          <span class="section-badge">Mobile Ready</span>
+        </div>
+        <div class="section-body" id="mobile-container">${mobileHtml}</div>
+      </section>
+
+      <section id="social" class="report-section">
+        <div class="section-header">
+          <div class="section-title"><span>🌐</span> SOCIAL (OPEN GRAPH & TWITTER)</div>
+          <span id="badge-social-count" class="section-badge">${ogList.length + twList.length} tags</span>
+        </div>
+        <div class="section-body" id="social-container">
+          <div class="social-preview-grid" id="social-previews-container">${socialPreviewsHtml}</div>
+          <div style="margin-top:16px;" id="social-tags-container">${socTagsHtml}</div>
+        </div>
+      </section>
+
+      <section id="structureddata" class="report-section">
+        <div class="section-header">
+          <div class="section-title"><span>🧩</span> STRUCTURED DATA (JSON-LD & SCHEMA)</div>
+          <span id="badge-schema-count" class="section-badge">${schemas.length} schemas</span>
+        </div>
+        <div class="section-body" id="schema-container">${schemaHtml}</div>
+      </section>
+
+      <section id="headings" class="report-section">
+        <div class="section-header">
+          <div class="section-title"><span>📑</span> MARKUP & HEADINGS (H1 - H6)</div>
+          <span id="badge-headings-count" class="section-badge">${headings.length} headings</span>
+        </div>
+        <div class="section-body" id="headings-container">
+          <div id="headings-summary" style="display:flex; gap:10px; margin-bottom:14px; flex-wrap:wrap;">${sumHtml}</div>
+          <div class="heading-tree" id="headings-tree-container">${treeHtml}</div>
+          ${formsHtml}
+          ${html5Html}
+        </div>
+      </section>
+
+      <section id="links" class="report-section">
+        <div class="section-header">
+          <div class="section-title"><span>⚓</span> LINKS & ANCHORS ANALYSIS</div>
+          <span id="badge-links-count" class="section-badge">${lStats.total} links</span>
+        </div>
+        <div class="section-body" id="links-container">${linksHtml}</div>
+      </section>
+
+      <section id="rhints" class="report-section">
+        <div class="section-header">
+          <div class="section-title"><span>⚡</span> RESOURCE HINTS</div>
+          <span id="badge-hints-count" class="section-badge">${hints.length} hints</span>
+        </div>
+        <div class="section-body" id="hints-container">${hintsHtml}</div>
+      </section>
+
+      <section id="externalr" class="report-section">
+        <div class="section-header">
+          <div class="section-title"><span>🏢</span> EXTERNAL RESOURCES & 3RD PARTIES</div>
+          <span id="badge-ext-count" class="section-badge">${extDomains.length} domains</span>
+        </div>
+        <div class="section-body" id="external-container">${extHtml}</div>
+      </section>
+
+      <section id="security" class="report-section">
+        <div class="section-header">
+          <div class="section-title"><span>🛡️</span> SECURITY & CONFIG</div>
+          <span class="section-badge">HTTPS & CSP</span>
+        </div>
+        <div class="section-body" id="security-container">${secHtml}</div>
+      </section>
+    </main>
+
+    <aside class="sidebar-nav">
+      <div class="sidebar-nav-title">Daftar Bagian</div>
+      <ul class="nav-list">
+        <li class="nav-item"><a href="#diagnostics-section" class="nav-link"><span>🩺 Diagnostics</span></a></li>
+        <li class="nav-item"><a href="#common" class="nav-link"><span>📄 Common Meta</span></a></li>
+        <li class="nav-item"><a href="#mobile" class="nav-link"><span>📱 Mobile & Viewport</span></a></li>
+        <li class="nav-item"><a href="#social" class="nav-link"><span>🌐 Social Meta</span> <span id="nav-badge-social" class="nav-count">${ogList.length + twList.length}</span></a></li>
+        <li class="nav-item"><a href="#structureddata" class="nav-link"><span>🧩 Structured Data</span> <span id="nav-badge-schema" class="nav-count">${schemas.length}</span></a></li>
+        <li class="nav-item"><a href="#headings" class="nav-link"><span>📑 Headings (H1-H6)</span> <span id="nav-badge-headings" class="nav-count">${headings.length}</span></a></li>
+        <li class="nav-item"><a href="#links" class="nav-link"><span>⚓ Links Analysis</span> <span id="nav-badge-links" class="nav-count">${lStats.total}</span></a></li>
+        <li class="nav-item"><a href="#rhints" class="nav-link"><span>⚡ Resource Hints</span> <span id="nav-badge-hints" class="nav-count">${hints.length}</span></a></li>
+        <li class="nav-item"><a href="#externalr" class="nav-link"><span>🏢 External Resources</span> <span id="nav-badge-ext" class="nav-count">${extDomains.length}</span></a></li>
+        <li class="nav-item"><a href="#security" class="nav-link"><span>🛡️ Security & Config</span></a></li>
+      </ul>
+      <div style="margin-top:24px; padding-top:16px; border-top:1px solid var(--border-color); font-size:11px; color:#64748b; line-height:1.4;">
+        META SEO Inspector Report<br>Generated by IPvFoo Extension
+      </div>
+    </aside>
+  </div>
+
+  <div id="toast" class="toast-msg">Teks berhasil disalin!</div>
+
+  <script>
+    const DATA = ${JSON.stringify(data).replace(/<\/script>/gi, "<\\/script>")};
+
+    function showToast(msg) {
+      const t = document.getElementById("toast");
+      if (!t) return;
+      t.textContent = msg;
+      t.classList.add("show");
+      setTimeout(() => t.classList.remove("show"), 2200);
+    }
+
+    function copyText(text, label = "Teks") {
+      if (!text) return;
+      navigator.clipboard.writeText(text).then(() => {
+        showToast("✅ " + label + " disalin ke clipboard!");
+      }).catch(() => {
+        const ta = document.createElement("textarea");
+        ta.value = text;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand("copy");
+        document.body.removeChild(ta);
+        showToast("✅ " + label + " disalin ke clipboard!");
+      });
+    }
+
+    document.addEventListener("click", (e) => {
+      const btn = e.target.closest(".copy-btn");
+      if (!btn) return;
+      if (btn.id === "btn-copy-url") {
+        copyText(DATA.url, "URL");
+        return;
+      }
+      if (btn.classList.contains("btn-copy-schema")) {
+        const idx = parseInt(btn.getAttribute("data-idx"), 10);
+        const s = (DATA.jsonLd || []).find(item => item.index === idx);
+        if (s) {
+          let code = s.raw;
+          try { code = JSON.stringify(s.parsed, null, 2); } catch(err) {}
+          copyText(code, "JSON-LD #" + idx);
+        }
+        return;
+      }
+      const text = btn.getAttribute("data-copy");
+      const label = btn.getAttribute("data-label") || "Teks";
+      if (text !== null) {
+        copyText(text, label);
+      }
+    });
+
+    const btnSum = document.getElementById("btn-copy-summary");
+    if (btnSum) {
+      btnSum.onclick = () => {
+        let md = "# SEO Audit Report - " + (DATA.hostname || "") + "\\r\\n";
+        md += "URL: " + (DATA.url || "") + "\\r\\n";
+        md += "Generated: " + (DATA.generatedAt || "") + "\\r\\n\\r\\n";
+        md += "## Ringkasan Skor\\r\\n";
+        md += "- Total Tests: " + (DATA.diagnostics ? DATA.diagnostics.length : 0) + "\\r\\n";
+        md += "- Passed: " + ${goodCount} + "\\r\\n";
+        md += "- Warnings: " + ${warnCount} + "\\r\\n";
+        md += "- Errors: " + ${errCount} + "\\r\\n\\r\\n";
+        md += "## Metadata Utama\\r\\n";
+        md += "- Title (" + (DATA.titleLength || 0) + " chars): " + (DATA.title || "") + "\\r\\n";
+        md += "- Description (" + (DATA.descriptionLength || 0) + " chars): " + (DATA.description || "") + "\\r\\n";
+        md += "- Canonical: " + (DATA.canonical || 'None') + "\\r\\n";
+        md += "- H1: " + (DATA.headingCounts ? (DATA.headingCounts.h1 || 0) : 0) + "\\r\\n";
+        md += "- Structured Data: " + (DATA.jsonLd ? DATA.jsonLd.length : 0) + " schemas\\r\\n\\r\\n";
+        md += "## Diagnostik\\r\\n";
+        (DATA.diagnostics || []).forEach(d => {
+          md += "- [" + d.level.toUpperCase() + "] " + d.category + ": " + d.message + "\\r\\n";
+        });
+        copyText(md, "Ringkasan Markdown");
+      };
+    }
+
+    const btnExport = document.getElementById("btn-export-json");
+    if (btnExport) {
+      btnExport.onclick = () => {
+        const jsonStr = JSON.stringify(DATA, null, 2);
+        const blob = new Blob([jsonStr], { type: "application/json;charset=utf-8;" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "seo_" + (DATA.hostname || "report") + "_" + Date.now() + ".json";
+        a.click();
+        URL.revokeObjectURL(url);
+        showToast("✅ Berhasil mengekspor JSON!");
+      };
+    }
+
+    const btnPrint = document.getElementById("btn-print");
+    if (btnPrint) {
+      btnPrint.onclick = () => { window.print(); };
+    }
+
+    const searchInput = document.getElementById("search-input");
+    if (searchInput) {
+      searchInput.oninput = (e) => {
+        const query = e.target.value.toLowerCase().trim();
+        const rows = document.querySelectorAll(".meta-row, .heading-item");
+        rows.forEach(r => {
+          if (!query) {
+            r.style.display = "";
+            return;
+          }
+          const text = r.textContent.toLowerCase();
+          r.style.display = text.includes(query) ? "" : "none";
+        });
+      };
+    }
+  </script>
+</body>
+</html>`;
+  }
+
+  function openSeoInNewTab() {
+    const seoData = extractPageSeoData();
+    const sourceUrl = window.location.href;
+    const sourceHost = window.location.hostname || "page";
+
+    try {
+      if (typeof chrome !== "undefined" && chrome.storage && chrome.storage.local) {
+        chrome.storage.local.set({ last_seo_data: seoData });
+      }
+    } catch(e) {}
+
+    showCopyToast("🚀 Membuka META SEO Inspector (" + escapeHtml(sourceHost) + ") di Tab Baru...");
+
+    try {
+      if (typeof chrome !== "undefined" && chrome.runtime && chrome.runtime.sendMessage) {
+        chrome.runtime.sendMessage({ cmd: "open_seo_tab" }, (res) => {
+          if (chrome.runtime.lastError || !res || res.status !== "ok") {
+            openPreRenderedSeoBlob(seoData);
+          }
+        });
+        return;
+      }
+    } catch(e) {}
+
+    openPreRenderedSeoBlob(seoData);
+  }
+
+  function openPreRenderedSeoBlob(seoData) {
+    const fullHtml = buildSeoReportHtml(seoData);
+    const blob = new Blob([fullHtml], { type: "text/html;charset=utf-8" });
+    const blobUrl = URL.createObjectURL(blob);
+    window.open(blobUrl, "_blank");
+  }
+
   window.__ipvfoo_open_linkgrabber = openGrabberInNewTab;
+  window.__ipvfoo_open_seo = openSeoInNewTab;
 
   chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     if (msg && msg.action === "open_linkgrabber") {
       openGrabberInNewTab();
+      sendResponse({ ok: true });
+    }
+    if (msg && msg.action === "open_seo") {
+      openSeoInNewTab();
       sendResponse({ ok: true });
     }
   });
