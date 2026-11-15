@@ -260,6 +260,16 @@
       color: #fff;
     }
 
+    .btn-export {
+      background: rgba(0, 217, 255, 0.15);
+      color: #00d9ff;
+      border-color: rgba(0, 217, 255, 0.35);
+    }
+    .btn-export:hover {
+      background: rgba(0, 217, 255, 0.35);
+      color: #fff;
+    }
+
     #table-wrap {
       overflow-y: auto;
       overflow-x: hidden;
@@ -702,6 +712,8 @@
         <span id="widget-speed" class="widget-speed"></span>
       </div>
       <div class="controls">
+        <button id="btn-export-csv" class="btn btn-export" title="Export Session ke CSV">CSV</button>
+        <button id="btn-export-txt" class="btn btn-export" title="Export Session ke TXT">TXT</button>
         <button id="btn-rst" class="btn btn-rst" title="Reset Hit & Size Counter">RESET HITS</button>
         <button id="btn-min" class="btn btn-action" title="Minimize / Sembunyikan">_</button>
         <button id="btn-close" class="btn btn-action" title="Tutup Widget">✕</button>
@@ -807,7 +819,174 @@
     isDragging = false;
   });
 
+  // Export Functions
+  function triggerDownload(content, filename, mimeType) {
+    try {
+      const blob = new Blob([content], { type: mimeType });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      (document.body || document.documentElement).appendChild(a);
+      a.click();
+      setTimeout(() => {
+        if (a.parentNode) a.parentNode.removeChild(a);
+        URL.revokeObjectURL(url);
+      }, 1500);
+    } catch (e) {
+      console.error("Export download error:", e);
+    }
+  }
+
+  function getExportFilename(mainDomain, ext) {
+    const host = (mainDomain || location.hostname || "session").replace(/[^a-zA-Z0-9.-]/g, "_");
+    const d = new Date();
+    const pad2 = (n) => String(n).padStart(2, "0");
+    const dateStr = `${d.getFullYear()}${pad2(d.getMonth() + 1)}${pad2(d.getDate())}_${pad2(d.getHours())}${pad2(d.getMinutes())}${pad2(d.getSeconds())}`;
+    return `ipvfoo_${host}_${dateStr}.${ext}`;
+  }
+
+  function getExportProtocol(flags) {
+    if (flags & DFLAG_WEBSOCKET) return "WS";
+    if (flags & 0x800) return "H3";
+    if (flags & 0x400) return "H2";
+    if (flags & DFLAG_SSL || flags & 0x200) return "HTTPS";
+    return "HTTP";
+  }
+
+  function exportCsvSession(tuples, mainDomain) {
+    if (!tuples || tuples.length === 0) {
+      showCopyToast("Tidak ada data session untuk di-export");
+      return;
+    }
+    const header = ["Domain", "IP Address", "IP Version", "Protocol", "Status Code", "Latency (ms)", "Hits", "Bytes", "Size Formatted", "ASN"];
+    const rows = [header.map(c => `"${c}"`).join(",")];
+
+    tuples.forEach(t => {
+      const domain = t[0] || "";
+      const addr = t[1] || "";
+      const ver = t[2] || "";
+      const flags = t[3] || 0;
+      const hits = t[4] !== undefined ? t[4] : 0;
+      const bytes = t[5] !== undefined ? t[5] : 0;
+      const status = t[6] !== undefined ? t[6] : 200;
+      const latency = t[7] !== undefined ? t[7] : 0;
+      const asn = t[8] || "";
+      const proto = getExportProtocol(flags);
+
+      const row = [
+        domain,
+        addr,
+        ver,
+        proto,
+        status,
+        latency,
+        hits,
+        bytes,
+        formatBytes(bytes),
+        asn
+      ];
+
+      rows.push(row.map(val => `"${String(val).replace(/"/g, '""')}"`).join(","));
+    });
+
+    const csvContent = rows.join("\r\n");
+    const filename = getExportFilename(mainDomain, "csv");
+    triggerDownload(csvContent, filename, "text/csv;charset=utf-8;");
+    showCopyToast(`✅ Exported CSV (${tuples.length} baris)`);
+  }
+
+  function exportTxtSession(tuples, mainDomain) {
+    if (!tuples || tuples.length === 0) {
+      showCopyToast("Tidak ada data session untuk di-export");
+      return;
+    }
+    const now = new Date();
+    const dateStr = now.toISOString().replace("T", " ").substring(0, 19);
+    let totalHits = 0;
+    let totalBytes = 0;
+    tuples.forEach(t => {
+      totalHits += t[4] || 0;
+      totalBytes += t[5] || 0;
+    });
+
+    const lines = [];
+    lines.push("=".repeat(110));
+    lines.push("IPvFoo Session Report");
+    lines.push("=".repeat(110));
+    lines.push(`Target / Main Host : ${mainDomain || (tuples[0] ? tuples[0][0] : "-")}`);
+    lines.push(`Export Time        : ${dateStr}`);
+    lines.push(`Total Domains      : ${tuples.length}`);
+    lines.push(`Total Requests     : ${totalHits} reqs`);
+    lines.push(`Total Bandwidth    : ${formatBytes(totalBytes)}`);
+    lines.push("=".repeat(110));
+    lines.push("");
+
+    const pad = (str, len, align = "left") => {
+      str = String(str ?? "");
+      if (str.length > len) {
+        return align === "left" ? str.substring(0, len - 2) + ".." : ".." + str.substring(str.length - (len - 2));
+      }
+      return align === "left" ? str.padEnd(len, " ") : str.padStart(len, " ");
+    };
+
+    lines.push(
+      pad("Domain", 32) + " " +
+      pad("IP Address", 22) + " " +
+      pad("Ver", 4) + " " +
+      pad("Proto", 7) + " " +
+      pad("Status", 7) + " " +
+      pad("Latency", 9, "right") + " " +
+      pad("Hits", 6, "right") + " " +
+      pad("Size", 10, "right") + "  " +
+      "ASN / Organization"
+    );
+    lines.push("-".repeat(110));
+
+    tuples.forEach(t => {
+      const domain = t[0] || "";
+      const addr = t[1] || "";
+      const ver = t[2] || "";
+      const flags = t[3] || 0;
+      const hits = t[4] !== undefined ? t[4] : 0;
+      const bytes = t[5] !== undefined ? t[5] : 0;
+      const status = t[6] !== undefined ? t[6] : 200;
+      const latency = t[7] !== undefined && t[7] > 0 ? `${t[7]} ms` : "-";
+      const asn = t[8] || "-";
+      const proto = getExportProtocol(flags);
+
+      lines.push(
+        pad(domain, 32) + " " +
+        pad(addr, 22) + " " +
+        pad(ver, 4) + " " +
+        pad(proto, 7) + " " +
+        pad(status, 7) + " " +
+        pad(latency, 9, "right") + " " +
+        pad(hits, 6, "right") + " " +
+        pad(formatBytes(bytes), 10, "right") + "  " +
+        asn
+      );
+    });
+
+    lines.push("-".repeat(110));
+    lines.push("Generated by IPvFoo Extension");
+    lines.push("=".repeat(110));
+
+    const txtContent = lines.join("\r\n");
+    const filename = getExportFilename(mainDomain, "txt");
+    triggerDownload(txtContent, filename, "text/plain;charset=utf-8;");
+    showCopyToast(`✅ Exported TXT (${tuples.length} baris)`);
+  }
+
   // Buttons
+  shadow.getElementById("btn-export-csv").onclick = () => {
+    exportCsvSession(allTuplesCache, allTuplesCache[0] ? allTuplesCache[0][0] : location.hostname);
+  };
+
+  shadow.getElementById("btn-export-txt").onclick = () => {
+    exportTxtSession(allTuplesCache, allTuplesCache[0] ? allTuplesCache[0][0] : location.hostname);
+  };
+
   shadow.getElementById("btn-min").onclick = () => {
     widget.style.display = "none";
     miniBadge.style.display = "flex";
