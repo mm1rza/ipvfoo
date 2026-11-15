@@ -444,6 +444,17 @@
       color: #fff;
     }
 
+    .btn-grabber {
+      background: rgba(124, 58, 237, 0.2);
+      color: #c084fc;
+      border-color: rgba(124, 58, 237, 0.45);
+    }
+    .btn-grabber:hover {
+      background: #7c3aed;
+      color: #fff;
+      box-shadow: 0 0 8px rgba(124, 58, 237, 0.6);
+    }
+
     #table-wrap {
       overflow-y: auto;
       overflow-x: hidden;
@@ -945,6 +956,215 @@
       font-size: 13px;
     }
 
+    /* Link Grabber Modal Styles */
+    #lg-modal-backdrop {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.78);
+      backdrop-filter: blur(4px);
+      z-index: 2147483647 !important;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      user-select: none;
+    }
+    #lg-modal {
+      width: 820px;
+      max-width: 94vw;
+      max-height: 88vh;
+      background: #141724;
+      border: 1px solid #7c3aed;
+      border-radius: 12px;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.85), 0 0 25px rgba(124, 58, 237, 0.3);
+      color: #eee;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      animation: modalPop 0.22s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    #lg-modal-header {
+      background: #1c1d30;
+      padding: 12px 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #2d2f4a;
+    }
+    #lg-modal-header .title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #c084fc;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .lg-badge {
+      background: rgba(124, 58, 237, 0.3);
+      color: #e9d5ff;
+      border: 1px solid rgba(124, 58, 237, 0.5);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 1px 7px;
+      border-radius: 10px;
+    }
+    #lg-modal-close {
+      background: none;
+      border: none;
+      color: #aaa;
+      font-size: 18px;
+      font-weight: 700;
+      cursor: pointer;
+      line-height: 1;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+    #lg-modal-close:hover {
+      color: #ff5252;
+      background: rgba(255, 82, 82, 0.15);
+    }
+    #lg-toolbar {
+      padding: 12px 18px;
+      background: #18192c;
+      border-bottom: 1px solid #282a45;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .lg-search-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    #lg-search-input {
+      flex: 1;
+      background: #0f101d;
+      border: 1px solid #3c3f66;
+      border-radius: 6px;
+      padding: 6px 12px;
+      color: #fff;
+      font-size: 12px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    #lg-search-input:focus {
+      border-color: #7c3aed;
+      box-shadow: 0 0 6px rgba(124, 58, 237, 0.4);
+    }
+    .lg-options-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      font-size: 11.5px;
+      color: #bbb;
+      align-items: center;
+    }
+    .lg-checkbox {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .lg-checkbox input {
+      cursor: pointer;
+      accent-color: #7c3aed;
+    }
+    #lg-list-container {
+      flex: 1;
+      overflow-y: auto;
+      max-height: calc(85vh - 200px);
+      min-height: 200px;
+      padding: 6px 14px;
+    }
+    #lg-link-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      font-family: Consolas, Monaco, monospace;
+      font-size: 11px;
+    }
+    .lg-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 8px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      transition: background 0.15s;
+    }
+    .lg-item:hover {
+      background: rgba(124, 58, 237, 0.1);
+    }
+    .lg-item-num {
+      color: #666;
+      font-size: 10px;
+      min-width: 28px;
+      text-align: right;
+    }
+    .lg-item-host {
+      background: rgba(0, 217, 255, 0.15);
+      color: #00d9ff;
+      border-radius: 3px;
+      padding: 1px 5px;
+      font-size: 10px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .lg-item-text {
+      color: #aaa;
+      font-size: 11px;
+      max-width: 160px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    .lg-item-url {
+      flex: 1;
+      color: #c084fc;
+      text-decoration: none;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      word-break: break-all;
+    }
+    .lg-item-url:hover {
+      text-decoration: underline;
+      color: #e9d5ff;
+    }
+    .lg-item-copy {
+      background: transparent;
+      border: 1px solid #3c3f66;
+      color: #888;
+      border-radius: 4px;
+      padding: 2px 6px;
+      cursor: pointer;
+      font-size: 10px;
+      transition: all 0.15s;
+    }
+    .lg-item-copy:hover {
+      border-color: #7c3aed;
+      color: #fff;
+    }
+    .lg-empty {
+      padding: 40px;
+      text-align: center;
+      color: #888;
+      font-size: 13px;
+    }
+    #lg-footer {
+      padding: 8px 18px;
+      background: #111220;
+      border-top: 1px solid #282a45;
+      font-size: 10.5px;
+      color: #666;
+      display: flex;
+      justify-content: space-between;
+    }
+
   `;
   shadow.appendChild(style);
 
@@ -960,6 +1180,7 @@
       <div class="controls">
         <button id="btn-export-csv" class="btn btn-export" title="Export Session ke CSV">CSV</button>
         <button id="btn-export-txt" class="btn btn-export" title="Export Session ke TXT">TXT</button>
+        <button id="btn-linkgrabber" class="btn btn-grabber" title="Ekstrak Semua Link di Halaman Ini (Link Grabber)">LINKGRABBER</button>
         <button id="btn-rst" class="btn btn-rst" title="Reset Hit & Size Counter">RESET HITS</button>
         <button id="btn-min" class="btn btn-action" title="Minimize / Sembunyikan">_</button>
         <button id="btn-close" class="btn btn-action" title="Tutup Widget">✕</button>
@@ -1237,6 +1458,10 @@
 
   shadow.getElementById("btn-export-txt").onclick = () => {
     exportTxtSession(allTuplesCache, allTuplesCache[0] ? allTuplesCache[0][0] : location.hostname);
+  };
+
+  shadow.getElementById("btn-linkgrabber").onclick = () => {
+    openLinkGrabberModal();
   };
 
   shadow.getElementById("btn-min").onclick = () => {
@@ -1876,6 +2101,262 @@
       };
     }
   }
+
+  function escapeHtml(str) {
+    if (!str) return "";
+    return String(str)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
+
+  // Link Grabber Modal DOM
+  const lgBackdrop = document.createElement("div");
+  lgBackdrop.id = "lg-modal-backdrop";
+  lgBackdrop.innerHTML = `
+    <div id="lg-modal">
+      <div id="lg-modal-header">
+        <div class="title">
+          <span>🔗 Link Grabber</span>
+          <span id="lg-count-badge" class="lg-badge">0 links</span>
+        </div>
+        <button id="lg-modal-close" title="Tutup Modal">✕</button>
+      </div>
+      <div id="lg-toolbar">
+        <div class="lg-search-row">
+          <input type="text" id="lg-search-input" placeholder="Filter links (misal: domain, kata kunci, ekstensi .pdf/.jpg)..." />
+          <button id="lg-btn-copy" class="btn btn-export" title="Copy semua link yang terfilter ke clipboard">📋 Copy (<span id="lg-copy-count">0</span>)</button>
+          <button id="lg-btn-export" class="btn btn-export" title="Download teks file semua link">📥 Export TXT</button>
+          <button id="lg-btn-newtab" class="btn btn-export" title="Buka daftar link di Tab Baru">🌐 Tab Baru</button>
+        </div>
+        <div class="lg-options-row">
+          <label class="lg-checkbox"><input type="checkbox" id="lg-opt-dedup" checked /> Hide duplicate links</label>
+          <label class="lg-checkbox"><input type="checkbox" id="lg-opt-diff-origin" /> Hide same origin (<span id="lg-curr-origin">domain</span>)</label>
+          <label class="lg-checkbox"><input type="checkbox" id="lg-opt-group" /> Group by domain</label>
+        </div>
+      </div>
+      <div id="lg-list-container">
+        <ul id="lg-link-list"></ul>
+      </div>
+      <div id="lg-footer">
+        <span id="lg-source-url">Sumber: ${window.location.href}</span>
+        <span style="color:#888;">Tip: Klik icon 📋 di baris link untuk copy satu link</span>
+      </div>
+    </div>
+  `;
+  shadow.appendChild(lgBackdrop);
+
+  let rawExtractedLinks = [];
+  let currentFilteredLinks = [];
+
+  function extractPageLinks() {
+    const elements = document.querySelectorAll('a[href]:not([href^="javascript:"]):not([href=""]):not([href^="#"])');
+    const links = [];
+    for (let i = 0; i < elements.length; i++) {
+      const el = elements[i];
+      try {
+        const href = el.href;
+        if (!href || href.startsWith("javascript:") || href.startsWith("mailto:") || href.startsWith("tel:")) {
+          continue;
+        }
+        const u = new URL(href, window.location.href);
+        if (u.protocol !== "http:" && u.protocol !== "https:" && u.protocol !== "ftp:") {
+          continue;
+        }
+        const text = (el.textContent || el.title || el.getAttribute("aria-label") || "").trim().replace(/\s+/g, " ");
+        links.push({
+          href: u.href,
+          origin: u.origin,
+          hostname: u.hostname,
+          pathname: u.pathname,
+          search: u.search,
+          hash: u.hash,
+          text: text
+        });
+      } catch (e) {}
+    }
+    return links;
+  }
+
+  function groupLinksByDomain(links) {
+    const indexes = new Array(links.length);
+    const rh = new Array(links.length);
+    for (let i = 0; i < links.length; i++) {
+      indexes[i] = i;
+      rh[i] = links[i].hostname.toLowerCase().split('.').reverse().join('.');
+    }
+    indexes.sort((i, j) => {
+      if (rh[i] < rh[j]) return -1;
+      if (rh[i] > rh[j]) return 1;
+      return i - j;
+    });
+    return indexes.map(i => links[i]);
+  }
+
+  function renderLinkGrabberList() {
+    const searchVal = lgBackdrop.querySelector("#lg-search-input").value.trim().toLowerCase();
+    const hideDuplicates = lgBackdrop.querySelector("#lg-opt-dedup").checked;
+    const hideSameOrigin = lgBackdrop.querySelector("#lg-opt-diff-origin").checked;
+    const groupByDomain = lgBackdrop.querySelector("#lg-opt-group").checked;
+    const listEl = lgBackdrop.querySelector("#lg-link-list");
+    const countBadge = lgBackdrop.querySelector("#lg-count-badge");
+    const copyCountSpan = lgBackdrop.querySelector("#lg-copy-count");
+
+    let links = rawExtractedLinks.slice(0);
+    const currOrigin = window.location.origin;
+
+    if (hideSameOrigin) {
+      links = links.filter(l => l.origin !== currOrigin);
+    }
+    if (groupByDomain) {
+      links = groupLinksByDomain(links);
+    }
+
+    const seenHrefs = new Set();
+    const filtered = [];
+
+    for (const link of links) {
+      if (hideDuplicates) {
+        if (seenHrefs.has(link.href)) continue;
+        seenHrefs.add(link.href);
+      }
+      if (searchVal) {
+        const matchHref = link.href.toLowerCase().includes(searchVal);
+        const matchText = link.text.toLowerCase().includes(searchVal);
+        const matchHost = link.hostname.toLowerCase().includes(searchVal);
+        if (!matchHref && !matchText && !matchHost) continue;
+      }
+      filtered.push(link);
+    }
+
+    currentFilteredLinks = filtered;
+    countBadge.textContent = `${filtered.length} / ${rawExtractedLinks.length} links`;
+    copyCountSpan.textContent = filtered.length;
+
+    if (filtered.length === 0) {
+      listEl.innerHTML = `<li class="lg-empty">🔍 Tidak ada link yang cocok dengan filter "${escapeHtml(searchVal)}"</li>`;
+      return;
+    }
+
+    listEl.innerHTML = filtered.map((l, idx) => `
+      <li class="lg-item">
+        <span class="lg-item-num">${idx + 1}.</span>
+        <span class="lg-item-host" title="Host: ${escapeHtml(l.hostname)}">${escapeHtml(l.hostname)}</span>
+        ${l.text ? `<span class="lg-item-text" title="${escapeHtml(l.text)}">${escapeHtml(l.text)}</span>` : ''}
+        <a href="${escapeHtml(l.href)}" target="_blank" class="lg-item-url" title="${escapeHtml(l.href)}">${escapeHtml(l.href)}</a>
+        <button class="lg-item-copy" data-url="${escapeHtml(l.href)}" title="Copy link ini">📋</button>
+      </li>
+    `).join("");
+
+    listEl.querySelectorAll(".lg-item-copy").forEach(btn => {
+      btn.onclick = (e) => {
+        e.stopPropagation();
+        const urlToCopy = btn.getAttribute("data-url");
+        if (urlToCopy) {
+          copyToClipboard(urlToCopy, "Link");
+        }
+      };
+    });
+  }
+
+  function openLinkGrabberModal() {
+    rawExtractedLinks = extractPageLinks();
+    const originEl = lgBackdrop.querySelector("#lg-curr-origin");
+    if (originEl) originEl.textContent = window.location.hostname;
+    const sourceEl = lgBackdrop.querySelector("#lg-source-url");
+    if (sourceEl) sourceEl.textContent = `Sumber: ${window.location.href}`;
+
+    lgBackdrop.style.display = "flex";
+    renderLinkGrabberList();
+
+    const searchInput = lgBackdrop.querySelector("#lg-search-input");
+    if (searchInput) {
+      setTimeout(() => searchInput.focus(), 50);
+    }
+  }
+
+  window.__ipvfoo_open_linkgrabber = openLinkGrabberModal;
+
+  // Listen for message from popup
+  chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+    if (msg && msg.action === "open_linkgrabber") {
+      openLinkGrabberModal();
+      sendResponse({ ok: true });
+    }
+  });
+
+  // Modal close handlers
+  const lgCloseBtn = lgBackdrop.querySelector("#lg-modal-close");
+  lgCloseBtn.onclick = () => { lgBackdrop.style.display = "none"; };
+  lgBackdrop.onclick = (e) => {
+    if (e.target === lgBackdrop) lgBackdrop.style.display = "none";
+  };
+
+  // Search input & options change handlers
+  const lgSearchInput = lgBackdrop.querySelector("#lg-search-input");
+  lgSearchInput.oninput = () => renderLinkGrabberList();
+  lgBackdrop.querySelector("#lg-opt-dedup").onchange = () => renderLinkGrabberList();
+  lgBackdrop.querySelector("#lg-opt-diff-origin").onchange = () => renderLinkGrabberList();
+  lgBackdrop.querySelector("#lg-opt-group").onchange = () => renderLinkGrabberList();
+
+  // Copy button
+  lgBackdrop.querySelector("#lg-btn-copy").onclick = () => {
+    if (!currentFilteredLinks.length) {
+      showCopyToast("Tidak ada link untuk di-copy");
+      return;
+    }
+    const text = currentFilteredLinks.map(l => l.href).join("\r\n");
+    copyToClipboard(text, `${currentFilteredLinks.length} Links`);
+  };
+
+  // Export TXT button
+  lgBackdrop.querySelector("#lg-btn-export").onclick = () => {
+    if (!currentFilteredLinks.length) {
+      showCopyToast("Tidak ada link untuk di-export");
+      return;
+    }
+    const text = currentFilteredLinks.map(l => l.href).join("\r\n");
+    triggerDownload(text, `links_${window.location.hostname}_${Date.now()}.txt`, "text/plain;charset=utf-8;");
+    showCopyToast(`Exported ${currentFilteredLinks.length} links!`);
+  };
+
+  // New Tab button
+  lgBackdrop.querySelector("#lg-btn-newtab").onclick = () => {
+    if (!currentFilteredLinks.length) {
+      showCopyToast("Tidak ada link untuk dibuka");
+      return;
+    }
+    const html = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Extracted Links - ${escapeHtml(window.location.hostname)}</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #0f101d; color: #eee; margin: 0; padding: 24px; }
+    h1 { font-size: 20px; color: #c084fc; margin-bottom: 4px; }
+    .sub { font-size: 13px; color: #888; margin-bottom: 20px; }
+    .sub a { color: #00d9ff; text-decoration: none; }
+    ol { font-family: Consolas, Monaco, monospace; font-size: 12px; padding-left: 24px; line-height: 1.6; }
+    li { margin-bottom: 6px; }
+    a { color: #38bdf8; text-decoration: none; word-break: break-all; }
+    a:hover { text-decoration: underline; color: #7dd3fc; }
+    .host { color: #c084fc; font-weight: bold; margin-right: 8px; }
+  </style>
+</head>
+<body>
+  <h1>🔗 Extracted Links (${currentFilteredLinks.length})</h1>
+  <div class="sub">Source: <a href="${escapeHtml(window.location.href)}" target="_blank">${escapeHtml(window.location.href)}</a></div>
+  <ol>
+    ${currentFilteredLinks.map(l => `<li><span class="host">[${escapeHtml(l.hostname)}]</span><a href="${escapeHtml(l.href)}" target="_blank">${escapeHtml(l.href)}</a></li>`).join("")}
+  </ol>
+</body>
+</html>`;
+    const blob = new Blob([html], { type: "text/html;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    window.open(url, "_blank");
+  };
 
   let activePort = null;
   let isPageHidden = false;

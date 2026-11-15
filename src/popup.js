@@ -540,6 +540,18 @@ window.onload = async function () {
     };
   }
 
+  const linkgrabberBtn = document.getElementById("linkgrabber_btn");
+  if (linkgrabberBtn) {
+    linkgrabberBtn.onclick = () => {
+      chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+        if (!tabs || !tabs[0]) return;
+        chrome.tabs.sendMessage(tabs[0].id, { action: "open_linkgrabber" }, () => {
+          window.close();
+        });
+      });
+    };
+  }
+
   const rstBtn = document.getElementById("rst_btn");
   if (rstBtn) {
     rstBtn.onclick = async () => {
