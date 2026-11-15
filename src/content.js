@@ -3671,7 +3671,7 @@
             </div>
           </div>
           <div class="header-actions">
-            <button id="btn-copy-summary" class="btn" title="Copy Ringkasan SEO (Markdown)">&#x1F4CB; Copy Summary</button>
+            <button id="btn-copy-summary" class="btn btn-primary" title="Copy Ringkasan SEO (Markdown)">&#x1F4CB; Copy Summary</button>
             <button id="btn-export-json" class="btn" title="Export Raw Data ke JSON">&#x1F4BE; Export JSON</button>
           </div>
         </div>
