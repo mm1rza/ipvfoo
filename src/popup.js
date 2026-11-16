@@ -538,6 +538,7 @@ window.onload = async function () {
 
     popupMyIp.onclick = (e) => {
       e.stopPropagation();
+      popupMyIp.classList.toggle("unblurred");
       const ipText = popupMyIp.textContent.replace(/^🌐\s*/, "").trim();
       if (ipText && ipText !== "-" && ipText !== "Gagal" && !ipText.includes("...")) {
         navigator.clipboard.writeText(ipText);

@@ -278,6 +278,30 @@ limitations under the License.
       background: #039be5;
     }
 
+    .header_btn_screenshot {
+      background: rgba(168, 85, 247, 0.2);
+      color: #c084fc;
+      border-color: rgba(168, 85, 247, 0.5);
+      font-weight: 700;
+    }
+
+    .header_btn_screenshot:hover {
+      background: #a855f7;
+      color: #fff;
+    }
+
+    .header_btn_txt {
+      background: rgba(26, 230, 128, 0.2);
+      color: #1ae680;
+      border-color: rgba(26, 230, 128, 0.5);
+      font-weight: 700;
+    }
+
+    .header_btn_txt:hover {
+      background: #1ae680;
+      color: #07090D;
+    }
+
     .header_btn_seo {
       background: rgba(250, 156, 27, 0.15);
       color: #FA9C1B;
@@ -541,9 +565,16 @@ limitations under the License.
       line-height: 1.2;
       cursor: pointer;
       white-space: nowrap;
+      filter: blur(4.5px);
+      user-select: none;
+      transition: filter 0.2s ease, background 0.15s ease;
     }
-    .header_myip:hover {
+
+    .header_myip:hover,
+    .header_myip.unblurred {
+      filter: blur(0);
       background: rgba(0, 234, 255, 0.25);
+      user-select: text;
     }
 
     .shake {
@@ -567,12 +598,13 @@ limitations under the License.
       </div>
       <div class="btn_group">
         <button id="export_csv_btn" class="header_btn header_btn_action" title="Export Session ke CSV">CSV</button>
-        <button id="screenshot_btn" class="header_btn header_btn_action" title="Full Page Screenshot">📸</button>
-        <button id="export_txt_btn" class="header_btn header_btn_action" title="Export Session ke TXT">TXT</button>
+        <button id="screenshot_btn" class="header_btn header_btn_screenshot"
+          title="Full Page Screenshot">SCREENSHOOT</button>
+        <button id="export_txt_btn" class="header_btn header_btn_txt" title="Export Session ke TXT">TXT LIST</button>
         <button id="seo_btn" class="header_btn header_btn_seo" title="Buka META SEO Inspector (New Tab)">META
           SEO</button>
         <button id="linkgrabber_btn" class="header_btn header_btn_grabber"
-          title="Ekstrak Semua Link di Halaman Ini (Link Grabber)">LINK GRABBER</button>
+          title="Ekstrak Semua Link di Halaman Ini (Link Grabber)">LINK GRAB</button>
         <button id="rst_btn" class="header_btn header_btn_rst" title="Reset Hit & Size Counter">RESET HITS</button>
         <button id="close_btn" class="header_btn header_btn_close" title="Tutup Popup">X</button>
       </div>

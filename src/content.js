@@ -485,6 +485,34 @@
       box-shadow: var(--glow-cyan);
     }
 
+    .btn-screenshot {
+      background: rgba(168, 85, 247, 0.15);
+      color: #c084fc;
+      border-color: rgba(168, 85, 247, 0.45);
+      font-weight: 700;
+      letter-spacing: 0.2px;
+    }
+    .btn-screenshot:hover {
+      background: #a855f7;
+      color: #ffffff;
+      border-color: #a855f7;
+      box-shadow: 0 0 10px rgba(168, 85, 247, 0.5);
+    }
+
+    .btn-txt {
+      background: rgba(26, 230, 128, 0.15);
+      color: var(--cyber-green);
+      border-color: rgba(26, 230, 128, 0.45);
+      font-weight: 700;
+      letter-spacing: 0.2px;
+    }
+    .btn-txt:hover {
+      background: var(--cyber-green);
+      color: #07090D;
+      border-color: var(--cyber-green);
+      box-shadow: 0 0 10px rgba(26, 230, 128, 0.5);
+    }
+
     .btn-seo {
       background: rgba(250, 156, 27, 0.15);
       color: var(--primary);
@@ -744,13 +772,18 @@
       gap: 3px;
       line-height: 1.2;
       cursor: pointer;
-      transition: all 0.15s ease;
       white-space: nowrap;
+      filter: blur(4.5px);
+      user-select: none;
+      transition: filter 0.2s ease, background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
     }
-    .widget-myip:hover {
+    .widget-myip:hover,
+    .widget-myip.unblurred {
+      filter: blur(0);
       background: rgba(0, 234, 255, 0.25);
       border-color: var(--cyber-cyan);
       box-shadow: var(--glow-cyan);
+      user-select: text;
     }
 
     .speed-tag {
@@ -1054,10 +1087,10 @@
         <span id="widget-myip" class="widget-myip" title="IP Publik Anda (Klik untuk Copy)">🌐 IP Saya: ...</span>
       </div>
       <div class="controls">
-        <button id="btn-screenshot" class="btn btn-export" title="Ambil Full Page Screenshot">📸</button>
-        <button id="btn-export-txt" class="btn btn-export" title="Export Session ke TXT">TXT</button>
+        <button id="btn-screenshot" class="btn btn-screenshot" title="Ambil Full Page Screenshot">SCREENSHOOT</button>
+        <button id="btn-export-txt" class="btn btn-txt" title="Export Session ke TXT">TXT LIST</button>
         <button id="btn-seo" class="btn btn-seo" title="Buka META SEO Inspector (New Tab)">META SEO</button>
-        <button id="btn-linkgrabber" class="btn btn-grabber" title="Ekstrak Semua Link di Halaman Ini (Link Grabber)">LINK GRABBER</button>
+        <button id="btn-linkgrabber" class="btn btn-grabber" title="Ekstrak Semua Link di Halaman Ini (Link Grabber)">LINK GRAB</button>
         <button id="btn-rst" class="btn btn-rst" title="Reset Hit & Size Counter">RESET HITS</button>
         <button id="btn-min" class="btn btn-action" title="Minimize / Sembunyikan">_</button>
         <button id="btn-close" class="btn btn-action" title="Tutup Widget">✕</button>
@@ -1550,6 +1583,7 @@
 
     myIpEl.onclick = (e) => {
       e.stopPropagation();
+      myIpEl.classList.toggle("unblurred");
       const ipText = myIpEl.textContent.replace(/^🌐\s*/, "").trim();
       if (ipText && ipText !== "-" && ipText !== "Gagal" && !ipText.includes("...")) {
         copyToClipboard(ipText, "IP Saya");
