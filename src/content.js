@@ -730,6 +730,29 @@
       line-height: 1.2;
     }
 
+    .widget-myip {
+      font-size: 9.5px;
+      font-weight: 700;
+      color: var(--cyber-cyan);
+      background: rgba(0, 234, 255, 0.12);
+      border: 1px solid rgba(0, 234, 255, 0.35);
+      padding: 1px 6px;
+      border-radius: 3px;
+      margin-left: 6px;
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      line-height: 1.2;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+    }
+    .widget-myip:hover {
+      background: rgba(0, 234, 255, 0.25);
+      border-color: var(--cyber-cyan);
+      box-shadow: var(--glow-cyan);
+    }
+
     .speed-tag {
       display: inline-block;
       margin-right: 4px;
@@ -1028,6 +1051,7 @@
       <div class="title" style="display:flex; align-items:center;">
         <span>IPvFooKan</span>
         <span id="widget-speed" class="widget-speed"></span>
+        <span id="widget-myip" class="widget-myip" title="IP Publik Anda (Klik untuk Copy)">🌐 IP Saya: ...</span>
       </div>
       <div class="controls">
         <button id="btn-screenshot" class="btn btn-export" title="Ambil Full Page Screenshot">📸</button>
@@ -1158,7 +1182,7 @@
     }
   }
 
-  // Full-page screen capture (inspired by ref/full-page-screen-capture-chrome-extension-master)
+  // Full-page screen capture (Top-to-bottom seamless stitch)
   async function takeFullPageScreenshot() {
     const origWidgetDisplay = widget.style.display;
     const origMiniDisplay = miniBadge.style.display;
@@ -1171,60 +1195,118 @@
       existingToast.style.display = "none";
     }
 
-    const body = document.body;
     const origScrollX = window.scrollX;
     const origScrollY = window.scrollY;
-    const origDocOverflow = document.documentElement.style.overflow;
-    const origBodyOverflowY = body ? body.style.overflowY : "";
 
-    if (body) {
-      body.style.overflowY = "visible";
-    }
-    document.documentElement.style.overflow = "hidden";
+    // Sembunyikan scrollbar sementara tanpa merusak overflow
+    const hideScrollStyle = document.createElement("style");
+    hideScrollStyle.textContent = `
+      ::-webkit-scrollbar { display: none !important; width: 0 !important; height: 0 !important; }
+      html, body { scrollbar-width: none !important; -ms-overflow-style: none !important; }
+    `;
+    (document.head || document.documentElement).appendChild(hideScrollStyle);
+
+    // Kumpulkan fixed/sticky headers agar tidak tercetak berulang di tengah halaman
+    const fixedElements = [];
+    try {
+      const candidates = document.querySelectorAll("header, nav, div, banner, aside");
+      candidates.forEach((el) => {
+        if (el === widget || el === miniBadge || shadow.contains(el)) return;
+        const pos = window.getComputedStyle(el).position;
+        if (pos === "fixed") {
+          fixedElements.push({ el, origVisibility: el.style.visibility });
+        }
+      });
+    } catch (e) { }
 
     try {
-      const fullWidth = Math.max(
-        document.documentElement.clientWidth,
-        body ? body.scrollWidth : 0,
-        document.documentElement.scrollWidth,
-        body ? body.offsetWidth : 0,
-        document.documentElement.offsetWidth
-      );
-      const fullHeight = Math.max(
-        document.documentElement.clientHeight,
-        body ? body.scrollHeight : 0,
-        document.documentElement.scrollHeight,
-        body ? body.offsetHeight : 0,
-        document.documentElement.offsetHeight
-      );
+      // Tunggu layout stabil sejenak
+      await new Promise((r) => setTimeout(r, 100));
+
+      const scrollEl = document.scrollingElement || document.documentElement || document.body;
       const windowWidth = window.innerWidth;
       const windowHeight = window.innerHeight;
 
-      const scrollPad = 200;
-      const yDelta = windowHeight - (windowHeight > scrollPad ? scrollPad : 0);
-      const xDelta = windowWidth;
+      const fullWidth = Math.max(
+        windowWidth,
+        scrollEl ? scrollEl.scrollWidth : 0,
+        document.documentElement.scrollWidth,
+        document.body ? document.body.scrollWidth : 0
+      );
+      const fullHeight = Math.max(
+        windowHeight,
+        scrollEl ? scrollEl.scrollHeight : 0,
+        document.documentElement.scrollHeight,
+        document.body ? document.body.scrollHeight : 0
+      );
+      const maxScrollY = Math.max(0, fullHeight - windowHeight);
 
-      // Susun urutan scroll dari bawah ke atas agar sticky headers
-      // ditimpa rapi oleh render bagian atas halaman terakhir (metode Peter Coles)
-      const arrangements = [];
-      let yPos = fullHeight - windowHeight;
-      while (yPos > -yDelta) {
-        let xPos = 0;
-        while (xPos < fullWidth) {
-          arrangements.push([xPos, Math.max(0, yPos)]);
-          xPos += xDelta;
+      // Hitung slice scroll dari atas ke bawah hingga mencapai dasar halaman paling bawah
+      const slices = [];
+      let currentY = 0;
+      while (currentY < fullHeight) {
+        const targetScrollY = Math.min(currentY, maxScrollY);
+        const sourceY = currentY - targetScrollY;
+        const sliceHeight = Math.min(windowHeight - sourceY, fullHeight - currentY);
+        slices.push({
+          targetScrollY,
+          canvasY: currentY,
+          sourceY,
+          sliceHeight
+        });
+        currentY += sliceHeight;
+      }
+
+      // Smooth scroll helper dengan animasi bertahap yang tenang dan santai
+      async function smoothScrollToY(targetY, duration = 650) {
+        const startY = window.scrollY;
+        const diff = targetY - startY;
+        if (Math.abs(diff) < 2) {
+          window.scrollTo(0, targetY);
+          return;
         }
-        yPos -= yDelta;
+
+        const startTime = performance.now();
+        await new Promise((resolve) => {
+          function step(now) {
+            const elapsed = now - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            // Easing kuadratik lembut (in-out)
+            const ease = progress < 0.5
+              ? 2 * progress * progress
+              : -1 + (4 - 2 * progress) * progress;
+            window.scrollTo(0, startY + diff * ease);
+
+            if (progress < 1) {
+              requestAnimationFrame(step);
+            } else {
+              window.scrollTo(0, targetY);
+              resolve();
+            }
+          }
+          requestAnimationFrame(step);
+        });
       }
 
       let canvas = null;
       let ctx = null;
       let scale = 1;
 
-      for (let i = 0; i < arrangements.length; i++) {
-        const [x, y] = arrangements[i];
-        window.scrollTo(x, y);
-        await new Promise((r) => setTimeout(r, 160));
+      for (let i = 0; i < slices.length; i++) {
+        const s = slices[i];
+        
+        // Scroll secara perlahan ke bawah agar seluruh animasi web & lazy-load selesai 100%
+        if (i === 0) {
+          window.scrollTo(0, s.targetScrollY);
+          // Beri waktu 600ms di posisi awal
+          await new Promise((r) => setTimeout(r, 600));
+        } else {
+          // Gulir lambat dan halus (smooth scroll 650ms)
+          await smoothScrollToY(s.targetScrollY, 650);
+          // Beri jeda 800ms agar animasi CSS (fade-in, slide-up, AOS), IntersectionObserver,
+          // chart rendering, dan gambar lazy load selesai me-render tampilannya secara sempurna
+          await new Promise((r) => setTimeout(r, 800));
+        }
 
         const resp = await new Promise((resolve) => {
           chrome.runtime.sendMessage({ cmd: "captureVisibleTab" }, (res) => {
@@ -1251,7 +1333,26 @@
           ctx = canvas.getContext("2d");
         }
 
-        ctx.drawImage(img, Math.round(x * scale), Math.round(y * scale));
+        // Potong hanya area slice dari viewport (menghindari duplikasi sisa scroll bawah)
+        const sx = 0;
+        const sy = Math.round(s.sourceY * scale);
+        const sw = Math.round(windowWidth * scale);
+        const sh = Math.round(s.sliceHeight * scale);
+
+        const dx = 0;
+        const dy = Math.round(s.canvasY * scale);
+        const dw = sw;
+        const dh = sh;
+
+        ctx.drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh);
+
+        // Setelah potongan pertama (header atas) selesai, sembunyikan fixed headers
+        // agar tidak muncul berulang di setiap potongan bawah
+        if (i === 0 && fixedElements.length > 0) {
+          fixedElements.forEach((f) => {
+            f.el.style.visibility = "hidden";
+          });
+        }
       }
 
       if (canvas) {
@@ -1273,8 +1374,14 @@
       console.error("[IPvFooKan] Screenshot error:", err);
       showCopyToast("❌ Gagal screenshot: " + (err.message || err));
     } finally {
-      document.documentElement.style.overflow = origDocOverflow;
-      if (body) body.style.overflowY = origBodyOverflowY;
+      // Kembalikan fixed headers
+      fixedElements.forEach((f) => {
+        f.el.style.visibility = f.origVisibility;
+      });
+      // Hapus style penyembunyi scrollbar
+      if (hideScrollStyle.parentNode) {
+        hideScrollStyle.parentNode.removeChild(hideScrollStyle);
+      }
       window.scrollTo(origScrollX, origScrollY);
       widget.style.display = origWidgetDisplay;
       miniBadge.style.display = origMiniDisplay;
@@ -1422,7 +1529,43 @@
     showCopyToast(`✅ Exported TXT (${tuples.length} baris)`);
   }
 
-  // Buttons
+  // Buttons & IP Saya (Real-time tanpa cache)
+  const myIpEl = shadow.getElementById("widget-myip");
+  if (myIpEl) {
+    function refreshMyIp() {
+      myIpEl.textContent = "🌐 Memeriksa...";
+      myIpEl.title = "Sedang mendeteksi IP publik terkini (tanpa cache)...";
+      chrome.runtime.sendMessage({ cmd: "getMyIp" }, (res) => {
+        if (res && res.ip && res.ip !== "Unknown") {
+          myIpEl.textContent = `🌐 ${res.ip}`;
+          myIpEl.title = `IP Publik Anda: ${res.ip} (Klik untuk Copy, Klik Kanan untuk Refresh)`;
+        } else {
+          myIpEl.textContent = `🌐 IP: Gagal`;
+          myIpEl.title = "Gagal memuat IP dari seluruh fallback server. Klik untuk coba lagi.";
+        }
+      });
+    }
+
+    refreshMyIp();
+
+    myIpEl.onclick = (e) => {
+      e.stopPropagation();
+      const ipText = myIpEl.textContent.replace(/^🌐\s*/, "").trim();
+      if (ipText && ipText !== "-" && ipText !== "Gagal" && !ipText.includes("...")) {
+        copyToClipboard(ipText, "IP Saya");
+      } else {
+        refreshMyIp();
+      }
+    };
+
+    myIpEl.oncontextmenu = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      refreshMyIp();
+      showCopyToast("🔄 Memperbarui IP Saya (Real-time)...");
+    };
+  }
+
   const btnScreenshot = shadow.getElementById("btn-screenshot");
   if (btnScreenshot) {
     btnScreenshot.onclick = () => {

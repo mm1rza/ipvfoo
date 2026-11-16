@@ -1907,6 +1907,106 @@ async function fetchBgpPath(ip) {
   }
 }
 
+async function fetchWithTimeout(url, options = {}, timeoutMs = 2500) {
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const response = await fetch(url, {
+      ...options,
+      cache: "no-store",
+      headers: { "Cache-Control": "no-cache", "Pragma": "no-cache" },
+      signal: controller.signal
+    });
+    clearTimeout(id);
+    return response;
+  } catch (err) {
+    clearTimeout(id);
+    throw err;
+  }
+}
+
+async function getMyPublicIp() {
+  const nonce = Date.now();
+  // Multi-provider fallback chain (Real-time, tanpa cache sama sekali)
+  const providers = [
+    {
+      name: "cloudflare-trace",
+      url: `https://cloudflare.com/cdn-cgi/trace?_=${nonce}`,
+      extract: async (res) => {
+        const text = await res.text();
+        const m = text.match(/^ip=(.+)$/m);
+        return m ? m[1].trim() : null;
+      }
+    },
+    {
+      name: "cloudflare-dns-trace",
+      url: `https://1.1.1.1/cdn-cgi/trace?_=${nonce}`,
+      extract: async (res) => {
+        const text = await res.text();
+        const m = text.match(/^ip=(.+)$/m);
+        return m ? m[1].trim() : null;
+      }
+    },
+    {
+      name: "ipify",
+      url: `https://api64.ipify.org?format=json&_=${nonce}`,
+      extract: async (res) => {
+        const data = await res.json();
+        return data && data.ip ? data.ip.trim() : null;
+      }
+    },
+    {
+      name: "aws-checkip",
+      url: `https://checkip.amazonaws.com?_=${nonce}`,
+      extract: async (res) => {
+        const text = await res.text();
+        return text ? text.trim() : null;
+      }
+    },
+    {
+      name: "icanhazip",
+      url: `https://icanhazip.com?_=${nonce}`,
+      extract: async (res) => {
+        const text = await res.text();
+        return text ? text.trim() : null;
+      }
+    },
+    {
+      name: "ip-sb",
+      url: `https://api.ip.sb/ip?_=${nonce}`,
+      extract: async (res) => {
+        const text = await res.text();
+        return text ? text.trim() : null;
+      }
+    },
+    {
+      name: "ipinfo",
+      url: `https://ipinfo.io/ip?_=${nonce}`,
+      extract: async (res) => {
+        const text = await res.text();
+        return text ? text.trim() : null;
+      }
+    }
+  ];
+
+  for (const p of providers) {
+    try {
+      const res = await fetchWithTimeout(p.url, {}, 2500);
+      if (res.ok) {
+        const ip = await p.extract(res);
+        if (ip && (ip.includes(".") || ip.includes(":"))) {
+          return ip;
+        }
+      }
+    } catch (e) {
+      // Fallback ke provider berikutnya jika gagal / timeout / diblokir ISP
+      continue;
+    }
+  }
+
+  return "Unknown";
+}
+
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   if (msg.cmd === "resetHitCounter") {
     ipHitCounter = {};
@@ -1930,6 +2030,13 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     chrome.tabs.captureVisibleTab(null, { format: "png" }, (dataUrl) => {
       const err = chrome.runtime.lastError ? chrome.runtime.lastError.message : null;
       sendResponse({ dataUrl: dataUrl || null, error: err });
+    });
+    return true;
+  } else if (msg.cmd === "getMyIp") {
+    getMyPublicIp().then((ip) => {
+      sendResponse({ ip: ip || "Unknown" });
+    }).catch(() => {
+      sendResponse({ ip: "Unknown" });
     });
     return true;
   } else if (msg.cmd === "lookupBgpPath" || msg.cmd === "traceroute") {

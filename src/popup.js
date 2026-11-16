@@ -518,6 +518,43 @@ window.onload = async function () {
   table = document.getElementById("addr_table");
   table.onmousedown = handleMouseDown;
 
+  const popupMyIp = document.getElementById("popup_myip");
+  if (popupMyIp) {
+    function refreshPopupMyIp() {
+      popupMyIp.textContent = "🌐 Memeriksa...";
+      popupMyIp.title = "Sedang mendeteksi IP publik terkini (tanpa cache)...";
+      chrome.runtime.sendMessage({ cmd: "getMyIp" }, (res) => {
+        if (res && res.ip && res.ip !== "Unknown") {
+          popupMyIp.textContent = `🌐 ${res.ip}`;
+          popupMyIp.title = `IP Publik Anda: ${res.ip} (Klik untuk Copy, Klik Kanan untuk Refresh)`;
+        } else {
+          popupMyIp.textContent = `🌐 IP: Gagal`;
+          popupMyIp.title = "Gagal memuat IP publik. Klik untuk coba lagi.";
+        }
+      });
+    }
+
+    refreshPopupMyIp();
+
+    popupMyIp.onclick = (e) => {
+      e.stopPropagation();
+      const ipText = popupMyIp.textContent.replace(/^🌐\s*/, "").trim();
+      if (ipText && ipText !== "-" && ipText !== "Gagal" && !ipText.includes("...")) {
+        navigator.clipboard.writeText(ipText);
+        showPopupToast(`Copied IP Saya: ${ipText}`);
+      } else {
+        refreshPopupMyIp();
+      }
+    };
+
+    popupMyIp.oncontextmenu = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      refreshPopupMyIp();
+      showPopupToast("🔄 Memperbarui IP Saya (Real-time)...");
+    };
+  }
+
   const exportCsvBtn = document.getElementById("export_csv_btn");
   if (exportCsvBtn) {
     exportCsvBtn.onclick = () => {
