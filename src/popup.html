@@ -375,8 +375,43 @@ limitations under the License.
       border: 1px solid #ccc;
     }
 
+    .btn-hide-row {
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      padding: 0 2px;
+      margin-right: 3px;
+      font-size: 10px;
+      line-height: 1;
+      opacity: 0.55;
+      transition: opacity 0.15s ease, transform 0.15s ease;
+      user-select: none;
+      vertical-align: middle;
+    }
+
+    .btn-hide-row:hover {
+      opacity: 1;
+      transform: scale(1.15);
+    }
+
+    .row-hidden {
+      opacity: 0.45;
+    }
+
+    .row-hidden:hover {
+      opacity: 0.85;
+    }
+
+    .row-hidden .domainTd {
+      text-decoration: line-through;
+    }
+
     /* dark mode */
     @media (prefers-color-scheme: dark) {
+      .row-hidden {
+        opacity: 0.4;
+        background: rgba(0, 0, 0, 0.25);
+      }
       body {
         background-color: #222;
         color: #eee;

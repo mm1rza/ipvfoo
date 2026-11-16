@@ -9,70 +9,24 @@
   if (window !== window.top) return;
   if (document.getElementById("ipvfoo-overlay-host")) return;
 
-  const HIDDEN_DOMAINS = [
-    "googleads.g.doubleclick.net",
-    "ssl.google-analytics.com",
-    "www.googletagmanager.com",
-    "static.xx.fbcdn.net",
-    "crashlogs.whatsapp.net",
-    "graph.whatsapp.net",
-    "static.whatsapp.net",
-    "wa-web-plus.web.app",
-    "fonts.googleapis.com",
-    "fonts.gstatic.com",
-    "www.google-analytics.com",
-    "ajax.googleapis.com",
-    "assets.trakteer.id",
-    "connect.facebook.net",
-    "i.ytimg.com",
-    "jnn-pa.googleapis.com",
-    "maxcdn.bootstrapcdn.com",
-    "secure.gravatar.com",
-    "ad.doubleclick.net",
-    "9212252.fls.doubleclick.net",
-    "acs.whatsapp.com",
-    "www.googleadservices.com",
-    "avatars.githubusercontent.com",
-    "ssl.gstatic.com",
-    "www.gstatic.com",
-    "pagead2.googlesyndication.com",
-    "www.fbsbx.com",
-    "www.google.co.id",
-    "www.google.com",
-    "static.doubleclick.net",
-    "yt3.ggpht.com",
-    "accounts.youtube.com",
-    "fe-static.deepseek.com",
-    "dit.whatsapp.net",
-    "lh3.googleusercontent.com",
-    "api.github.com",
-    "apis.google.com",
-    "static.deepseek.com",
-    "analytics.google.com",
-    "maps.googleapis.com",
-    "youtube.googleapis.com",
-    "storage.googleapis.com",
-    "cdn.jsdelivr.net",
-    "code.jquery.com",
-    "cdnjs.cloudflare.com",
-    "csp.withgoogle.com",
-    "csi.gstatic.com",
-    "cdn.amcharts.com",
-    "cdn.datatables.net",
-    "play.google.com",
-    "use.fontawesome.com",
-    "analytics.tiktok.com",
-    "analytics.twitter.com",
-    "stats.g.doubleclick.net",
-    "static.ads-twitter.com",
-    "accounts.google.com",
-    "ogs.google.com",
-    "graph.instagram.com",
-    "fundingchoicesmessages.google.com",
-    "feedback-pa.clients6.google.com",
-    "scontent.xx.fbcdn.net",
-    "static.cdninstagram.com"
-  ];
+  // Domain blacklist kustom pengguna (disimpan di chrome.storage.local)
+  let userHiddenDomains = new Set();
+  try {
+    if (typeof chrome !== "undefined" && chrome.storage && chrome.storage.local) {
+      chrome.storage.local.get(["hidden_domains"], (res) => {
+        if (res && Array.isArray(res.hidden_domains)) {
+          userHiddenDomains = new Set(res.hidden_domains);
+          if (typeof reRenderTable === "function") reRenderTable();
+        }
+      });
+      chrome.storage.onChanged.addListener((changes, area) => {
+        if (area === "local" && changes.hidden_domains) {
+          userHiddenDomains = new Set(changes.hidden_domains.newValue || []);
+          if (typeof reRenderTable === "function") reRenderTable();
+        }
+      });
+    }
+  } catch (e) { }
 
   const DFLAG_NO_TLS = 0x100;  // Unencrypted HTTP
   const DFLAG_H1 = 0x200;      // HTTP/1.x with TLS
@@ -146,16 +100,20 @@
 
   function isBottomRow(tuple) {
     if (!tuple) return true;
-    const domain = tuple[0];
     const addr = tuple[1];
     const flags = tuple[3] || 0;
     const isWs = Boolean(flags & DFLAG_WEBSOCKET);
     const noIp = !addr || addr === "(x)" || addr === "(lost)" || addr.startsWith("(");
-    const isAux = HIDDEN_DOMAINS.includes(domain);
-    return isWs || noIp || isAux;
+    return isWs || noIp;
   }
 
   function compareTuples(a, b) {
+    const aHidden = a && userHiddenDomains.has(a[0]);
+    const bHidden = b && userHiddenDomains.has(b[0]);
+    if (aHidden !== bHidden) {
+      return aHidden ? 1 : -1;
+    }
+
     const aBottom = isBottomRow(a);
     const bBottom = isBottomRow(b);
     if (aBottom !== bBottom) {
@@ -587,6 +545,35 @@
       overflow: hidden;
       text-overflow: ellipsis;
       user-select: text;
+    }
+
+    .btn-hide-row {
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      padding: 0 2px;
+      margin-right: 3px;
+      font-size: 10px;
+      line-height: 1;
+      opacity: 0.55;
+      transition: opacity 0.15s ease, transform 0.15s ease;
+      user-select: none;
+      vertical-align: middle;
+    }
+    .btn-hide-row:hover {
+      opacity: 1;
+      transform: scale(1.15);
+    }
+    .row-hidden {
+      opacity: 0.42;
+      background: rgba(0, 0, 0, 0.25);
+    }
+    .row-hidden:hover {
+      opacity: 0.85;
+    }
+    .row-hidden .domain-cell {
+      text-decoration: line-through;
+      text-decoration-color: rgba(255, 255, 255, 0.4);
     }
 
     .ip-cell {
@@ -1330,7 +1317,7 @@
 
       for (let i = 0; i < slices.length; i++) {
         const s = slices[i];
-        
+
         // Scroll secara perlahan ke bawah agar seluruh animasi web & lazy-load selesai 100%
         if (i === 0) {
           window.scrollTo(0, s.targetScrollY);
@@ -1662,6 +1649,13 @@
     tr._tuple = tuple;
     tr._domain = domain;
 
+    const isHidden = !isFirst && userHiddenDomains.has(domain);
+    if (isHidden) tr.classList.add("row-hidden");
+
+    const hideBtnHtml = !isFirst
+      ? `<button class="btn-hide-row ${isHidden ? 'unhide' : ''}" title="${isHidden ? 'Tampilkan kembali domain ini' : 'Sembunyikan domain ini (Pindahkan ke paling bawah)'}">${isHidden ? '👁️' : '🚫'}</button>`
+      : '';
+
     const lockIcon = (flags & (DFLAG_H1 | DFLAG_H2 | DFLAG_H3) || !(flags & DFLAG_NO_TLS)) ? "🔒 " : "";
     const ipClass = version === "6" ? "ip6" : "ip4";
 
@@ -1728,7 +1722,7 @@
     const speedHtml = dSpeed >= 200 ? `<span class="speed-tag">⚡${formatSpeed(dSpeed)}</span>` : "";
 
     tr.innerHTML = `
-      <td class="domain-cell" title="Klik untuk copy: ${domain}">${lockIcon}${domain}${speedHtml}</td>
+      <td class="domain-cell" title="Klik untuk copy: ${domain}">${hideBtnHtml}${lockIcon}${domain}${speedHtml}</td>
       <td class="ip-cell ${ipClass}" title="Klik untuk copy: ${addr || '(x)'}">${addr || "(x)"}</td>
       <td class="lat-cell ${latClass}" title="${latTitle}">${latText}</td>
       <td style="text-align:center; white-space:nowrap;">${protoBadge}<span class="status-badge ${statusClass}">${status}</span></td>
@@ -1736,6 +1730,22 @@
       <td class="size-cell ${bytes > 0 ? '' : 'size-zero'}">${formatBytes(bytes)}</td>
       <td class="bgp-cell" style="text-align:left;">${bgpHtml}</td>
     `;
+
+    const hideBtn = tr.querySelector(".btn-hide-row");
+    if (hideBtn) {
+      hideBtn.onclick = (e) => {
+        e.stopPropagation();
+        if (userHiddenDomains.has(domain)) {
+          userHiddenDomains.delete(domain);
+        } else {
+          userHiddenDomains.add(domain);
+        }
+        if (typeof chrome !== "undefined" && chrome.storage && chrome.storage.local) {
+          chrome.storage.local.set({ hidden_domains: Array.from(userHiddenDomains) });
+        }
+        reRenderTable();
+      };
+    }
 
     const domainTd = tr.querySelector(".domain-cell");
     if (domainTd) {

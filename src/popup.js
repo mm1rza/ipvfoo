@@ -46,71 +46,24 @@ let currentSpeedBps = 0;
 let domainSpeedMap = {};
 let lastDomainBytes = {};
 
-// --- DAFTAR DOMAIN YANG DISEMBUNYIKAN ---
-const HIDDEN_DOMAINS = [
-  "googleads.g.doubleclick.net",
-  "ssl.google-analytics.com",
-  "www.googletagmanager.com",
-  "static.xx.fbcdn.net",
-  "crashlogs.whatsapp.net",
-  "graph.whatsapp.net",
-  "static.whatsapp.net",
-  "wa-web-plus.web.app",
-  "fonts.googleapis.com",
-  "fonts.gstatic.com",
-  "www.google-analytics.com",
-  "ajax.googleapis.com",
-  "assets.trakteer.id",
-  "connect.facebook.net",
-  "i.ytimg.com",
-  "jnn-pa.googleapis.com",
-  "maxcdn.bootstrapcdn.com",
-  "secure.gravatar.com",
-  "ad.doubleclick.net",
-  "9212252.fls.doubleclick.net",
-  "acs.whatsapp.com",
-  "www.googleadservices.com",
-  "avatars.githubusercontent.com",
-  "ssl.gstatic.com",
-  "www.gstatic.com",
-  "pagead2.googlesyndication.com",
-  "www.fbsbx.com",
-  "www.google.co.id",
-  "www.google.com",
-  "static.doubleclick.net",
-  "yt3.ggpht.com",
-  "accounts.youtube.com",
-  "fe-static.deepseek.com",
-  "dit.whatsapp.net",
-  "lh3.googleusercontent.com",
-  "api.github.com",
-  "apis.google.com",
-  "static.deepseek.com",
-  "analytics.google.com",
-  "maps.googleapis.com",
-  "youtube.googleapis.com",
-  "storage.googleapis.com",
-  "cdn.jsdelivr.net",
-  "code.jquery.com",
-  "cdnjs.cloudflare.com",
-  "csp.withgoogle.com",
-  "csi.gstatic.com",
-  "cdn.amcharts.com",
-  "cdn.datatables.net",
-  "play.google.com",
-  "use.fontawesome.com",
-  "analytics.tiktok.com",
-  "analytics.twitter.com",
-  "stats.g.doubleclick.net",
-  "static.ads-twitter.com",
-  "accounts.google.com",
-  "ogs.google.com",
-  "graph.instagram.com",
-  "fundingchoicesmessages.google.com",
-  "feedback-pa.clients6.google.com",
-  "scontent.xx.fbcdn.net",
-  "static.cdninstagram.com"
-];
+// Domain hidden kustom pengguna (disimpan di chrome.storage.local)
+let userHiddenDomains = new Set();
+try {
+  if (typeof chrome !== "undefined" && chrome.storage && chrome.storage.local) {
+    chrome.storage.local.get(["hidden_domains"], (res) => {
+      if (res && Array.isArray(res.hidden_domains)) {
+        userHiddenDomains = new Set(res.hidden_domains);
+        if (typeof reRenderTable === "function") reRenderTable();
+      }
+    });
+    chrome.storage.onChanged.addListener((changes, area) => {
+      if (area === "local" && changes.hidden_domains) {
+        userHiddenDomains = new Set(changes.hidden_domains.newValue || []);
+        if (typeof reRenderTable === "function") reRenderTable();
+      }
+    });
+  }
+} catch (e) { }
 
 // Load hit & byte counter dari chrome.storage
 async function loadHitCounter() {
@@ -189,16 +142,20 @@ let currentSort = { column: 'default', order: 'asc' };
 
 function isBottomRow(tuple) {
   if (!tuple) return true;
-  const domain = tuple[0];
   const addr = tuple[1];
   const flags = tuple[3] || 0;
   const isWs = Boolean(flags & DFLAG_WEBSOCKET);
   const noIp = !addr || addr === "(x)" || addr === "(lost)" || addr.startsWith("(");
-  const isAux = HIDDEN_DOMAINS.includes(domain);
-  return isWs || noIp || isAux;
+  return isWs || noIp;
 }
 
 function compareTuples(a, b) {
+  const aHidden = a && userHiddenDomains.has(a[0]);
+  const bHidden = b && userHiddenDomains.has(b[0]);
+  if (aHidden !== bHidden) {
+    return aHidden ? 1 : -1;
+  }
+
   const aBottom = isBottomRow(a);
   const bBottom = isBottomRow(b);
   if (aBottom !== bBottom) {
@@ -238,9 +195,9 @@ function classifyTraffic(addr, domain, asn, latency) {
 
   // Check Private / LAN
   if (addr.startsWith("10.") || addr.startsWith("192.168.") || addr.startsWith("127.") ||
-      addr.startsWith("169.254.") || addr === "::1" || addr.startsWith("fc00:") || addr.startsWith("fe80:") ||
-      /^172\.(1[6-9]|2[0-9]|3[0-1])\./.test(addr) ||
-      /^100\.(6[4-9]|[7-9][0-9]|1[0-1][0-9]|12[0-7])\./.test(addr)) {
+    addr.startsWith("169.254.") || addr === "::1" || addr.startsWith("fc00:") || addr.startsWith("fe80:") ||
+    /^172\.(1[6-9]|2[0-9]|3[0-1])\./.test(addr) ||
+    /^100\.(6[4-9]|[7-9][0-9]|1[0-1][0-9]|12[0-7])\./.test(addr)) {
     return { code: "LAN", label: "[LAN / Local]", class: "badge-lan", desc: "Local / Private Network IP" };
   }
 
@@ -727,550 +684,588 @@ function connectToExtension() {
   });
 }
 
-// Clear the table, and fill it with new data.
-function pushAll(tuples, pattern, color, spillCount, sawHttpGt1) {
-  gSawHttpGt1 = sawHttpGt1;
-  removeChildren(table);
-  const filteredTuples = tuples.filter(t => !HIDDEN_DOMAINS.includes(t[0]));
-  if (filteredTuples.length > 0) {
-    const mainTuple = filteredTuples[0];
-    const otherTuples = filteredTuples.slice(1).sort(compareTuples);
-    table.appendChild(makeRow(true, mainTuple));
-    for (let i = 0; i < otherTuples.length; i++) {
-      table.appendChild(makeRow(false, otherTuples[i]));
-    }
-  }
-  pushPattern(pattern, color);
-  pushSpillCount(spillCount);
-}
+  let allTuplesCache = [];
 
-function calculatePopupSpeed() {
-  if (!table) return;
-  const now = Date.now();
-  const dt = (now - lastBytesTimestamp) / 1000;
-  if (dt <= 0.3) return;
-
-  let currentTotalBytes = 0;
-  const currentDomainBytes = {};
-
-  for (let tr = table.firstChild; tr; tr = tr.nextSibling) {
-    if (tr._tuple && tr._domain) {
-      const b = (tr._tuple[5] !== undefined) ? tr._tuple[5] : (byteCounter[tr._tuple[1]] || 0);
-      currentTotalBytes += b;
-      currentDomainBytes[tr._domain] = b;
-    }
-  }
-
-  const byteDiff = Math.max(0, currentTotalBytes - lastTotalBytes);
-  const instantSpeed = byteDiff / dt;
-
-  if (byteDiff > 0) {
-    currentSpeedBps = (currentSpeedBps === 0) ? instantSpeed : (currentSpeedBps * 0.4 + instantSpeed * 0.6);
-  } else {
-    currentSpeedBps = currentSpeedBps * 0.5;
-    if (currentSpeedBps < 200) currentSpeedBps = 0;
-  }
-
-  for (const [domain, b] of Object.entries(currentDomainBytes)) {
-    const prevB = lastDomainBytes[domain] || 0;
-    const dDiff = Math.max(0, b - prevB);
-    if (dDiff > 0) {
-      domainSpeedMap[domain] = (domainSpeedMap[domain] ? domainSpeedMap[domain] * 0.4 : 0) + (dDiff / dt) * 0.6;
-    } else {
-      domainSpeedMap[domain] = (domainSpeedMap[domain] || 0) * 0.5;
-      if (domainSpeedMap[domain] < 200) delete domainSpeedMap[domain];
-    }
-  }
-
-  lastTotalBytes = currentTotalBytes;
-  lastDomainBytes = currentDomainBytes;
-  lastBytesTimestamp = now;
-
-  const speedBadge = document.getElementById("speed_badge");
-  if (speedBadge) {
-    if (currentSpeedBps >= 200) {
-      speedBadge.textContent = `⚡ ${formatSpeed(currentSpeedBps)}`;
-      speedBadge.style.display = "inline-block";
-    } else {
-      speedBadge.style.display = "none";
-    }
-  }
-
-  for (let tr = table.firstChild; tr; tr = tr.nextSibling) {
-    if (tr._domain && tr._tuple) {
-      const dSpeed = domainSpeedMap[tr._domain] || 0;
-      const domainTd = tr.querySelector(".domainTd");
-      if (domainTd) {
-        let speedEl = domainTd.querySelector(".speed-tag");
-        if (dSpeed >= 200) {
-          const speedText = `⚡${formatSpeed(dSpeed)}`;
-          if (!speedEl) {
-            speedEl = document.createElement("span");
-            speedEl.className = "speed-tag";
-            domainTd.appendChild(speedEl);
-          }
-          speedEl.textContent = speedText;
-        } else if (speedEl) {
-          speedEl.remove();
+  function reRenderTable() {
+    if (!table) return;
+    removeChildren(table);
+      if (allTuplesCache.length > 0) {
+        const mainTuple = allTuplesCache[0];
+        const otherTuples = allTuplesCache.slice(1).sort(compareTuples);
+        table.appendChild(makeRow(true, mainTuple));
+        for (let i = 0; i < otherTuples.length; i++) {
+          table.appendChild(makeRow(false, otherTuples[i]));
         }
       }
-      const sizeTd = tr.querySelector(".sizeTd");
-      if (sizeTd) {
-        const bytes = (tr._tuple[5] !== undefined) ? tr._tuple[5] : (byteCounter[tr._tuple[1]] || 0);
-        sizeTd.textContent = formatBytes(bytes);
+      if (IS_MOBILE) { zoomHack(); } else { scrollbarHack(); }
+    }
+
+    // Clear the table, and fill it with new data.
+    function pushAll(tuples, pattern, color, spillCount, sawHttpGt1) {
+      gSawHttpGt1 = sawHttpGt1;
+      allTuplesCache = tuples || [];
+      reRenderTable();
+      pushPattern(pattern, color);
+      pushSpillCount(spillCount);
+    }
+
+    function calculatePopupSpeed() {
+      if (!table) return;
+      const now = Date.now();
+      const dt = (now - lastBytesTimestamp) / 1000;
+      if (dt <= 0.3) return;
+
+      let currentTotalBytes = 0;
+      const currentDomainBytes = {};
+
+      for (let tr = table.firstChild; tr; tr = tr.nextSibling) {
+        if (tr._tuple && tr._domain) {
+          const b = (tr._tuple[5] !== undefined) ? tr._tuple[5] : (byteCounter[tr._tuple[1]] || 0);
+          currentTotalBytes += b;
+          currentDomainBytes[tr._domain] = b;
+        }
+      }
+
+      const byteDiff = Math.max(0, currentTotalBytes - lastTotalBytes);
+      const instantSpeed = byteDiff / dt;
+
+      if (byteDiff > 0) {
+        currentSpeedBps = (currentSpeedBps === 0) ? instantSpeed : (currentSpeedBps * 0.4 + instantSpeed * 0.6);
+      } else {
+        currentSpeedBps = currentSpeedBps * 0.5;
+        if (currentSpeedBps < 200) currentSpeedBps = 0;
+      }
+
+      for (const [domain, b] of Object.entries(currentDomainBytes)) {
+        const prevB = lastDomainBytes[domain] || 0;
+        const dDiff = Math.max(0, b - prevB);
+        if (dDiff > 0) {
+          domainSpeedMap[domain] = (domainSpeedMap[domain] ? domainSpeedMap[domain] * 0.4 : 0) + (dDiff / dt) * 0.6;
+        } else {
+          domainSpeedMap[domain] = (domainSpeedMap[domain] || 0) * 0.5;
+          if (domainSpeedMap[domain] < 200) delete domainSpeedMap[domain];
+        }
+      }
+
+      lastTotalBytes = currentTotalBytes;
+      lastDomainBytes = currentDomainBytes;
+      lastBytesTimestamp = now;
+
+      const speedBadge = document.getElementById("speed_badge");
+      if (speedBadge) {
+        if (currentSpeedBps >= 200) {
+          speedBadge.textContent = `⚡ ${formatSpeed(currentSpeedBps)}`;
+          speedBadge.style.display = "inline-block";
+        } else {
+          speedBadge.style.display = "none";
+        }
+      }
+
+      for (let tr = table.firstChild; tr; tr = tr.nextSibling) {
+        if (tr._domain && tr._tuple) {
+          const dSpeed = domainSpeedMap[tr._domain] || 0;
+          const domainTd = tr.querySelector(".domainTd");
+          if (domainTd) {
+            let speedEl = domainTd.querySelector(".speed-tag");
+            if (dSpeed >= 200) {
+              const speedText = `⚡${formatSpeed(dSpeed)}`;
+              if (!speedEl) {
+                speedEl = document.createElement("span");
+                speedEl.className = "speed-tag";
+                domainTd.appendChild(speedEl);
+              }
+              speedEl.textContent = speedText;
+            } else if (speedEl) {
+              speedEl.remove();
+            }
+          }
+          const sizeTd = tr.querySelector(".sizeTd");
+          if (sizeTd) {
+            const bytes = (tr._tuple[5] !== undefined) ? tr._tuple[5] : (byteCounter[tr._tuple[1]] || 0);
+            sizeTd.textContent = formatBytes(bytes);
+          }
+        }
       }
     }
-  }
-}
 
-setInterval(calculatePopupSpeed, 800);
+    setInterval(calculatePopupSpeed, 800);
 
-// Jangan tambahkan jika domain ada di daftar hidden & sortir posisi yang sesuai
-async function pushOne(tuple) {
-  const domain = tuple[0];
-  if (HIDDEN_DOMAINS.includes(domain)) {
-    return; // Stop di sini, jangan diproses
-  }
+    // Tambahkan tuple baru atau update posisi sesuai sortir & status hidden
+    async function pushOne(tuple) {
+      const domain = tuple[0];
+        const idx = allTuplesCache.findIndex(t => t[0] === domain);
+        if (idx >= 0) {
+          allTuplesCache[idx] = tuple;
+        } else {
+          allTuplesCache.push(tuple);
+        }
 
-  let existingRow = null;
-  for (let tr = table.firstChild; tr; tr = tr.nextSibling) {
-    if (tr._domain === domain) {
-      existingRow = tr;
-      break;
-    }
-  }
+        let existingRow = null;
+        for (let tr = table.firstChild; tr; tr = tr.nextSibling) {
+            if (tr._domain === domain || (tr._tuple && tr._tuple[0] === domain)) {
+              existingRow = tr;
+              break;
+            }
+          }
 
-  if (existingRow) {
-    const wasFirst = existingRow === table.firstChild;
-    if (wasFirst) {
-      minimalCopy(makeRow(true, tuple), existingRow);
-      existingRow._tuple = tuple;
-      return;
-    }
-    table.removeChild(existingRow);
-  }
+          if (existingRow) {
+            const wasFirst = existingRow === table.firstChild;
+            if (wasFirst) {
+              minimalCopy(makeRow(true, tuple), existingRow);
+              existingRow._tuple = tuple;
+              existingRow._domain = domain;
+              return;
+            }
+            table.removeChild(existingRow);
+          }
 
-  let insertHere = null;
-  for (let tr = table.firstChild; tr; tr = tr.nextSibling) {
-    if (tr === table.firstChild) {
-      continue;
-    }
-    if (tr._tuple && compareTuples(tuple, tr._tuple) < 0) {
-      insertHere = tr;
-      break;
-    }
-  }
-  const newRow = makeRow(false, tuple);
-  table.insertBefore(newRow, insertHere);
-  if (IS_MOBILE) { zoomHack(); } else { scrollbarHack(); }
-}
+          let insertHere = null;
+          for (let tr = table.firstChild; tr; tr = tr.nextSibling) {
+            if (tr === table.firstChild) {
+              continue;
+            }
+            if (tr._tuple && compareTuples(tuple, tr._tuple) < 0) {
+              insertHere = tr;
+              break;
+            }
+          }
+          const newRow = makeRow(false, tuple);
+          table.insertBefore(newRow, insertHere);
+          if (IS_MOBILE) { zoomHack(); } else { scrollbarHack(); }
+        }
 
-let lastPattern = "";
-let lastColor = "";
-function pushPattern(pattern, color) {
-  if (lastColor != color) {
-    lastColor = color;
-    setColorIsDarkMode(lastColor, darkMode);
-  }
-  if (!IS_MOBILE) return;
-  if (lastPattern != pattern) {
-    lastPattern = pattern;
-  } else {
-    return;
-  }
-  for (const color of ["darkfg", "lightfg"]) {
-    const img = document.getElementById(`pattern_icon_${color}`);
-    img.src = iconPath(pattern, 32, color);
-  }
-}
+        let lastPattern = "";
+        let lastColor = "";
+        function pushPattern(pattern, color) {
+          if (lastColor != color) {
+            lastColor = color;
+            setColorIsDarkMode(lastColor, darkMode);
+          }
+          if (!IS_MOBILE) return;
+          if (lastPattern != pattern) {
+            lastPattern = pattern;
+          } else {
+            return;
+          }
+          for (const color of ["darkfg", "lightfg"]) {
+            const img = document.getElementById(`pattern_icon_${color}`);
+            img.src = iconPath(pattern, 32, color);
+          }
+        }
 
-function pushSpillCount(count) {
-  document.getElementById("spill_count_container").style.display = count == 0 ? "none" : "block";
-  removeChildren(document.getElementById("spill_count")).appendChild(document.createTextNode(count));
-  if (IS_MOBILE) { zoomHack(); } else { scrollbarHack(); }
-}
+        function pushSpillCount(count) {
+          document.getElementById("spill_count_container").style.display = count == 0 ? "none" : "block";
+          removeChildren(document.getElementById("spill_count")).appendChild(document.createTextNode(count));
+          if (IS_MOBILE) { zoomHack(); } else { scrollbarHack(); }
+        }
 
-function shake() {
-  document.body.className = "shake";
-  setTimeout(function () { document.body.className = ""; }, 600);
-}
+        function shake() {
+          document.body.className = "shake";
+          setTimeout(function () { document.body.className = ""; }, 600);
+        }
 
-function zoomHack() {
-  const tableWidth = document.querySelector('table').offsetWidth;
-  document.querySelector('meta[name="viewport"]').setAttribute('content', `width=${tableWidth}`);
-  table.style.setProperty('--cache-min-width', `${tableWidth * 0.08}px`);
-}
+        function zoomHack() {
+          const tableWidth = document.querySelector('table').offsetWidth;
+          document.querySelector('meta[name="viewport"]').setAttribute('content', `width=${tableWidth}`);
+          table.style.setProperty('--cache-min-width', `${tableWidth * 0.08}px`);
+        }
 
-let redrawn = false;
-function scrollbarHack() {
-  if (IS_CHROMIUM) return;
-  setTimeout(() => {
-    const e = document.documentElement;
-    if (e.scrollHeight > e.clientHeight) {
-      document.body.style.paddingRight = '20px';
-    } else if (!redrawn) {
-      document.body.classList.toggle('force-redraw');
-      redrawn = true;
-    }
-  }, 200);
-}
+        let redrawn = false;
+        function scrollbarHack() {
+          if (IS_CHROMIUM) return;
+          setTimeout(() => {
+            const e = document.documentElement;
+            if (e.scrollHeight > e.clientHeight) {
+              document.body.style.paddingRight = '20px';
+            } else if (!redrawn) {
+              document.body.classList.toggle('force-redraw');
+              redrawn = true;
+            }
+          }, 200);
+        }
 
-function minimalCopy(src, dst) {
-  dst.className = src.className;
-  for (let s = src.firstChild, d = dst.firstChild, sNext, dNext; s && d; s = sNext, d = dNext) {
-    sNext = s.nextSibling;
-    dNext = d.nextSibling;
-    d.className = s.className;
-    if (!d.isEqualNode(s)) {
-      dst.replaceChild(s, d);
-    }
-  }
-}
+        function minimalCopy(src, dst) {
+          dst.className = src.className;
+          for (let s = src.firstChild, d = dst.firstChild, sNext, dNext; s && d; s = sNext, d = dNext) {
+            sNext = s.nextSibling;
+            dNext = d.nextSibling;
+            d.className = s.className;
+            if (!d.isEqualNode(s)) {
+              dst.replaceChild(s, d);
+            }
+          }
+        }
 
-function makeImg(src, title) {
-  const img = document.createElement("img");
-  img.src = src.startsWith("icons/") ? src : `icons/${src}`;
-  img.title = title;
-  return img;
-}
+        function makeImg(src, title) {
+          const img = document.createElement("img");
+          img.src = src.startsWith("icons/") ? src : `icons/${src}`;
+          img.title = title;
+          return img;
+        }
 
-function makeHttpImg(flags) {
-  if (flags & DFLAG_NO_TLS) {
-    return makeImg(
-      "gray_unlock.png",
-      "Some connections do not use TLS.");
-  }
-  if (gSawHttpGt1) {
-    if (flags & DFLAG_H3) {
-      return makeImg(
-        "gray_h3.png",
-        "HTTP/3 (with TLS) is the max version seen.");
-    }
-    if (flags & DFLAG_H2) {
-      return makeImg(
-        "gray_h2.png",
-        "HTTP/2 (with TLS) is the max version seen.");
-    }
-    if (flags & DFLAG_H1) {
-      return makeImg(
-        "gray_h1.png",
-        "HTTP/1.x (with TLS) is the max version seen.");
-    }
-  } else if (flags & (DFLAG_H1 | DFLAG_H2 | DFLAG_H3 | DFLAG_SSL)) {
-    return makeImg(
-      "gray_lock.png",
-      "All connections use TLS.");
-  }
-  return makeImg(
-    "gray_question.png",
-    "Failed to parse HTTP status.");
-}
+        function makeHttpImg(flags) {
+          if (flags & DFLAG_NO_TLS) {
+            return makeImg(
+              "gray_unlock.png",
+              "Some connections do not use TLS.");
+          }
+          if (gSawHttpGt1) {
+            if (flags & DFLAG_H3) {
+              return makeImg(
+                "gray_h3.png",
+                "HTTP/3 (with TLS) is the max version seen.");
+            }
+            if (flags & DFLAG_H2) {
+              return makeImg(
+                "gray_h2.png",
+                "HTTP/2 (with TLS) is the max version seen.");
+            }
+            if (flags & DFLAG_H1) {
+              return makeImg(
+                "gray_h1.png",
+                "HTTP/1.x (with TLS) is the max version seen.");
+            }
+          } else if (flags & (DFLAG_H1 | DFLAG_H2 | DFLAG_H3 | DFLAG_SSL)) {
+            return makeImg(
+              "gray_lock.png",
+              "All connections use TLS.");
+          }
+          return makeImg(
+            "gray_question.png",
+            "Failed to parse HTTP status.");
+        }
 
-function makeSelectMe(...children) {
-  const span = document.createElement("span");
-  span.className = "selectMe";
-  for (const child of children) {
-    if (child instanceof Node) {
-      span.appendChild(child);
-    } else {
-      span.appendChild(document.createTextNode(child));
-    }
-  }
-  return span;
-}
+        function makeSelectMe(...children) {
+          const span = document.createElement("span");
+          span.className = "selectMe";
+          for (const child of children) {
+            if (child instanceof Node) {
+              span.appendChild(child);
+            } else {
+              span.appendChild(document.createTextNode(child));
+            }
+          }
+          return span;
+        }
 
-function makeRow(isFirst, tuple) {
-  const domain = tuple[0];
-  const addr = tuple[1];
-  const version = tuple[2];
-  const flags = tuple[3];
-  const tr = document.createElement("tr");
-  if (isFirst) tr.className = "mainRow";
-  tr._tuple = tuple;
+        function makeRow(isFirst, tuple) {
+          const domain = tuple[0];
+          const addr = tuple[1];
+          const version = tuple[2];
+          const flags = tuple[3];
+          const tr = document.createElement("tr");
+          if (isFirst) tr.className = "mainRow";
+          tr._tuple = tuple;
+          tr._domain = domain;
 
-  // Build the HTTP icon for the "zeroth" pseudo-column.
-  const httpImg = makeHttpImg(flags);
-  httpImg.className = "httpImg";
+          const isHidden = !isFirst && userHiddenDomains.has(domain);
+          if (isHidden) {
+            tr.classList.add("row-hidden");
+          }
 
-  // Build the "Domain" column.
-  const domainTd = document.createElement("td");
-  domainTd.appendChild(httpImg);
-  domainTd.appendChild(makeSelectMe(
-    domain.length > LONG_DOMAIN ? makeSnippedText(domain, Math.floor(LONG_DOMAIN / 2)) : domain));
-  const dSpeed = domainSpeedMap[domain] || 0;
-  if (dSpeed >= 200) {
-    const speedSpan = document.createElement("span");
-    speedSpan.className = "speed-tag";
-    speedSpan.textContent = `⚡${formatSpeed(dSpeed)}`;
-    domainTd.appendChild(speedSpan);
-  }
-  domainTd.className = "domainTd";
-  domainTd.onclick = handleClick;
-  domainTd.oncontextmenu = handleContextMenu;
+          // Build the HTTP icon for the "zeroth" pseudo-column.
+          const httpImg = makeHttpImg(flags);
+          httpImg.className = "httpImg";
 
-  const addrTd = document.createElement("td");
-  let addrClass = "";
-  switch (version) {
-    case "4": addrClass = " ip4"; break;
-    case "6": addrClass = " ip6"; break;
-  }
-  const connectedClass = (flags & DFLAG_CONNECTED) ? " highlight" : "";
-  addrTd.className = `addrTd${addrClass}${connectedClass}`;
-  const match = addr.match(/^(.*:)(\d+[.]\d+[.]\d+[.]\d+)$/);
-  if (match) {
-    addrTd.appendChild(makeSelectMe(match[1], makeSelectMe(match[2])));
-  } else {
-    addrTd.appendChild(makeSelectMe(addr));
-  }
+          // Build the "Domain" column.
+          const domainTd = document.createElement("td");
+          if (!isFirst) {
+            const hideBtn = document.createElement("button");
+            hideBtn.className = `btn-hide-row ${isHidden ? "unhide" : ""}`;
+            hideBtn.title = isHidden ? "Tampilkan kembali domain ini" : "Sembunyikan domain ini (Pindahkan ke paling bawah)";
+            hideBtn.textContent = isHidden ? "👁️" : "🚫";
+            hideBtn.onclick = (e) => {
+              e.stopPropagation();
+              e.preventDefault();
+              if (userHiddenDomains.has(domain)) {
+                userHiddenDomains.delete(domain);
+              } else {
+                userHiddenDomains.add(domain);
+              }
+              if (typeof chrome !== "undefined" && chrome.storage && chrome.storage.local) {
+                chrome.storage.local.set({ hidden_domains: Array.from(userHiddenDomains) });
+              }
+              reRenderTable();
+            };
+            domainTd.appendChild(hideBtn);
+          }
+          domainTd.appendChild(httpImg);
+          domainTd.appendChild(makeSelectMe(
+            domain.length > LONG_DOMAIN ? makeSnippedText(domain, Math.floor(LONG_DOMAIN / 2)) : domain));
+          const dSpeed = domainSpeedMap[domain] || 0;
+          if (dSpeed >= 200) {
+            const speedSpan = document.createElement("span");
+            speedSpan.className = "speed-tag";
+            speedSpan.textContent = `⚡${formatSpeed(dSpeed)}`;
+            domainTd.appendChild(speedSpan);
+          }
+          domainTd.className = "domainTd";
+          domainTd.onclick = handleClick;
+          domainTd.oncontextmenu = handleContextMenu;
 
-  addrTd.onclick = handleClick;
-  addrTd.oncontextmenu = handleContextMenu;
+          const addrTd = document.createElement("td");
+          let addrClass = "";
+          switch (version) {
+            case "4": addrClass = " ip4"; break;
+            case "6": addrClass = " ip6"; break;
+          }
+          const connectedClass = (flags & DFLAG_CONNECTED) ? " highlight" : "";
+          addrTd.className = `addrTd${addrClass}${connectedClass}`;
+          const match = addr.match(/^(.*:)(\d+[.]\d+[.]\d+[.]\d+)$/);
+          if (match) {
+            addrTd.appendChild(makeSelectMe(match[1], makeSelectMe(match[2])));
+          } else {
+            addrTd.appendChild(makeSelectMe(addr));
+          }
 
-  let proto = "";
-  let protoCls = "";
-  let protoTitle = "";
-  if (flags & DFLAG_WEBSOCKET) {
-    proto = "WS";
-    protoTitle = "WebSocket";
-    protoCls = "proto-ws";
-  } else if (flags & DFLAG_H3) {
-    proto = "H3";
-    protoTitle = "HTTP/3 (QUIC / UDP)";
-    protoCls = "proto-h3";
-  } else if (flags & DFLAG_H2) {
-    proto = "H2";
-    protoTitle = "HTTP/2 (Multiplexed TCP)";
-    protoCls = "proto-h2";
-  } else if (flags & DFLAG_H1) {
-    proto = "H1";
-    protoTitle = "HTTP/1.1 (TLS)";
-    protoCls = "proto-h1";
-  } else if (flags & DFLAG_NO_TLS) {
-    proto = "HTTP";
-    protoTitle = "HTTP (Plaintext)";
-    protoCls = "proto-http";
-  }
+          addrTd.onclick = handleClick;
+          addrTd.oncontextmenu = handleContextMenu;
 
-  const statusTd = document.createElement("td");
-  statusTd.className = `statusTd${connectedClass}`;
-  statusTd.style.textAlign = "center";
-  statusTd.style.fontFamily = "monospace";
-  statusTd.style.fontSize = "10.5px";
-  statusTd.style.whiteSpace = "nowrap";
+          let proto = "";
+          let protoCls = "";
+          let protoTitle = "";
+          if (flags & DFLAG_WEBSOCKET) {
+            proto = "WS";
+            protoTitle = "WebSocket";
+            protoCls = "proto-ws";
+          } else if (flags & DFLAG_H3) {
+            proto = "H3";
+            protoTitle = "HTTP/3 (QUIC / UDP)";
+            protoCls = "proto-h3";
+          } else if (flags & DFLAG_H2) {
+            proto = "H2";
+            protoTitle = "HTTP/2 (Multiplexed TCP)";
+            protoCls = "proto-h2";
+          } else if (flags & DFLAG_H1) {
+            proto = "H1";
+            protoTitle = "HTTP/1.1 (TLS)";
+            protoCls = "proto-h1";
+          } else if (flags & DFLAG_NO_TLS) {
+            proto = "HTTP";
+            protoTitle = "HTTP (Plaintext)";
+            protoCls = "proto-http";
+          }
 
-  if (proto) {
-    const protoSpan = document.createElement("span");
-    protoSpan.className = `proto-badge ${protoCls}`;
-    protoSpan.textContent = proto;
-    protoSpan.title = protoTitle;
-    statusTd.appendChild(protoSpan);
-  }
+          const statusTd = document.createElement("td");
+          statusTd.className = `statusTd${connectedClass}`;
+          statusTd.style.textAlign = "center";
+          statusTd.style.fontFamily = "monospace";
+          statusTd.style.fontSize = "10.5px";
+          statusTd.style.whiteSpace = "nowrap";
 
-  const status = (tuple && tuple[6] !== undefined) ? tuple[6] : 200;
-  const statusSpan = document.createElement("span");
-  statusSpan.textContent = status;
-  statusSpan.style.fontWeight = "bold";
-  if (typeof status === "number") {
-    if (status >= 500) statusSpan.style.color = "#ff5252";
-    else if (status >= 400) statusSpan.style.color = "#ffa726";
-    else if (status >= 300) statusSpan.style.color = "#64b5f6";
-    else statusSpan.style.color = "#48ff00";
-  } else {
-    statusSpan.style.color = "#ff5252";
-  }
-  statusTd.appendChild(statusSpan);
+          if (proto) {
+            const protoSpan = document.createElement("span");
+            protoSpan.className = `proto-badge ${protoCls}`;
+            protoSpan.textContent = proto;
+            protoSpan.title = protoTitle;
+            statusTd.appendChild(protoSpan);
+          }
 
-  const latTd = document.createElement("td");
-  latTd.className = `latTd${connectedClass}`;
-  const latency = (tuple && tuple[7] !== undefined) ? tuple[7] : 0;
-  latTd.textContent = latency > 0 ? `${latency}ms` : "-";
-  latTd.style.textAlign = "right";
-  latTd.style.fontFamily = "monospace";
-  latTd.style.fontSize = "10.5px";
-  latTd.style.whiteSpace = "nowrap";
+          const status = (tuple && tuple[6] !== undefined) ? tuple[6] : 200;
+          const statusSpan = document.createElement("span");
+          statusSpan.textContent = status;
+          statusSpan.style.fontWeight = "bold";
+          if (typeof status === "number") {
+            if (status >= 500) statusSpan.style.color = "#ff5252";
+            else if (status >= 400) statusSpan.style.color = "#ffa726";
+            else if (status >= 300) statusSpan.style.color = "#64b5f6";
+            else statusSpan.style.color = "#48ff00";
+          } else {
+            statusSpan.style.color = "#ff5252";
+          }
+          statusTd.appendChild(statusSpan);
 
-  if (latency <= 0) {
-    latTd.style.color = "#777";
-    latTd.title = "Latency tidak tersedia";
-  } else if (latency <= 30) {
-    latTd.style.color = "#00ff88";
-    latTd.style.fontWeight = "bold";
-    latTd.title = `${latency}ms - Local / IIX / Cache Sangat Cepat (< 30ms)`;
-  } else if (latency <= 80) {
-    latTd.style.color = "#00d9ff";
-    latTd.title = `${latency}ms - Regional Asia Tenggara (30-80ms)`;
-  } else if (latency <= 180) {
-    latTd.style.color = "#fbbf24";
-    latTd.title = `${latency}ms - Asia Timur / US West (80-180ms)`;
-  } else {
-    latTd.style.color = "#ff5252";
-    latTd.style.fontWeight = "bold";
-    latTd.title = `${latency}ms - High Latency (> 180ms)`;
-  }
+          const latTd = document.createElement("td");
+          latTd.className = `latTd${connectedClass}`;
+          const latency = (tuple && tuple[7] !== undefined) ? tuple[7] : 0;
+          latTd.textContent = latency > 0 ? `${latency}ms` : "-";
+          latTd.style.textAlign = "right";
+          latTd.style.fontFamily = "monospace";
+          latTd.style.fontSize = "10.5px";
+          latTd.style.whiteSpace = "nowrap";
 
-  const hitsTd = document.createElement("td");
-  hitsTd.className = `hitsTd${connectedClass}`;
-  const hits = (tuple && tuple[4] !== undefined) ? tuple[4] : (hitCounter[addr] || 0);
-  hitsTd.appendChild(document.createTextNode(hits));
-  hitsTd.style.textAlign = "center";
-  hitsTd.style.color = hits > 0 ? "#48ff00" : "#999";
-  hitsTd.style.fontWeight = hits > 0 ? "bold" : "normal";
+          if (latency <= 0) {
+            latTd.style.color = "#777";
+            latTd.title = "Latency tidak tersedia";
+          } else if (latency <= 30) {
+            latTd.style.color = "#00ff88";
+            latTd.style.fontWeight = "bold";
+            latTd.title = `${latency}ms - Local / IIX / Cache Sangat Cepat (< 30ms)`;
+          } else if (latency <= 80) {
+            latTd.style.color = "#00d9ff";
+            latTd.title = `${latency}ms - Regional Asia Tenggara (30-80ms)`;
+          } else if (latency <= 180) {
+            latTd.style.color = "#fbbf24";
+            latTd.title = `${latency}ms - Asia Timur / US West (80-180ms)`;
+          } else {
+            latTd.style.color = "#ff5252";
+            latTd.style.fontWeight = "bold";
+            latTd.title = `${latency}ms - High Latency (> 180ms)`;
+          }
 
-  const sizeTd = document.createElement("td");
-  sizeTd.className = `sizeTd${connectedClass}`;
-  const bytes = (tuple && tuple[5] !== undefined) ? tuple[5] : (byteCounter[addr] || 0);
-  sizeTd.textContent = formatBytes(bytes);
-  sizeTd.style.textAlign = "right";
-  sizeTd.style.color = bytes > 0 ? "#ffd700" : "#999";
-  sizeTd.style.fontSize = "11px";
-  sizeTd.style.fontFamily = "monospace";
-  sizeTd.style.paddingLeft = "4pt";
-  sizeTd.style.paddingRight = "4pt";
+          const hitsTd = document.createElement("td");
+          hitsTd.className = `hitsTd${connectedClass}`;
+          const hits = (tuple && tuple[4] !== undefined) ? tuple[4] : (hitCounter[addr] || 0);
+          hitsTd.appendChild(document.createTextNode(hits));
+          hitsTd.style.textAlign = "center";
+          hitsTd.style.color = hits > 0 ? "#48ff00" : "#999";
+          hitsTd.style.fontWeight = hits > 0 ? "bold" : "normal";
 
-  const bgpTd = document.createElement("td");
-  bgpTd.className = `bgpTd${connectedClass}`;
-  const asn = tuple && tuple[8];
-  let bgpDisplay = "bgp";
-  let bgpFull = asn || "bgp";
-  let bgpHref = `https://bgp.he.net/ip/${addr}`;
-  if (asn) {
-    const maxLen = 22;
-    bgpDisplay = asn.length > maxLen ? asn.substring(0, maxLen - 2) + ".." : asn;
-  }
-  if (addr && addr !== "(x)" && !addr.startsWith("(")) {
-    const bgpLink = document.createElement("a");
-    bgpLink.href = bgpHref;
-    bgpLink.textContent = bgpDisplay;
-    bgpLink.title = `${bgpFull} (Klik untuk lookup BGP IP: ${addr})`;
-    bgpLink.target = "_blank";
-    bgpLink.style.color = "#00d9ff";
-    bgpLink.style.textDecoration = "none";
-    bgpLink.style.whiteSpace = "nowrap";
-    bgpTd.appendChild(bgpLink);
-  } else {
-    bgpTd.appendChild(document.createTextNode("-"));
-    bgpTd.style.color = "#999";
-  }
-  bgpTd.style.maxWidth = "160px";
-  bgpTd.style.overflow = "hidden";
-  bgpTd.style.textOverflow = "ellipsis";
-  bgpTd.style.whiteSpace = "nowrap";
-  bgpTd.style.paddingLeft = "4pt";
-  bgpTd.style.paddingRight = "4pt";
+          const sizeTd = document.createElement("td");
+          sizeTd.className = `sizeTd${connectedClass}`;
+          const bytes = (tuple && tuple[5] !== undefined) ? tuple[5] : (byteCounter[addr] || 0);
+          sizeTd.textContent = formatBytes(bytes);
+          sizeTd.style.textAlign = "right";
+          sizeTd.style.color = bytes > 0 ? "#ffd700" : "#999";
+          sizeTd.style.fontSize = "11px";
+          sizeTd.style.fontFamily = "monospace";
+          sizeTd.style.paddingLeft = "4pt";
+          sizeTd.style.paddingRight = "4pt";
 
-  const cacheTd = document.createElement("td");
-  cacheTd.className = `cacheTd${connectedClass}`;
-  if (flags & DFLAG_WEBSOCKET) {
-    cacheTd.appendChild(makeImg("websocket.png", "WebSocket handshake."));
-    cacheTd.style.paddingLeft = '6pt';
-  } else if (flags & AFLAG_CACHE) {
-    cacheTd.appendChild(makeImg("cached_arrow.png", "Data from cached requests."));
-    cacheTd.style.paddingLeft = '6pt';
-  } else {
-    cacheTd.style.paddingLeft = '0';
-  }
+          const bgpTd = document.createElement("td");
+          bgpTd.className = `bgpTd${connectedClass}`;
+          const asn = tuple && tuple[8];
+          let bgpDisplay = "bgp";
+          let bgpFull = asn || "bgp";
+          let bgpHref = `https://bgp.he.net/ip/${addr}`;
+          if (asn) {
+            const maxLen = 22;
+            bgpDisplay = asn.length > maxLen ? asn.substring(0, maxLen - 2) + ".." : asn;
+          }
+          if (addr && addr !== "(x)" && !addr.startsWith("(")) {
+            const bgpLink = document.createElement("a");
+            bgpLink.href = bgpHref;
+            bgpLink.textContent = bgpDisplay;
+            bgpLink.title = `${bgpFull} (Klik untuk lookup BGP IP: ${addr})`;
+            bgpLink.target = "_blank";
+            bgpLink.style.color = "#00d9ff";
+            bgpLink.style.textDecoration = "none";
+            bgpLink.style.whiteSpace = "nowrap";
+            bgpTd.appendChild(bgpLink);
+          } else {
+            bgpTd.appendChild(document.createTextNode("-"));
+            bgpTd.style.color = "#999";
+          }
+          bgpTd.style.maxWidth = "160px";
+          bgpTd.style.overflow = "hidden";
+          bgpTd.style.textOverflow = "ellipsis";
+          bgpTd.style.whiteSpace = "nowrap";
+          bgpTd.style.paddingLeft = "4pt";
+          bgpTd.style.paddingRight = "4pt";
 
-  tr._domain = domain;
-  tr.appendChild(domainTd);
-  tr.appendChild(addrTd);
-  tr.appendChild(latTd);
-  tr.appendChild(statusTd);
-  tr.appendChild(hitsTd);
-  tr.appendChild(sizeTd);
-  tr.appendChild(bgpTd);
-  tr.appendChild(cacheTd);
-  return tr;
-}
+          const cacheTd = document.createElement("td");
+          cacheTd.className = `cacheTd${connectedClass}`;
+          if (flags & DFLAG_WEBSOCKET) {
+            cacheTd.appendChild(makeImg("websocket.png", "WebSocket handshake."));
+            cacheTd.style.paddingLeft = '6pt';
+          } else if (flags & AFLAG_CACHE) {
+            cacheTd.appendChild(makeImg("cached_arrow.png", "Data from cached requests."));
+            cacheTd.style.paddingLeft = '6pt';
+          } else {
+            cacheTd.style.paddingLeft = '0';
+          }
 
-function makeSnippedText(domain, keep) {
-  const prefix = domain.substr(0, keep);
-  const snipped = domain.substr(keep, domain.length - 2 * keep);
-  const suffix = domain.substr(domain.length - keep);
-  const f = document.createDocumentFragment();
-  f.appendChild(document.createTextNode(prefix));
-  let snippedText = document.createElement("span");
-  snippedText.className = "snippedTextInvisible";
-  snippedText.textContent = snipped;
-  f.appendChild(snippedText);
-  const snipImg = makeImg("snip.png", "");
-  snipImg.className = "snipImg";
-  const snipLink = document.createElement("a");
-  snipLink.className = "snipLinkInvisible snipLinkVisible";
-  snipLink.href = "#";
-  snipLink.addEventListener("click", unsnipAll);
-  snipLink.appendChild(snipImg);
-  f.appendChild(snipLink);
-  f.appendChild(document.createTextNode(suffix));
-  return f;
-}
+          tr._domain = domain;
+          tr.appendChild(domainTd);
+          tr.appendChild(addrTd);
+          tr.appendChild(latTd);
+          tr.appendChild(statusTd);
+          tr.appendChild(hitsTd);
+          tr.appendChild(sizeTd);
+          tr.appendChild(bgpTd);
+          tr.appendChild(cacheTd);
+          return tr;
+        }
 
-function unsnipAll(event) {
-  event.preventDefault();
-  removeStyles(".snippedTextInvisible", ".snipLinkVisible");
-}
+        function makeSnippedText(domain, keep) {
+          const prefix = domain.substr(0, keep);
+          const snipped = domain.substr(keep, domain.length - 2 * keep);
+          const suffix = domain.substr(domain.length - keep);
+          const f = document.createDocumentFragment();
+          f.appendChild(document.createTextNode(prefix));
+          let snippedText = document.createElement("span");
+          snippedText.className = "snippedTextInvisible";
+          snippedText.textContent = snipped;
+          f.appendChild(snippedText);
+          const snipImg = makeImg("snip.png", "");
+          snipImg.className = "snipImg";
+          const snipLink = document.createElement("a");
+          snipLink.className = "snipLinkInvisible snipLinkVisible";
+          snipLink.href = "#";
+          snipLink.addEventListener("click", unsnipAll);
+          snipLink.appendChild(snipImg);
+          f.appendChild(snipLink);
+          f.appendChild(document.createTextNode(suffix));
+          return f;
+        }
 
-function removeStyles(...selectors) {
-  const stylesheet = document.styleSheets[0];
-  for (const selector of selectors) {
-    for (let i = stylesheet.cssRules.length - 1; i >= 0; i--) {
-      const rule = stylesheet.cssRules[i];
-      if (rule.selectorText === selector) {
-        stylesheet.deleteRule(i);
-      }
-    }
-  }
-}
+        function unsnipAll(event) {
+          event.preventDefault();
+          removeStyles(".snippedTextInvisible", ".snipLinkVisible");
+        }
 
-let oldTimeStamp = 0;
-let oldRanges = [];
-function handleMouseDown(e) {
-  oldTimeStamp = e.timeStamp;
-  oldRanges = [];
-  const sel = window.getSelection();
-  for (let i = 0; i < sel.rangeCount; i++) {
-    oldRanges.push(sel.getRangeAt(i));
-  }
-}
+        function removeStyles(...selectors) {
+          const stylesheet = document.styleSheets[0];
+          for (const selector of selectors) {
+            for (let i = stylesheet.cssRules.length - 1; i >= 0; i--) {
+              const rule = stylesheet.cssRules[i];
+              if (rule.selectorText === selector) {
+                stylesheet.deleteRule(i);
+              }
+            }
+          }
+        }
 
-function sameRange(r1, r2) {
-  return (r1.compareBoundaryPoints(Range.START_TO_START, r2) == 0 &&
-    r1.compareBoundaryPoints(Range.END_TO_END, r2) == 0);
-}
+        let oldTimeStamp = 0;
+        let oldRanges = [];
+        function handleMouseDown(e) {
+          oldTimeStamp = e.timeStamp;
+          oldRanges = [];
+          const sel = window.getSelection();
+          for (let i = 0; i < sel.rangeCount; i++) {
+            oldRanges.push(sel.getRangeAt(i));
+          }
+        }
 
-function isSpuriousSelection(sel, newTimeStamp) {
-  if (newTimeStamp - oldTimeStamp > 10) return false;
-  if (sel.rangeCount != oldRanges.length) return true;
-  for (let i = 0; i < sel.rangeCount; i++) {
-    if (!sameRange(sel.getRangeAt(i), oldRanges[i])) return true;
-  }
-  return false;
-}
+        function sameRange(r1, r2) {
+          return (r1.compareBoundaryPoints(Range.START_TO_START, r2) == 0 &&
+            r1.compareBoundaryPoints(Range.END_TO_END, r2) == 0);
+        }
 
-function handleContextMenu(e) {
-  const sel = window.getSelection();
-  if (isSpuriousSelection(sel, e.timeStamp)) {
-    sel.removeAllRanges();
-  }
-  selectAddress(this, e.target, sel);
-  return sel;
-}
+        function isSpuriousSelection(sel, newTimeStamp) {
+          if (newTimeStamp - oldTimeStamp > 10) return false;
+          if (sel.rangeCount != oldRanges.length) return true;
+          for (let i = 0; i < sel.rangeCount; i++) {
+            if (!sameRange(sel.getRangeAt(i), oldRanges[i])) return true;
+          }
+          return false;
+        }
 
-// Find the innermost "selectMe" that the user clicked on directly,
-// otherwise find the outermost "selectMe" in the cell.
-// This will either select a NAT64 IPv4 suffix, or the entire address.
-function findSelectMe(node, target) {
-  const range = document.createRange();
-  range.selectNodeContents(
-    target?.closest(".selectMe") || node.querySelector(".selectMe"));
-  return range;
-}
+        function handleContextMenu(e) {
+          const sel = window.getSelection();
+          if (isSpuriousSelection(sel, e.timeStamp)) {
+            sel.removeAllRanges();
+          }
+          selectAddress(this, e.target, sel);
+          return sel;
+        }
 
-function showPopupToast(msg) {
-  let toast = document.getElementById("popup-toast");
-  if (!toast) {
-    toast = document.createElement("div");
-    toast.id = "popup-toast";
-    toast.style.cssText = `
+        // Find the innermost "selectMe" that the user clicked on directly,
+        // otherwise find the outermost "selectMe" in the cell.
+        // This will either select a NAT64 IPv4 suffix, or the entire address.
+        function findSelectMe(node, target) {
+          const range = document.createRange();
+          range.selectNodeContents(
+            target?.closest(".selectMe") || node.querySelector(".selectMe"));
+          return range;
+        }
+
+        function showPopupToast(msg) {
+          let toast = document.getElementById("popup-toast");
+          if (!toast) {
+            toast = document.createElement("div");
+            toast.id = "popup-toast";
+            toast.style.cssText = `
       position: fixed;
       bottom: 8px;
       left: 50%;
@@ -1286,47 +1281,47 @@ function showPopupToast(msg) {
       pointer-events: none;
       transition: opacity 0.2s;
     `;
-    document.body.appendChild(toast);
-  }
-  toast.textContent = msg;
-  toast.style.opacity = "1";
-  clearTimeout(toast._timeout);
-  toast._timeout = setTimeout(() => {
-    toast.style.opacity = "0";
-  }, 1500);
-}
+            document.body.appendChild(toast);
+          }
+          toast.textContent = msg;
+          toast.style.opacity = "1";
+          clearTimeout(toast._timeout);
+          toast._timeout = setTimeout(() => {
+            toast.style.opacity = "0";
+          }, 1500);
+        }
 
-function handleClick(e) {
-  const text = (this.querySelector('.selectMe') || this).textContent.trim();
-  if (text && text !== "(x)" && text !== "-") {
-    navigator.clipboard.writeText(text).then(() => {
-      showPopupToast(`Copied: ${text}`);
-    }).catch(() => {
-      const textarea = document.createElement("textarea");
-      textarea.value = text;
-      document.body.appendChild(textarea);
-      textarea.select();
-      document.execCommand("copy");
-      document.body.removeChild(textarea);
-      showPopupToast(`Copied: ${text}`);
-    });
-  }
-  const sel = window.getSelection();
-  if (e.detail == 1 && oldRanges.length == 1) {
-    if (sameRange(findSelectMe(this, e.target), oldRanges[0])) {
-      sel.removeAllRanges();
-      return;
-    }
-  }
+        function handleClick(e) {
+          const text = (this.querySelector('.selectMe') || this).textContent.trim();
+          if (text && text !== "(x)" && text !== "-") {
+            navigator.clipboard.writeText(text).then(() => {
+              showPopupToast(`Copied: ${text}`);
+            }).catch(() => {
+              const textarea = document.createElement("textarea");
+              textarea.value = text;
+              document.body.appendChild(textarea);
+              textarea.select();
+              document.execCommand("copy");
+              document.body.removeChild(textarea);
+              showPopupToast(`Copied: ${text}`);
+            });
+          }
+          const sel = window.getSelection();
+          if (e.detail == 1 && oldRanges.length == 1) {
+            if (sameRange(findSelectMe(this, e.target), oldRanges[0])) {
+              sel.removeAllRanges();
+              return;
+            }
+          }
 
-  selectAddress(this, e.target, sel);
-}
+          selectAddress(this, e.target, sel);
+        }
 
-// If the user hasn't manually selected part of the address, then select
-// the whole thing, to make copying easier.
-function selectAddress(node, target, sel) {
-  if (sel.isCollapsed || !sel.containsNode(node, true)) {
-    sel.removeAllRanges();
-    sel.addRange(findSelectMe(node, target));
-  }
-}
+        // If the user hasn't manually selected part of the address, then select
+        // the whole thing, to make copying easier.
+        function selectAddress(node, target, sel) {
+          if (sel.isCollapsed || !sel.containsNode(node, true)) {
+            sel.removeAllRanges();
+            sel.addRange(findSelectMe(node, target));
+          }
+        }

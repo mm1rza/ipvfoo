@@ -44,3 +44,21 @@ git show <COMMIT_HASH>
 | :--- | :--- | :--- |
 | **Core IPvFoo Engine** | `src/background.js`<br>`src/popup.js` & `popup.html`<br>`src/iputil.js`<br>`src/common.js` | **Porting Selektif**: Bandingkan perubahan dengan teliti jika ada bugfix protokol jaringan, manifest, atau kompatibilitas browser baru. |
 | **Modul Khusus Fork Anda** | `src/content.js`<br>`src/bgp_he.js`<br>`src/grabber.html` & `scripts/grabber.js`<br>`src/seo.html` & `scripts/seo*.js`<br>`src/theme.css` & `THEMES*`<br>`src/id_asn_default.js` | **Jangan Ditimpa**: Ini adalah modul kustom fitur In-Page Shadow DOM widget, live speed meter, BGP visualizer, Asset Grabber, dan SEO diagnostics. |
+
+---
+
+## 🚀 Fitur Baru & Kustomisasi IPvFooKan Terbaru
+
+1. **User Dynamic Hide/Unhide Domain & Sort ke Posisi Terbawah**:
+   - Menghapus daftar statis *hardcoded*. Kini pengguna dapat menyembunyikan (*hide*) atau memunculkan kembali (*unhide*) domain secara mandiri melalui tombol ikon (`🚫` / `👁️`) di samping setiap baris sub-domain.
+   - **Main domain tidak dapat di-hide**: Baris domain utama halaman selalu berada di baris pertama dan terkunci.
+   - **Posisi baris tersembunyi**: Domain yang di-hide otomatis diurutkan dan dipindahkan ke urutan paling bawah tabel dengan tampilan transparan dan coret halus (*strikethrough*).
+   - **Sinkronisasi Otomatis**: Daftar domain yang di-hide disimpan ke `chrome.storage.local` (`hidden_domains`), tersinkronisasi otomatis secara *real-time* antara Popup Extension dan In-Page Overlay Widget.
+2. **Posisi Indikator Kecepatan Trafik & Salin Bersih (*Clean Copy*)**:
+   - Badge kecepatan trafik (`⚡... KB/s`) diposisikan rapi di sebelah kanan nama domain.
+   - Mengklik sel domain hanya akan menyalin nama domain murni ke clipboard (tanpa teks trafik, tanpa ikon hide/unhide).
+3. **Widget IP Publik Klien (Tanpa Cache & Privasi Blur)**:
+   - Menampilkan IP publik pengguna di header Popup & In-Page Overlay secara *real-time* dengan 6 penyedia CDN/Anycast *fallback* tanpa cache.
+   - Tampilan murni angka IP (tanpa ikon globe), ter-blur secara default untuk privasi pengguna, dan otomatis unblur saat di-hover atau di-klik.
+4. **Full Page Screenshot Engine (`SCREENSHOOT`)**:
+   - Fitur tangkapan layar penuh vertikal (*stitched capture*) dengan scrolling halus dari atas ke bawah, penanganan elemen *sticky/fixed header*, dan otomatis menyembunyikan scrollbar selama proses pengambilan gambar.
