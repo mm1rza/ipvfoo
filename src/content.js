@@ -1165,7 +1165,11 @@
     widget.style.display = "none";
     miniBadge.style.display = "none";
 
-    showCopyToast("📸 Mengambil screenshot halaman...");
+    // Pastikan tidak ada toast yang tertinggal di layar saat capture
+    const existingToast = shadow.getElementById("copy-toast");
+    if (existingToast) {
+      existingToast.style.display = "none";
+    }
 
     const body = document.body;
     const origScrollX = window.scrollX;
