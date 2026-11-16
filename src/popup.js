@@ -521,14 +521,14 @@ window.onload = async function () {
   const popupMyIp = document.getElementById("popup_myip");
   if (popupMyIp) {
     function refreshPopupMyIp() {
-      popupMyIp.textContent = "🌐 Memeriksa...";
+      popupMyIp.textContent = "...";
       popupMyIp.title = "Sedang mendeteksi IP publik terkini (tanpa cache)...";
       chrome.runtime.sendMessage({ cmd: "getMyIp" }, (res) => {
         if (res && res.ip && res.ip !== "Unknown") {
-          popupMyIp.textContent = `🌐 ${res.ip}`;
+          popupMyIp.textContent = res.ip;
           popupMyIp.title = `IP Publik Anda: ${res.ip} (Klik untuk Copy, Klik Kanan untuk Refresh)`;
         } else {
-          popupMyIp.textContent = `🌐 IP: Gagal`;
+          popupMyIp.textContent = "-";
           popupMyIp.title = "Gagal memuat IP publik. Klik untuk coba lagi.";
         }
       });
@@ -539,7 +539,7 @@ window.onload = async function () {
     popupMyIp.onclick = (e) => {
       e.stopPropagation();
       popupMyIp.classList.toggle("unblurred");
-      const ipText = popupMyIp.textContent.replace(/^🌐\s*/, "").trim();
+      const ipText = popupMyIp.textContent.trim();
       if (ipText && ipText !== "-" && ipText !== "Gagal" && !ipText.includes("...")) {
         navigator.clipboard.writeText(ipText);
         showPopupToast(`Copied IP Saya: ${ipText}`);

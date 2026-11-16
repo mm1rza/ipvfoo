@@ -1084,7 +1084,7 @@
       <div class="title" style="display:flex; align-items:center;">
         <span>IPvFooKan</span>
         <span id="widget-speed" class="widget-speed"></span>
-        <span id="widget-myip" class="widget-myip" title="IP Publik Anda (Klik untuk Copy)">🌐 IP Saya: ...</span>
+        <span id="widget-myip" class="widget-myip" title="IP Publik Anda (Klik untuk Copy)">...</span>
       </div>
       <div class="controls">
         <button id="btn-screenshot" class="btn btn-screenshot" title="Ambil Full Page Screenshot">SCREENSHOOT</button>
@@ -1566,14 +1566,14 @@
   const myIpEl = shadow.getElementById("widget-myip");
   if (myIpEl) {
     function refreshMyIp() {
-      myIpEl.textContent = "🌐 Memeriksa...";
+      myIpEl.textContent = "...";
       myIpEl.title = "Sedang mendeteksi IP publik terkini (tanpa cache)...";
       chrome.runtime.sendMessage({ cmd: "getMyIp" }, (res) => {
         if (res && res.ip && res.ip !== "Unknown") {
-          myIpEl.textContent = `🌐 ${res.ip}`;
+          myIpEl.textContent = res.ip;
           myIpEl.title = `IP Publik Anda: ${res.ip} (Klik untuk Copy, Klik Kanan untuk Refresh)`;
         } else {
-          myIpEl.textContent = `🌐 IP: Gagal`;
+          myIpEl.textContent = "-";
           myIpEl.title = "Gagal memuat IP dari seluruh fallback server. Klik untuk coba lagi.";
         }
       });
@@ -1584,7 +1584,7 @@
     myIpEl.onclick = (e) => {
       e.stopPropagation();
       myIpEl.classList.toggle("unblurred");
-      const ipText = myIpEl.textContent.replace(/^🌐\s*/, "").trim();
+      const ipText = myIpEl.textContent.trim();
       if (ipText && ipText !== "-" && ipText !== "Gagal" && !ipText.includes("...")) {
         copyToClipboard(ipText, "IP Saya");
       } else {
