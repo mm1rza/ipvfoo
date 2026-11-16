@@ -1926,6 +1926,12 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     chrome.tabs.create({ url: msg.url });
     sendResponse({ status: "ok" });
     return true;
+  } else if (msg.cmd === "captureVisibleTab") {
+    chrome.tabs.captureVisibleTab(null, { format: "png" }, (dataUrl) => {
+      const err = chrome.runtime.lastError ? chrome.runtime.lastError.message : null;
+      sendResponse({ dataUrl: dataUrl || null, error: err });
+    });
+    return true;
   } else if (msg.cmd === "lookupBgpPath" || msg.cmd === "traceroute") {
     fetchBgpPath(msg.ip).then((data) => {
       sendResponse(data);

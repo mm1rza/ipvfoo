@@ -26,7 +26,8 @@ Semua data jaringan ditangkap secara pasif dan privat menggunakan API `webReques
 - Menggunakan **Shadow DOM isolated container** sehingga CSS widget tidak bocor dan tidak merusak tata letak maupun tampilan website asli.
 - Dilengkapi **Live Bandwidth Speed Meter** untuk memantau kecepatan transfer data (per-domain dan total halaman).
 - Sorting tabel interaktif berdasarkan Domain, IP, Latency, Status Code, Hits, Size, dan BGP/ASN.
-- Tombol akses cepat ke tab **META SEO** dan **LINK GRABBER**.
+- Tombol akses cepat ke tab **META SEO**, **LINK GRABBER**, dan **📸 (Full Page Screenshot)**.
+- **📸 Full Page Screen Capture**: Fitur tangkapan layar penuh satu halaman utuh (*scroll & stitch*) yang otomatis menyembunyikan widget saat capture dan merender gambar PNG resolusi tinggi tanpa merusak sticky navigation bar.
 
 ### 2. BGP AS-Path Visualizer & Helper Script (bgp.he.net)
 - **In-Page AS-Path Route Lookup**: Klik IP mana saja pada tabel widget untuk membuka modal diagram visual alur rute BGP transit (`Global Ingress ──► Transit AS ──► Origin AS`).

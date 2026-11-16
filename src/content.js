@@ -1030,6 +1030,7 @@
         <span id="widget-speed" class="widget-speed"></span>
       </div>
       <div class="controls">
+        <button id="btn-screenshot" class="btn btn-export" title="Ambil Full Page Screenshot">📸</button>
         <button id="btn-export-txt" class="btn btn-export" title="Export Session ke TXT">TXT</button>
         <button id="btn-seo" class="btn btn-seo" title="Buka META SEO Inspector (New Tab)">META SEO</button>
         <button id="btn-linkgrabber" class="btn btn-grabber" title="Ekstrak Semua Link di Halaman Ini (Link Grabber)">LINK GRABBER</button>
@@ -1141,7 +1142,7 @@
   // Export Functions
   function triggerDownload(content, filename, mimeType) {
     try {
-      const blob = new Blob([content], { type: mimeType });
+      const blob = (content instanceof Blob) ? content : new Blob([content], { type: mimeType });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
@@ -1154,6 +1155,125 @@
       }, 1500);
     } catch (e) {
       console.error("Export download error:", e);
+    }
+  }
+
+  // Full-page screen capture (inspired by ref/full-page-screen-capture-chrome-extension-master)
+  async function takeFullPageScreenshot() {
+    const origWidgetDisplay = widget.style.display;
+    const origMiniDisplay = miniBadge.style.display;
+    widget.style.display = "none";
+    miniBadge.style.display = "none";
+
+    showCopyToast("📸 Mengambil screenshot halaman...");
+
+    const body = document.body;
+    const origScrollX = window.scrollX;
+    const origScrollY = window.scrollY;
+    const origDocOverflow = document.documentElement.style.overflow;
+    const origBodyOverflowY = body ? body.style.overflowY : "";
+
+    if (body) {
+      body.style.overflowY = "visible";
+    }
+    document.documentElement.style.overflow = "hidden";
+
+    try {
+      const fullWidth = Math.max(
+        document.documentElement.clientWidth,
+        body ? body.scrollWidth : 0,
+        document.documentElement.scrollWidth,
+        body ? body.offsetWidth : 0,
+        document.documentElement.offsetWidth
+      );
+      const fullHeight = Math.max(
+        document.documentElement.clientHeight,
+        body ? body.scrollHeight : 0,
+        document.documentElement.scrollHeight,
+        body ? body.offsetHeight : 0,
+        document.documentElement.offsetHeight
+      );
+      const windowWidth = window.innerWidth;
+      const windowHeight = window.innerHeight;
+
+      const scrollPad = 200;
+      const yDelta = windowHeight - (windowHeight > scrollPad ? scrollPad : 0);
+      const xDelta = windowWidth;
+
+      // Susun urutan scroll dari bawah ke atas agar sticky headers
+      // ditimpa rapi oleh render bagian atas halaman terakhir (metode Peter Coles)
+      const arrangements = [];
+      let yPos = fullHeight - windowHeight;
+      while (yPos > -yDelta) {
+        let xPos = 0;
+        while (xPos < fullWidth) {
+          arrangements.push([xPos, Math.max(0, yPos)]);
+          xPos += xDelta;
+        }
+        yPos -= yDelta;
+      }
+
+      let canvas = null;
+      let ctx = null;
+      let scale = 1;
+
+      for (let i = 0; i < arrangements.length; i++) {
+        const [x, y] = arrangements[i];
+        window.scrollTo(x, y);
+        await new Promise((r) => setTimeout(r, 160));
+
+        const resp = await new Promise((resolve) => {
+          chrome.runtime.sendMessage({ cmd: "captureVisibleTab" }, (res) => {
+            resolve(res || {});
+          });
+        });
+
+        if (!resp || !resp.dataUrl) {
+          throw new Error(resp && resp.error ? resp.error : "Gagal menangkap layar viewport");
+        }
+
+        const img = await new Promise((resolve, reject) => {
+          const image = new Image();
+          image.onload = () => resolve(image);
+          image.onerror = () => reject(new Error("Gagal merender potongan layar"));
+          image.src = resp.dataUrl;
+        });
+
+        if (!canvas) {
+          scale = img.width / windowWidth || 1;
+          canvas = document.createElement("canvas");
+          canvas.width = Math.round(fullWidth * scale);
+          canvas.height = Math.round(fullHeight * scale);
+          ctx = canvas.getContext("2d");
+        }
+
+        ctx.drawImage(img, Math.round(x * scale), Math.round(y * scale));
+      }
+
+      if (canvas) {
+        canvas.toBlob((blob) => {
+          if (!blob) {
+            showCopyToast("❌ Gagal membuat berkas screenshot");
+            return;
+          }
+          const host = (location.hostname || "page").replace(/[^a-zA-Z0-9.-]/g, "_");
+          const d = new Date();
+          const pad2 = (n) => String(n).padStart(2, "0");
+          const dateStr = `${d.getFullYear()}${pad2(d.getMonth() + 1)}${pad2(d.getDate())}_${pad2(d.getHours())}${pad2(d.getMinutes())}${pad2(d.getSeconds())}`;
+          const filename = `screenshot_${host}_${dateStr}.png`;
+          triggerDownload(blob, filename, "image/png");
+          showCopyToast("📸 Screenshot full page berhasil disimpan!");
+        }, "image/png");
+      }
+    } catch (err) {
+      console.error("[IPvFooKan] Screenshot error:", err);
+      showCopyToast("❌ Gagal screenshot: " + (err.message || err));
+    } finally {
+      document.documentElement.style.overflow = origDocOverflow;
+      if (body) body.style.overflowY = origBodyOverflowY;
+      window.scrollTo(origScrollX, origScrollY);
+      widget.style.display = origWidgetDisplay;
+      miniBadge.style.display = origMiniDisplay;
     }
   }
 
@@ -1299,6 +1419,13 @@
   }
 
   // Buttons
+  const btnScreenshot = shadow.getElementById("btn-screenshot");
+  if (btnScreenshot) {
+    btnScreenshot.onclick = () => {
+      takeFullPageScreenshot();
+    };
+  }
+
   shadow.getElementById("btn-export-txt").onclick = () => {
     exportTxtSession(allTuplesCache, allTuplesCache[0] ? allTuplesCache[0][0] : location.hostname);
   };
@@ -3960,6 +4087,10 @@
   window.__ipvfoo_open_seo = openSeoInNewTab;
 
   chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+    if (msg && (msg.action === "take_screenshot" || msg.cmd === "takeFullPageScreenshot")) {
+      takeFullPageScreenshot();
+      sendResponse({ ok: true });
+    }
     if (msg && msg.action === "open_linkgrabber") {
       openGrabberInNewTab();
       sendResponse({ ok: true });

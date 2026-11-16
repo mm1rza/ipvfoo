@@ -35,7 +35,8 @@
     "contextMenus",
     "storage",
     "webNavigation",
-    "webRequest"
+    "webRequest",
+    "activeTab"
   ],
   "content_scripts": [
     {

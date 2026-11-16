@@ -527,6 +527,22 @@ window.onload = async function () {
     };
   }
 
+  const screenshotBtn = document.getElementById("screenshot_btn");
+  if (screenshotBtn) {
+    screenshotBtn.onclick = () => {
+      chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+        if (!tabs || !tabs[0]) return;
+        chrome.tabs.sendMessage(tabs[0].id, { cmd: "takeFullPageScreenshot" }, (res) => {
+          if (chrome.runtime.lastError) {
+            showPopupToast("❌ Halaman belum siap atau tidak mendukung screenshot");
+          } else {
+            window.close();
+          }
+        });
+      });
+    };
+  }
+
   const exportTxtBtn = document.getElementById("export_txt_btn");
   if (exportTxtBtn) {
     exportTxtBtn.onclick = () => {
