@@ -151,6 +151,15 @@ Rencana fitur untuk pembaruan berikutnya:
 
 ---
 
+## 🔄 Upstream Tracking & Changelogs
+
+Repositori ini secara aktif melacak dan menyelaraskan pembaruan dari repositori utama [pmarks-net/ipvfoo](https://github.com/pmarks-net/ipvfoo).
+
+Rincian perbandingan versi, catatan pembaruan yang diadaptasi, serta panduan cepat sinkronisasi upstream dapat dilihat pada dokumen:
+👉 **[CHANGELOGS.md](CHANGELOGS.md)**
+
+---
+
 ## 💻 Cara Install Ekstensi (Developer Mode)
 
 1. **Clone repository ini:**
