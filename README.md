@@ -161,21 +161,6 @@ Rincian perbandingan versi, catatan pembaruan yang diadaptasi, serta panduan cep
 
 ---
 
-## 💻 Cara Install Ekstensi (Developer Mode)
-
-1. **Clone repository ini:**
-   ```bash
-   git clone https://github.com/mm1rza/ipvfoo.git
-   ```
-2. Buka browser **Google Chrome** atau browser berbasis Chromium lainnya (Edge, Brave, Opera, Vivaldi).
-3. Buka halaman ekstensi: `chrome://extensions/`.
-4. Aktifkan tombol **Developer mode** di pojok kanan atas.
-5. Klik tombol **Load unpacked** (Muat yang belum dibongkar).
-6. Pilih direktori folder `src` dari repositori ini.
-7. Ekstensi **IPvFooKan** langsung aktif dan siap digunakan di seluruh tab website!
-
----
-
 ## 📜 Lisensi & Atribusi Sumber (Credits)
 
 Proyek ini merupakan hasil kompilasi, penyempurnaan, dan modifikasi mandiri dari karya open-source yang luar biasa:
