@@ -799,11 +799,25 @@ function calculatePopupSpeed() {
   for (let tr = table.firstChild; tr; tr = tr.nextSibling) {
     if (tr._domain && tr._tuple) {
       const dSpeed = domainSpeedMap[tr._domain] || 0;
+      const domainTd = tr.querySelector(".domainTd");
+      if (domainTd) {
+        let speedEl = domainTd.querySelector(".speed-tag");
+        if (dSpeed >= 200) {
+          const speedText = `⚡${formatSpeed(dSpeed)}`;
+          if (!speedEl) {
+            speedEl = document.createElement("span");
+            speedEl.className = "speed-tag";
+            domainTd.appendChild(speedEl);
+          }
+          speedEl.textContent = speedText;
+        } else if (speedEl) {
+          speedEl.remove();
+        }
+      }
       const sizeTd = tr.querySelector(".sizeTd");
       if (sizeTd) {
         const bytes = (tr._tuple[5] !== undefined) ? tr._tuple[5] : (byteCounter[tr._tuple[1]] || 0);
-        const speedHtml = dSpeed >= 200 ? `<span class="speed-tag">⚡${formatSpeed(dSpeed)}</span> ` : "";
-        sizeTd.innerHTML = `${speedHtml}${formatBytes(bytes)}`;
+        sizeTd.textContent = formatBytes(bytes);
       }
     }
   }
@@ -983,6 +997,13 @@ function makeRow(isFirst, tuple) {
   domainTd.appendChild(httpImg);
   domainTd.appendChild(makeSelectMe(
     domain.length > LONG_DOMAIN ? makeSnippedText(domain, Math.floor(LONG_DOMAIN / 2)) : domain));
+  const dSpeed = domainSpeedMap[domain] || 0;
+  if (dSpeed >= 200) {
+    const speedSpan = document.createElement("span");
+    speedSpan.className = "speed-tag";
+    speedSpan.textContent = `⚡${formatSpeed(dSpeed)}`;
+    domainTd.appendChild(speedSpan);
+  }
   domainTd.className = "domainTd";
   domainTd.onclick = handleClick;
   domainTd.oncontextmenu = handleContextMenu;
@@ -1098,9 +1119,7 @@ function makeRow(isFirst, tuple) {
   const sizeTd = document.createElement("td");
   sizeTd.className = `sizeTd${connectedClass}`;
   const bytes = (tuple && tuple[5] !== undefined) ? tuple[5] : (byteCounter[addr] || 0);
-  const dSpeed = domainSpeedMap[domain] || 0;
-  const speedHtml = dSpeed >= 200 ? `<span class="speed-tag">⚡${formatSpeed(dSpeed)}</span> ` : "";
-  sizeTd.innerHTML = `${speedHtml}${formatBytes(bytes)}`;
+  sizeTd.textContent = formatBytes(bytes);
   sizeTd.style.textAlign = "right";
   sizeTd.style.color = bytes > 0 ? "#ffd700" : "#999";
   sizeTd.style.fontSize = "11px";
