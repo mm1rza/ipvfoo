@@ -13,6 +13,7 @@ limitations under the License.
 "use strict";
 
 // Requires <script src="common.js">
+const IS_CHROMIUM = !!chrome.runtime.getManifest().background.service_worker;
 const ALL_URLS = "<all_urls>";
 const LONG_DOMAIN = 50;
 const tabId = window.location.hash.substr(1);
@@ -834,7 +835,7 @@ function zoomHack() {
 
 let redrawn = false;
 function scrollbarHack() {
-  if (typeof browser == "undefined") return;
+  if (IS_CHROMIUM) return;
   setTimeout(() => {
     const e = document.documentElement;
     if (e.scrollHeight > e.clientHeight) {
