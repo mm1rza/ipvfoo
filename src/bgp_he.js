@@ -27,31 +27,34 @@ add address=198.51.100.0/24 comment=ip-private-local list=ip-private-local
 add address=203.0.113.0/24 comment=ip-private-local list=ip-private-local
 add address=224.0.0.0/3 comment=ip-private-local list=ip-private-local
 add address=255.255.255.255 comment=ip-private-local list=ip-private-local
-add address=240.0.0.0/4 comment=ip-private-local list=ip-private-local`
+add address=240.0.0.0/4 comment=ip-private-local list=ip-private-local
+`
     },
     tiktok: {
       name: "TikTok RAW Filter",
       countText: "Total: 3 Rules RAW prerouting (zzz-list-ip-tiktok)",
       title: "Template MikroTik: TikTok Domain Content Filter (RAW)",
-      data: `/ip firewall raw add action=add-dst-to-address-list address-list=zzz-list-ip-tiktok address-list-timeout=none-static chain=prerouting content=.tiktokcdn.com dst-address-list=!ip-private-local src-address-list=ip-local disabled=yes
-/ip firewall raw add action=add-dst-to-address-list address-list=zzz-list-ip-tiktok address-list-timeout=none-static chain=prerouting content=.tiktokv.com dst-address-list=!ip-private-local src-address-list=ip-local disabled=yes
-/ip firewall raw add action=add-dst-to-address-list address-list=zzz-list-ip-tiktok address-list-timeout=none-static chain=prerouting content=.tiktok.com dst-address-list=!ip-private-local src-address-list=ip-local disabled=yes`
+      data: `/ip firewall raw add action=add-dst-to-address-list address-list=zzz-list-ip-tiktok address-list-timeout=12h chain=prerouting content=.tiktokcdn.com dst-address-list=!ip-private-local src-address-list=ip-local disabled=yes
+/ip firewall raw add action=add-dst-to-address-list address-list=zzz-list-ip-tiktok address-list-timeout=12h chain=prerouting content=.tiktokv.com dst-address-list=!ip-private-local src-address-list=ip-local disabled=yes
+/ip firewall raw add action=add-dst-to-address-list address-list=zzz-list-ip-tiktok address-list-timeout=12h chain=prerouting content=.tiktok.com dst-address-list=!ip-private-local src-address-list=ip-local disabled=yes
+`
     },
     winupdate: {
       name: "Windows Update RAW Filter",
       countText: "Total: 11 Rules RAW prerouting (zzz-list-ip-windows-update)",
       title: "Template MikroTik: Windows Update Content Filter (RAW)",
-      data: `/ip firewall raw add action=add-dst-to-address-list address-list=zzz-list-ip-windows-update address-list-timeout=none-static chain=prerouting content=windowsupdate.microsoft.com dst-address-list=!ip-private-local src-address-list=ip-local disabled=yes
-/ip firewall raw add action=add-dst-to-address-list address-list=zzz-list-ip-windows-update address-list-timeout=none-static chain=prerouting content=.windowsupdate.microsoft.com dst-address-list=!ip-private-local src-address-list=ip-local disabled=yes
-/ip firewall raw add action=add-dst-to-address-list address-list=zzz-list-ip-windows-update address-list-timeout=none-static chain=prerouting content=.update.microsoft.com dst-address-list=!ip-private-local src-address-list=ip-local disabled=yes
-/ip firewall raw add action=add-dst-to-address-list address-list=zzz-list-ip-windows-update address-list-timeout=none-static chain=prerouting content=.windowsupdate.com dst-address-list=!ip-private-local src-address-list=ip-local disabled=yes
-/ip firewall raw add action=add-dst-to-address-list address-list=zzz-list-ip-windows-update address-list-timeout=none-static chain=prerouting content=download.windowsupdate.com dst-address-list=!ip-private-local src-address-list=ip-local disabled=yes
-/ip firewall raw add action=add-dst-to-address-list address-list=zzz-list-ip-windows-update address-list-timeout=none-static chain=prerouting content=.download.windowsupdate.com dst-address-list=!ip-private-local src-address-list=ip-local disabled=yes
-/ip firewall raw add action=add-dst-to-address-list address-list=zzz-list-ip-windows-update address-list-timeout=none-static chain=prerouting content=download.microsoft.com dst-address-list=!ip-private-local src-address-list=ip-local disabled=yes
-/ip firewall raw add action=add-dst-to-address-list address-list=zzz-list-ip-windows-update address-list-timeout=none-static chain=prerouting content=wustat.windows.com dst-address-list=!ip-private-local src-address-list=ip-local disabled=yes
-/ip firewall raw add action=add-dst-to-address-list address-list=zzz-list-ip-windows-update address-list-timeout=none-static chain=prerouting content=ntservicepack.microsoft.com dst-address-list=!ip-private-local src-address-list=ip-local disabled=yes
-/ip firewall raw add action=add-dst-to-address-list address-list=zzz-list-ip-windows-update address-list-timeout=none-static chain=prerouting content=go.microsoft.com dst-address-list=!ip-private-local src-address-list=ip-local disabled=yes
-/ip firewall raw add action=add-dst-to-address-list address-list=zzz-list-ip-windows-update address-list-timeout=none-static chain=prerouting content=dl.delivery.mp.microsoft.com dst-address-list=!ip-private-local src-address-list=ip-local disabled=yes`
+      data: `/ip firewall raw add action=add-dst-to-address-list address-list=zzz-list-ip-windows-update address-list-timeout=12h chain=prerouting content=windowsupdate.microsoft.com dst-address-list=!ip-private-local src-address-list=ip-local disabled=yes
+/ip firewall raw add action=add-dst-to-address-list address-list=zzz-list-ip-windows-update address-list-timeout=12h chain=prerouting content=.windowsupdate.microsoft.com dst-address-list=!ip-private-local src-address-list=ip-local disabled=yes
+/ip firewall raw add action=add-dst-to-address-list address-list=zzz-list-ip-windows-update address-list-timeout=12h chain=prerouting content=.update.microsoft.com dst-address-list=!ip-private-local src-address-list=ip-local disabled=yes
+/ip firewall raw add action=add-dst-to-address-list address-list=zzz-list-ip-windows-update address-list-timeout=12h chain=prerouting content=.windowsupdate.com dst-address-list=!ip-private-local src-address-list=ip-local disabled=yes
+/ip firewall raw add action=add-dst-to-address-list address-list=zzz-list-ip-windows-update address-list-timeout=12h chain=prerouting content=download.windowsupdate.com dst-address-list=!ip-private-local src-address-list=ip-local disabled=yes
+/ip firewall raw add action=add-dst-to-address-list address-list=zzz-list-ip-windows-update address-list-timeout=12h chain=prerouting content=.download.windowsupdate.com dst-address-list=!ip-private-local src-address-list=ip-local disabled=yes
+/ip firewall raw add action=add-dst-to-address-list address-list=zzz-list-ip-windows-update address-list-timeout=12h chain=prerouting content=download.microsoft.com dst-address-list=!ip-private-local src-address-list=ip-local disabled=yes
+/ip firewall raw add action=add-dst-to-address-list address-list=zzz-list-ip-windows-update address-list-timeout=12h chain=prerouting content=wustat.windows.com dst-address-list=!ip-private-local src-address-list=ip-local disabled=yes
+/ip firewall raw add action=add-dst-to-address-list address-list=zzz-list-ip-windows-update address-list-timeout=12h chain=prerouting content=ntservicepack.microsoft.com dst-address-list=!ip-private-local src-address-list=ip-local disabled=yes
+/ip firewall raw add action=add-dst-to-address-list address-list=zzz-list-ip-windows-update address-list-timeout=12h chain=prerouting content=go.microsoft.com dst-address-list=!ip-private-local src-address-list=ip-local disabled=yes
+/ip firewall raw add action=add-dst-to-address-list address-list=zzz-list-ip-windows-update address-list-timeout=12h chain=prerouting content=dl.delivery.mp.microsoft.com dst-address-list=!ip-private-local src-address-list=ip-local disabled=yes
+`
     }
   };
 
@@ -72,7 +75,8 @@ ${TEMPLATES.tiktok.data}
 # ==========================================
 # 3. RAW Content Filter - Windows Update
 # ==========================================
-${TEMPLATES.winupdate.data}`
+${TEMPLATES.winupdate.data}
+`
   };
 
   let globalUniqueIPs = new Set();
@@ -442,59 +446,72 @@ ${TEMPLATES.winupdate.data}`
 
             // 1. IP Only (CIDR)
             let ipOnlyLines = [
-              `# AS Info: ${asNumber} ${orgName}`
+              `# AS Info: ${asNumber} ${orgName}`,
+              ``
             ];
             if (ipArr.length > 0) {
               ipOnlyLines.push(...ipArr);
+              ipOnlyLines.push(``);
               ipOnlyLines.push(`# Total IPv4 Prefix: ${ipArr.length}`);
             } else {
               ipOnlyLines.push(`# Tidak ada IPv4 Prefix di tabel halaman ini.`);
+              ipOnlyLines.push(``);
               ipOnlyLines.push(`# Total IPv4 Prefix: 0`);
             }
+            ipOnlyLines.push(``);
             generatedData.ipOnly = ipOnlyLines.join("\n");
 
             // 2. Address List
             let addrListLines = [
               `# AS Info: ${asNumber} ${orgName}`,
+              ``,
               `/ip firewall address-list`
             ];
             if (ipArr.length > 0) {
               ipArr.forEach((ip) => {
                 addrListLines.push(`add list="z-ip-list-${listName}" address=${ip} comment="${asNumber} ${orgName}"`);
               });
+              addrListLines.push(``);
               addrListLines.push(`# Total IPv4 Prefix: ${ipArr.length}`);
             } else {
               addrListLines.push(`# Tidak ada IPv4 Prefix di tabel halaman ini.`);
             }
+            addrListLines.push(``);
             generatedData.addressList = addrListLines.join("\n");
 
             // 3. IP Route
             let ipRouteLines = [
               `# AS Info: ${asNumber} ${orgName}`,
+              ``
             ];
             if (ipArr.length > 0) {
               ipArr.forEach((ip) => {
                 ipRouteLines.push(`/ip route add dst-address=${ip} gateway=XXXXXXX comment="${asNumber} ${orgName}" check-gateway=ping`);
               });
+              ipRouteLines.push(``);
               ipRouteLines.push(`# Total IPv4 Prefix: ${ipArr.length}`);
             } else {
               ipRouteLines.push(`# Tidak ada IPv4 Prefix di tabel halaman ini.`);
             }
+            ipRouteLines.push(``);
             generatedData.ipRoute = ipRouteLines.join("\n");
 
             // 4. BGP Filter (RouterOS v7)
             let bgpFilterLines = [
               `# AS Info: ${asNumber} ${orgName}`,
+              ``,
               `/routing filter rule`
             ];
             if (ipArr.length > 0) {
               ipArr.forEach((ip) => {
                 bgpFilterLines.push(`/routing filter rule add chain=from_XXX disabled=no comment="${asNumber} ${orgName}" rule="if (dst == ${ip}) { set bgp-weight 300; accept }"`);
               });
+              bgpFilterLines.push(``);
               bgpFilterLines.push(`# Total IPv4 Prefix: ${ipArr.length}`);
             } else {
               bgpFilterLines.push(`/routing filter rule add chain=from_XXX disabled=no comment="${asNumber} ${orgName}" rule="if (bgp-as-path \"${asnDigits}$\") { set bgp-local-pref 300; accept }"`);
             }
+            bgpFilterLines.push(``);
             generatedData.bgpFilter = bgpFilterLines.join("\n");
 
             // 5. BGP Local-Preference (Juniper)
@@ -514,7 +531,8 @@ ${TEMPLATES.winupdate.data}`
               `delete policy-options policy-statement from_XXXXXXX term ${asPathName}`,
               `delete policy-options as-path ${asPathName} ".* ${asnDigits}$"`,
               ``,
-              `# Total IPv4 Prefix: ${ipArr.length}`
+              `# Total IPv4 Prefix: ${ipArr.length}`,
+              ``
             ];
             generatedData.bgpJuniper = bgpJuniperLines.join("\n");
 
@@ -540,6 +558,7 @@ ${TEMPLATES.winupdate.data}`
             bgpBlockLines.push(`delete policy-options policy-statement from_XXXXXXX term ${rejectTermName}`);
             bgpBlockLines.push(``);
             bgpBlockLines.push(`# Total IPv4 Prefix: ${ipArr.length}`);
+            bgpBlockLines.push(``);
             generatedData.bgpJuniperBlock = bgpBlockLines.join("\n");
 
             // Display
