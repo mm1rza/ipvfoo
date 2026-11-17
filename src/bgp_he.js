@@ -11,7 +11,7 @@
     private: {
       name: "IP Private Local",
       countText: "Total: 15 Rules MikroTik address-list (ip-private-local)",
-      title: "📋 Template MikroTik: IP Private Local (Address List)",
+      title: "Template MikroTik: IP Private Local (Address List)",
       data: `/ip firewall address-list
 add address=0.0.0.0/8 comment=ip-private-local list=ip-private-local
 add address=10.0.0.0/8 comment=ip-private-local list=ip-private-local
@@ -32,7 +32,7 @@ add address=240.0.0.0/4 comment=ip-private-local list=ip-private-local`
     tiktok: {
       name: "TikTok RAW Filter",
       countText: "Total: 3 Rules RAW prerouting (zzz-list-ip-tiktok)",
-      title: "📋 Template MikroTik: TikTok Domain Content Filter (RAW)",
+      title: "Template MikroTik: TikTok Domain Content Filter (RAW)",
       data: `/ip firewall raw add action=add-dst-to-address-list address-list=zzz-list-ip-tiktok address-list-timeout=none-static chain=prerouting content=.tiktokcdn.com dst-address-list=!ip-private-local src-address-list=ip-local disabled=yes
 /ip firewall raw add action=add-dst-to-address-list address-list=zzz-list-ip-tiktok address-list-timeout=none-static chain=prerouting content=.tiktokv.com dst-address-list=!ip-private-local src-address-list=ip-local disabled=yes
 /ip firewall raw add action=add-dst-to-address-list address-list=zzz-list-ip-tiktok address-list-timeout=none-static chain=prerouting content=.tiktok.com dst-address-list=!ip-private-local src-address-list=ip-local disabled=yes`
@@ -40,7 +40,7 @@ add address=240.0.0.0/4 comment=ip-private-local list=ip-private-local`
     winupdate: {
       name: "Windows Update RAW Filter",
       countText: "Total: 11 Rules RAW prerouting (zzz-list-ip-windows-update)",
-      title: "📋 Template MikroTik: Windows Update Content Filter (RAW)",
+      title: "Template MikroTik: Windows Update Content Filter (RAW)",
       data: `/ip firewall raw add action=add-dst-to-address-list address-list=zzz-list-ip-windows-update address-list-timeout=none-static chain=prerouting content=windowsupdate.microsoft.com dst-address-list=!ip-private-local src-address-list=ip-local disabled=yes
 /ip firewall raw add action=add-dst-to-address-list address-list=zzz-list-ip-windows-update address-list-timeout=none-static chain=prerouting content=.windowsupdate.microsoft.com dst-address-list=!ip-private-local src-address-list=ip-local disabled=yes
 /ip firewall raw add action=add-dst-to-address-list address-list=zzz-list-ip-windows-update address-list-timeout=none-static chain=prerouting content=.update.microsoft.com dst-address-list=!ip-private-local src-address-list=ip-local disabled=yes
@@ -58,7 +58,7 @@ add address=240.0.0.0/4 comment=ip-private-local list=ip-private-local`
   TEMPLATES.all = {
     name: "Semua Template IP & Domain",
     countText: "Total: 29 Rules (15 IP Private + 3 TikTok + 11 Windows Update)",
-    title: "📋 Template MikroTik: Semua List IP & Domain RAW",
+    title: "Template MikroTik: Semua List IP & Domain RAW",
     data: `# ==========================================
 # 1. IP Private Local (Address List)
 # ==========================================
@@ -262,7 +262,7 @@ ${TEMPLATES.winupdate.data}`
     templatePrivBtn.href = "#";
     templatePrivBtn.id = "bgp-template-priv";
     templatePrivBtn.className = "bgp-btn-open";
-    templatePrivBtn.textContent = "📋 Template List IP/Domain";
+    templatePrivBtn.textContent = "Template List IP/Domain";
     templatePrivBtn.title = "Lihat & Copy Template MikroTik IP & Domain (IP Private, TikTok, Windows Update)";
     headerBtnWrap.appendChild(templatePrivBtn);
 
