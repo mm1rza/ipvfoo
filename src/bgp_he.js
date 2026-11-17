@@ -30,6 +30,15 @@ add address=255.255.255.255 comment=ip-private-local list=ip-private-local
 add address=240.0.0.0/4 comment=ip-private-local list=ip-private-local
 `
     },
+    youtube: {
+      name: "YouTube RAW Filter",
+      countText: "Total: 3 Rules RAW prerouting (zzz-list-ip-google)",
+      title: "Template MikroTik: YouTube Domain Content Filter (RAW)",
+      data: `/ip firewall raw add action=add-dst-to-address-list address-list=zzz-list-ip-google address-list-timeout=12h chain=prerouting content=.googlevideo.com dst-address-list=!ip-private-local src-address-list=ip-local disabled=yes
+/ip firewall raw add action=add-dst-to-address-list address-list=zzz-list-ip-google address-list-timeout=12h chain=prerouting content=.youtube.com dst-address-list=!ip-private-local src-address-list=ip-local disabled=yes
+/ip firewall raw add action=add-dst-to-address-list address-list=zzz-list-ip-google address-list-timeout=12h chain=prerouting content=.ytimg.com dst-address-list=!ip-private-local src-address-list=ip-local disabled=yes
+`
+    },
     tiktok: {
       name: "TikTok RAW Filter",
       countText: "Total: 3 Rules RAW prerouting (zzz-list-ip-tiktok)",
@@ -56,27 +65,6 @@ add address=240.0.0.0/4 comment=ip-private-local list=ip-private-local
 /ip firewall raw add action=add-dst-to-address-list address-list=zzz-list-ip-windows-update address-list-timeout=12h chain=prerouting content=dl.delivery.mp.microsoft.com dst-address-list=!ip-private-local src-address-list=ip-local disabled=yes
 `
     }
-  };
-
-  TEMPLATES.all = {
-    name: "Semua Template IP & Domain",
-    countText: "Total: 29 Rules (15 IP Private + 3 TikTok + 11 Windows Update)",
-    title: "Template MikroTik: Semua List IP & Domain RAW",
-    data: `# ==========================================
-# 1. IP Private Local (Address List)
-# ==========================================
-${TEMPLATES.private.data}
-
-# ==========================================
-# 2. RAW Content Filter - TikTok
-# ==========================================
-${TEMPLATES.tiktok.data}
-
-# ==========================================
-# 3. RAW Content Filter - Windows Update
-# ==========================================
-${TEMPLATES.winupdate.data}
-`
   };
 
   let globalUniqueIPs = new Set();
@@ -238,9 +226,9 @@ ${TEMPLATES.winupdate.data}
       </div>
       <div>
         <button class="bgp-btn-action" id="bgp-tpl-priv">IP Private Local</button>
+        <button class="bgp-btn-action" id="bgp-tpl-youtube">YouTube RAW</button>
         <button class="bgp-btn-action" id="bgp-tpl-tiktok">TikTok RAW</button>
         <button class="bgp-btn-action" id="bgp-tpl-winupdate">Windows Update RAW</button>
-        <button class="bgp-btn-action" id="bgp-tpl-all">Semua Template</button>
       </div>
       <textarea id="bgp-template-preview" class="bgp-preview-area" readonly placeholder="Hasil script template akan muncul disini..."></textarea>
       <div id="bgp-template-count" style="margin-top:6px; font-weight:bold; color:#000066; font-size:11px;"></div>
@@ -267,15 +255,15 @@ ${TEMPLATES.winupdate.data}
     templatePrivBtn.id = "bgp-template-priv";
     templatePrivBtn.className = "bgp-btn-open";
     templatePrivBtn.textContent = "Template List IP/Domain";
-    templatePrivBtn.title = "Lihat & Copy Template MikroTik IP & Domain (IP Private, TikTok, Windows Update)";
+    templatePrivBtn.title = "Lihat & Copy Template MikroTik IP & Domain (IP Private, YouTube, TikTok, Windows Update)";
     headerBtnWrap.appendChild(templatePrivBtn);
 
     headerSearch.appendChild(headerBtnWrap);
 
-    let currentTemplateKey = "all";
+    let currentTemplateKey = "private";
     function applyTemplate(key, autoCopy = true) {
       currentTemplateKey = key;
-      const tpl = TEMPLATES[key] || TEMPLATES.all;
+      const tpl = TEMPLATES[key] || TEMPLATES.private;
       templateBox.style.display = "block";
       document.getElementById("bgp-template-title").textContent = tpl.title;
       document.getElementById("bgp-template-preview").value = tpl.data;
@@ -295,7 +283,7 @@ ${TEMPLATES.winupdate.data}
     templatePrivBtn.onclick = (e) => {
       e.preventDefault();
       resultBox.style.display = "none";
-      applyTemplate("all", false);
+      applyTemplate("private", false);
     };
 
     document.getElementById("bgp-close").onclick = () => {
@@ -310,16 +298,16 @@ ${TEMPLATES.winupdate.data}
       applyTemplate("private", true);
     };
 
+    document.getElementById("bgp-tpl-youtube").onclick = () => {
+      applyTemplate("youtube", true);
+    };
+
     document.getElementById("bgp-tpl-tiktok").onclick = () => {
       applyTemplate("tiktok", true);
     };
 
     document.getElementById("bgp-tpl-winupdate").onclick = () => {
       applyTemplate("winupdate", true);
-    };
-
-    document.getElementById("bgp-tpl-all").onclick = () => {
-      applyTemplate("all", true);
     };
 
     document.getElementById("bgp-cp-ip").onclick = () => {
