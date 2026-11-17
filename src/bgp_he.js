@@ -291,7 +291,7 @@ ${TEMPLATES.winupdate.data}`
     templatePrivBtn.onclick = (e) => {
       e.preventDefault();
       resultBox.style.display = "none";
-      applyTemplate("all", true);
+      applyTemplate("all", false);
     };
 
     document.getElementById("bgp-close").onclick = () => {
