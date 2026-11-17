@@ -7,6 +7,74 @@
 (function () {
   const ipv4CidrRegex = /^((25[0-5]|2[0-4]\d|1?\d?\d)\.){3}(25[0-5]|2[0-4]\d|1?\d?\d)(\/([0-9]|[1-2][0-9]|3[0-2]))$/;
 
+  const TEMPLATES = {
+    private: {
+      name: "IP Private Local",
+      countText: "Total: 15 Rules MikroTik address-list (ip-private-local)",
+      title: "📋 Template MikroTik: IP Private Local (Address List)",
+      data: `/ip firewall address-list
+add address=0.0.0.0/8 comment=ip-private-local list=ip-private-local
+add address=10.0.0.0/8 comment=ip-private-local list=ip-private-local
+add address=100.64.0.0/10 comment=ip-private-local list=ip-private-local
+add address=127.0.0.0/8 comment=ip-private-local list=ip-private-local
+add address=169.254.0.0/16 comment=ip-private-local list=ip-private-local
+add address=172.16.0.0/12 comment=ip-private-local list=ip-private-local
+add address=192.0.0.0/24 comment=ip-private-local list=ip-private-local
+add address=192.0.2.0/24 comment=ip-private-local list=ip-private-local
+add address=192.168.0.0/16 comment=ip-private-local list=ip-private-local
+add address=198.18.0.0/15 comment=ip-private-local list=ip-private-local
+add address=198.51.100.0/24 comment=ip-private-local list=ip-private-local
+add address=203.0.113.0/24 comment=ip-private-local list=ip-private-local
+add address=224.0.0.0/3 comment=ip-private-local list=ip-private-local
+add address=255.255.255.255 comment=ip-private-local list=ip-private-local
+add address=240.0.0.0/4 comment=ip-private-local list=ip-private-local`
+    },
+    tiktok: {
+      name: "TikTok RAW Filter",
+      countText: "Total: 3 Rules RAW prerouting (zzz-list-ip-tiktok)",
+      title: "📋 Template MikroTik: TikTok Domain Content Filter (RAW)",
+      data: `/ip firewall raw add action=add-dst-to-address-list address-list=zzz-list-ip-tiktok address-list-timeout=none-static chain=prerouting content=.tiktokcdn.com dst-address-list=!ip-private-local src-address-list=ip-local disabled=yes
+/ip firewall raw add action=add-dst-to-address-list address-list=zzz-list-ip-tiktok address-list-timeout=none-static chain=prerouting content=.tiktokv.com dst-address-list=!ip-private-local src-address-list=ip-local disabled=yes
+/ip firewall raw add action=add-dst-to-address-list address-list=zzz-list-ip-tiktok address-list-timeout=none-static chain=prerouting content=.tiktok.com dst-address-list=!ip-private-local src-address-list=ip-local disabled=yes`
+    },
+    winupdate: {
+      name: "Windows Update RAW Filter",
+      countText: "Total: 11 Rules RAW prerouting (zzz-list-ip-windows-update)",
+      title: "📋 Template MikroTik: Windows Update Content Filter (RAW)",
+      data: `/ip firewall raw add action=add-dst-to-address-list address-list=zzz-list-ip-windows-update address-list-timeout=none-static chain=prerouting content=windowsupdate.microsoft.com dst-address-list=!ip-private-local src-address-list=ip-local disabled=yes
+/ip firewall raw add action=add-dst-to-address-list address-list=zzz-list-ip-windows-update address-list-timeout=none-static chain=prerouting content=.windowsupdate.microsoft.com dst-address-list=!ip-private-local src-address-list=ip-local disabled=yes
+/ip firewall raw add action=add-dst-to-address-list address-list=zzz-list-ip-windows-update address-list-timeout=none-static chain=prerouting content=.update.microsoft.com dst-address-list=!ip-private-local src-address-list=ip-local disabled=yes
+/ip firewall raw add action=add-dst-to-address-list address-list=zzz-list-ip-windows-update address-list-timeout=none-static chain=prerouting content=.windowsupdate.com dst-address-list=!ip-private-local src-address-list=ip-local disabled=yes
+/ip firewall raw add action=add-dst-to-address-list address-list=zzz-list-ip-windows-update address-list-timeout=none-static chain=prerouting content=download.windowsupdate.com dst-address-list=!ip-private-local src-address-list=ip-local disabled=yes
+/ip firewall raw add action=add-dst-to-address-list address-list=zzz-list-ip-windows-update address-list-timeout=none-static chain=prerouting content=.download.windowsupdate.com dst-address-list=!ip-private-local src-address-list=ip-local disabled=yes
+/ip firewall raw add action=add-dst-to-address-list address-list=zzz-list-ip-windows-update address-list-timeout=none-static chain=prerouting content=download.microsoft.com dst-address-list=!ip-private-local src-address-list=ip-local disabled=yes
+/ip firewall raw add action=add-dst-to-address-list address-list=zzz-list-ip-windows-update address-list-timeout=none-static chain=prerouting content=wustat.windows.com dst-address-list=!ip-private-local src-address-list=ip-local disabled=yes
+/ip firewall raw add action=add-dst-to-address-list address-list=zzz-list-ip-windows-update address-list-timeout=none-static chain=prerouting content=ntservicepack.microsoft.com dst-address-list=!ip-private-local src-address-list=ip-local disabled=yes
+/ip firewall raw add action=add-dst-to-address-list address-list=zzz-list-ip-windows-update address-list-timeout=none-static chain=prerouting content=go.microsoft.com dst-address-list=!ip-private-local src-address-list=ip-local disabled=yes
+/ip firewall raw add action=add-dst-to-address-list address-list=zzz-list-ip-windows-update address-list-timeout=none-static chain=prerouting content=dl.delivery.mp.microsoft.com dst-address-list=!ip-private-local src-address-list=ip-local disabled=yes`
+    }
+  };
+
+  TEMPLATES.all = {
+    name: "Semua Template IP & Domain",
+    countText: "Total: 29 Rules (15 IP Private + 3 TikTok + 11 Windows Update)",
+    title: "📋 Template MikroTik: Semua List IP & Domain RAW",
+    data: `# ==========================================
+# 1. IP Private Local (Address List)
+# ==========================================
+${TEMPLATES.private.data}
+
+# ==========================================
+# 2. RAW Content Filter - TikTok
+# ==========================================
+${TEMPLATES.tiktok.data}
+
+# ==========================================
+# 3. RAW Content Filter - Windows Update
+# ==========================================
+${TEMPLATES.winupdate.data}`
+  };
+
   let globalUniqueIPs = new Set();
   let currentAsNumber = "";
   let generatedData = {
@@ -64,17 +132,27 @@
         font-size: 11.5px;
         box-sizing: border-box;
       }
+      .bgp-header-btn-wrap {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        margin-left: 10px;
+        vertical-align: middle;
+      }
       .bgp-btn-open {
         background: #000066;
         color: #ffd700 !important;
         font-weight: bold;
-        padding: 3px 8px;
+        padding: 4px 10px;
         border-radius: 4px;
         text-decoration: none;
-        margin-left: 10px;
-        display: inline-block;
+        display: inline-flex;
+        align-items: center;
         font-size: 11.5px;
         border: 1px solid #000044;
+        white-space: nowrap;
+        cursor: pointer;
+        line-height: 1.2;
       }
       .bgp-btn-open:hover {
         background: #003399;
@@ -92,7 +170,9 @@
         border-radius: 4px;
         border: 1px solid #444;
         box-sizing: border-box;
-        white-space: pre;
+        white-space: pre-wrap;
+        word-break: break-all;
+        overflow-x: hidden;
         overflow-y: auto;
       }
       #bgp-toast {
@@ -120,7 +200,7 @@
     toast.id = "bgp-toast";
     document.body.appendChild(toast);
 
-    // Result container
+    // Result container: BGP Prefix Extractor
     const resultBox = document.createElement("div");
     resultBox.id = "bgp-he-prefix-helper";
     resultBox.className = "bgp-tabresult";
@@ -131,34 +211,111 @@
         <button class="bgp-btn-action bgp-btn-close" id="bgp-close">✕ Tutup</button>
       </div>
       <div>
-        <button class="bgp-btn-action" id="bgp-cp-ip">📋 Copy CIDR</button>
-        <button class="bgp-btn-action" id="bgp-cp-addr">📋 Copy Address List</button>
-        <button class="bgp-btn-action" id="bgp-cp-route">📋 Copy Ip Route</button>
-        <button class="bgp-btn-action" id="bgp-cp-filter">📋 Copy BGP LP MikroTik (v7)</button>
-        <button class="bgp-btn-action" id="bgp-cp-juniper">📋 Copy BGP LP Juniper</button>
-        <button class="bgp-btn-action" id="bgp-cp-juniper-block">📋 Copy BGP Block IP Juniper</button>
+        <button class="bgp-btn-action" id="bgp-cp-ip">CIDR</button>
+        <button class="bgp-btn-action" id="bgp-cp-addr">Address List</button>
+        <button class="bgp-btn-action" id="bgp-cp-route">Ip Route</button>
+        <button class="bgp-btn-action" id="bgp-cp-filter">BGP LP MikroTik (v7)</button>
+        <button class="bgp-btn-action" id="bgp-cp-juniper">BGP LP Juniper</button>
+        <button class="bgp-btn-action" id="bgp-cp-juniper-block">BGP Block IP Juniper</button>
       </div>
       <textarea id="bgp-preview" class="bgp-preview-area" readonly placeholder="Hasil script akan muncul disini..."></textarea>
       <div id="bgp-total-count" style="margin-top:6px; font-weight:bold; color:#000066; font-size:11px;"></div>
     `;
 
+    // Dedicated Container: Template List IP/Domain (Dibuat terpisah mandiri)
+    const templateBox = document.createElement("div");
+    templateBox.id = "bgp-he-template-box";
+    templateBox.className = "bgp-tabresult";
+    templateBox.style.display = "none";
+    templateBox.innerHTML = `
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+        <span id="bgp-template-title" style="font-weight:bold; color:#000066; font-size:12.5px;">Template MikroTik: List IP & Domain RAW</span>
+        <button class="bgp-btn-action bgp-btn-close" id="bgp-template-close">✕ Tutup</button>
+      </div>
+      <div>
+        <button class="bgp-btn-action" id="bgp-tpl-priv">IP Private Local</button>
+        <button class="bgp-btn-action" id="bgp-tpl-tiktok">TikTok RAW</button>
+        <button class="bgp-btn-action" id="bgp-tpl-winupdate">Windows Update RAW</button>
+        <button class="bgp-btn-action" id="bgp-tpl-all">Semua Template</button>
+      </div>
+      <textarea id="bgp-template-preview" class="bgp-preview-area" readonly placeholder="Hasil script template akan muncul disini..."></textarea>
+      <div id="bgp-template-count" style="margin-top:6px; font-weight:bold; color:#000066; font-size:11px;"></div>
+    `;
+
+    content.insertBefore(templateBox, content.firstChild);
     content.insertBefore(resultBox, content.firstChild);
 
-    // Button in header
+    // Flex container di header agar kedua tombol berdampingan 1 baris
+    const headerBtnWrap = document.createElement("div");
+    headerBtnWrap.className = "bgp-header-btn-wrap";
+
+    // Tombol 1: Ambil Prefix List IP
     const getScriptBtn = document.createElement("a");
     getScriptBtn.href = "#";
     getScriptBtn.id = "getscript";
     getScriptBtn.className = "bgp-btn-open";
     getScriptBtn.textContent = "Ambil Prefix List IP";
-    headerSearch.appendChild(getScriptBtn);
+    headerBtnWrap.appendChild(getScriptBtn);
+
+    // Tombol 2: Template List IP/Domain
+    const templatePrivBtn = document.createElement("a");
+    templatePrivBtn.href = "#";
+    templatePrivBtn.id = "bgp-template-priv";
+    templatePrivBtn.className = "bgp-btn-open";
+    templatePrivBtn.textContent = "📋 Template List IP/Domain";
+    templatePrivBtn.title = "Lihat & Copy Template MikroTik IP & Domain (IP Private, TikTok, Windows Update)";
+    headerBtnWrap.appendChild(templatePrivBtn);
+
+    headerSearch.appendChild(headerBtnWrap);
+
+    let currentTemplateKey = "all";
+    function applyTemplate(key, autoCopy = true) {
+      currentTemplateKey = key;
+      const tpl = TEMPLATES[key] || TEMPLATES.all;
+      templateBox.style.display = "block";
+      document.getElementById("bgp-template-title").textContent = tpl.title;
+      document.getElementById("bgp-template-preview").value = tpl.data;
+      document.getElementById("bgp-template-count").textContent = tpl.countText;
+      if (autoCopy) {
+        copyToClipboard(tpl.data, tpl.name, tpl.countText.split(":")[1]?.trim() || "");
+      }
+      templateBox.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
 
     getScriptBtn.onclick = (e) => {
       e.preventDefault();
+      templateBox.style.display = "none";
       extractPrefixes();
+    };
+
+    templatePrivBtn.onclick = (e) => {
+      e.preventDefault();
+      resultBox.style.display = "none";
+      applyTemplate("all", true);
     };
 
     document.getElementById("bgp-close").onclick = () => {
       resultBox.style.display = "none";
+    };
+
+    document.getElementById("bgp-template-close").onclick = () => {
+      templateBox.style.display = "none";
+    };
+
+    document.getElementById("bgp-tpl-priv").onclick = () => {
+      applyTemplate("private", true);
+    };
+
+    document.getElementById("bgp-tpl-tiktok").onclick = () => {
+      applyTemplate("tiktok", true);
+    };
+
+    document.getElementById("bgp-tpl-winupdate").onclick = () => {
+      applyTemplate("winupdate", true);
+    };
+
+    document.getElementById("bgp-tpl-all").onclick = () => {
+      applyTemplate("all", true);
     };
 
     document.getElementById("bgp-cp-ip").onclick = () => {

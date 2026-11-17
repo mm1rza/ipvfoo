@@ -62,3 +62,10 @@ git show <COMMIT_HASH>
    - Tampilan murni angka IP (tanpa ikon globe), ter-blur secara default untuk privasi pengguna, dan otomatis unblur saat di-hover atau di-klik.
 4. **Full Page Screenshot Engine (`SCREENSHOOT`)**:
    - Fitur tangkapan layar penuh vertikal (*stitched capture*) dengan scrolling halus dari atas ke bawah, penanganan elemen *sticky/fixed header*, dan otomatis menyembunyikan scrollbar selama proses pengambilan gambar.
+5. **Template List IP/Domain MikroTik & Unifikasi CSS (`bgp.he.net`)**:
+   - Menambahkan tombol cepat `📋 Template List IP/Domain` di samping tombol `Ambil Prefix List IP` dengan tata letak flex container 1 baris di header situs `https://bgp.he.net/*`.
+   - Dibuat dalam wadah tersendiri (*dedicated box*) tanpa bercampur dengan BGP Prefix Extractor.
+   - Menyediakan pilihan template bersih tanpa emotikon atau hitungan pada tombol: **IP Private Local**, **TikTok RAW**, **Windows Update RAW**, dan **Semua Template**.
+   - Menghapus kata "Copy" pada seluruh tombol aksi BGP Helper (`CIDR`, `Address List`, `Ip Route`, `BGP LP MikroTik (v7)`, `BGP LP Juniper`, `BGP Block IP Juniper`).
+   - Unifikasi CSS: Menggunakan satu standar tema `.bgp-tabresult`, `.bgp-btn-action`, dan `.bgp-preview-area` yang konsisten dan rapi.
+   - Text Area Word-Wrap: Menambahkan `white-space: pre-wrap; word-break: break-all; overflow-x: hidden;` pada `.bgp-preview-area` agar baris panjang otomatis turun ke bawah tanpa ada scrollbar horizontal.
