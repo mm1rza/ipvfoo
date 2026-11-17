@@ -474,7 +474,7 @@ ${TEMPLATES.winupdate.data}`
             ];
             if (ipArr.length > 0) {
               ipArr.forEach((ip) => {
-                ipRouteLines.push(`/ip route add dst-address=${ip} gateway=XXXXXXX comment="${asNumber} ${orgName}"`);
+                ipRouteLines.push(`/ip route add dst-address=${ip} gateway=XXXXXXX comment="${asNumber} ${orgName}" check-gateway=ping`);
               });
               ipRouteLines.push(`# Total IPv4 Prefix: ${ipArr.length}`);
             } else {
