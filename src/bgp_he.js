@@ -474,7 +474,7 @@ add address=240.0.0.0/4 comment=ip-private-local list=ip-private-local
             ];
             if (ipArr.length > 0) {
               ipArr.forEach((ip) => {
-                ipRouteLines.push(`/ip route add dst-address=${ip} gateway=XXXXXXX comment="${asNumber} ${orgName}" check-gateway=ping`);
+                ipRouteLines.push(`/ip route add dst-address=${ip} gateway=XXXXXXX comment="${asNumber} ${orgName}"`);
               });
               ipRouteLines.push(``);
               ipRouteLines.push(`# Total IPv4 Prefix: ${ipArr.length}`);
